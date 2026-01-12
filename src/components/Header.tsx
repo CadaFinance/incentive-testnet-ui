@@ -15,7 +15,7 @@ const navigation: { name: string; href: string; external?: boolean }[] = [
     { name: 'FAUCET', href: '/faucet' },
     { name: 'EXPLORER', href: 'https://explorer.zugchain.org' },
     { name: 'LEADERBOARD', href: '/leaderboard' },
-    { name: 'WHITEPAPER', href: 'http://10.10.10.245:3001/whitepaper' },
+    { name: 'WHITEPAPER', href: 'https://zugchain.org/whitepaper' },
     { name: 'AIRDROP', href: '/mission-control' },
     { name: 'DOCS', href: '/docs' },
 
