@@ -26,20 +26,13 @@ export async function generateMetadata(
       openGraph: {
         title,
         description,
-        images: [
-          {
-            url: `${baseUrl}/api/og?ref=${ref}`,
-            width: 1200,
-            height: 630,
-            alt: 'Zug Chain Genesis Invite',
-          }
-        ],
+        images: [`/api/og?ref=${ref}`],
       },
       twitter: {
         card: 'summary_large_image',
         title,
         description,
-        images: [`${baseUrl}/api/og?ref=${ref}`],
+        images: [`/api/og?ref=${ref}`],
       },
     }
   }
