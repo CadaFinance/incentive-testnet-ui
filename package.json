@@ -1,0 +1,48 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.9",
+    "@heroicons/react": "^2.2.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "@tanstack/react-query": "^5.62.8",
+    "bullmq": "^5.66.4",
+    "clsx": "^2.1.1",
+    "connectkit": "^1.8.2",
+    "dotenv": "^17.2.3",
+    "framer-motion": "^12.23.26",
+    "ioredis": "^5.8.2",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.1",
+    "pg": "^8.16.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-google-recaptcha": "^3.1.0",
+    "react-icons": "^5.5.0",
+    "react-telegram-login": "^1.1.2",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
+    "telegraf": "^4.16.3",
+    "viem": "^2.23.5",
+    "wagmi": "^2.14.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/pg": "^8.16.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-google-recaptcha": "^2.1.9",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

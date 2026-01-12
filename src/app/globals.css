@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+:root {
+  /* ZUG Chain Institutional Brand Colors */
+  --zug-primary: #e2ff3d;
+  /* Refined 'Electric Volt' - sharper, more modern */
+  --zug-primary-rgb: 226, 255, 61;
+  --zug-dark: #050505;
+  /* Deeper black for higher contrast */
+  --zug-darker: #020202;
+  --zug-card: #0a0a0a;
+  --zug-border: rgba(255, 255, 255, 0.08);
+  --zug-text: #ffffff;
+  --zug-text-muted: #666666;
+  --zug-success: #00ff88;
+  --zug-error: #ff4d4d;
+
+  /* ConnectKit overrides will be handled via the provider, 
+     but we sync basic colors here for consistency */
+  --ck-accent-color: var(--zug-primary);
+  --ck-border-radius: 4px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: var(--zug-text);
+  background: var(--zug-darker);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar - Minimalist */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--zug-darker);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--zug-primary);
+}
+
+/* Selection color */
+::selection {
+  background: var(--zug-primary);
+  color: #000;
+}
+
+/* --- CORPORATE UI UTILITIES --- */
+
+/* Ultra-sharp grid system */
+.blueprint-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+.blueprint-grid-fine {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Institutional Border */
+.inst-border {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Sophisticated Typography */
+.text-mono {
+  font-family: 'JetBrains Mono', 'Geist Mono', monospace;
+  letter-spacing: -0.02em;
+}
+
+/* Premium Glass */
+.corporate-glass {
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Subtle glow for technical highlights */
+.tech-glow {
+  box-shadow: 0 0 40px -10px rgba(226, 255, 61, 0.15);
+}
+
+/* Animated scanner line effect */
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.scan-line {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--zug-primary), transparent);
+  opacity: 0.1;
+  position: absolute;
+  top: 0;
+  animation: scan 10s linear infinite;
+  pointer-events: none;
+}
+
+/* Button primary override for staking */
+.btn-primary {
+  background: var(--zug-primary);
+  color: #000;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #fff;
+  box-shadow: 0 0 30px rgba(226, 255, 61, 0.2);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Number input hide arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

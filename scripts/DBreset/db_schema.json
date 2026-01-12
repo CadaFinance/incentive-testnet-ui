@@ -1,0 +1,916 @@
+{
+  "users": {
+    "columns": [
+      {
+        "column_name": "address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "points",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "total_claims",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "multiplier",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": "1.0"
+      },
+      {
+        "column_name": "last_active",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "total_referrals",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "referral_points",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "referred_by",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "streak_freezes",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "twitter_id",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "twitter_username",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "twitter_image",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "legacy_claimed",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "has_pending_streak_modal",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "telegram_id",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "telegram_username",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "users_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "address"
+      },
+      {
+        "constraint_name": "users_twitter_id_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "twitter_id"
+      },
+      {
+        "constraint_name": "users_telegram_id_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "telegram_id"
+      }
+    ]
+  },
+  "user_daily_completions": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('user_daily_completions_id_seq'::regclass)"
+      },
+      {
+        "column_name": "user_address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "task_id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "last_completed_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "user_daily_completions_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      },
+      {
+        "constraint_name": "user_daily_completions_user_address_task_id_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "user_address"
+      },
+      {
+        "constraint_name": "user_daily_completions_user_address_task_id_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "task_id"
+      },
+      {
+        "constraint_name": "user_daily_completions_task_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "column_name": "task_id"
+      }
+    ]
+  },
+  "referral_codes": {
+    "columns": [
+      {
+        "column_name": "address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "referral_codes_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "address"
+      },
+      {
+        "constraint_name": "referral_codes_code_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "code"
+      }
+    ]
+  },
+  "telegram_outbox": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('telegram_outbox_id_seq'::regclass)"
+      },
+      {
+        "column_name": "user_address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "telegram_id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "telegram_username",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": "'PENDING'::character varying"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      },
+      {
+        "column_name": "sent_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "error_message",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "event_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": "'WELCOME'::character varying"
+      },
+      {
+        "column_name": "payload",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "telegram_outbox_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      },
+      {
+        "constraint_name": "fk_user",
+        "constraint_type": "FOREIGN KEY",
+        "column_name": "user_address"
+      }
+    ]
+  },
+  "faucet_history": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('faucet_history_id_seq'::regclass)"
+      },
+      {
+        "column_name": "address",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "claimed_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "amount",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "tx_hash",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "faucet_history_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      }
+    ]
+  },
+  "staking_history": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('staking_history_id_seq'::regclass)"
+      },
+      {
+        "column_name": "address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "tx_hash",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "event_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "contract_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "amount",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      },
+      {
+        "column_name": "block_number",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "harvested_yield",
+        "data_type": "double precision",
+        "is_nullable": "YES",
+        "column_default": "0"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "staking_history_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      },
+      {
+        "constraint_name": "staking_history_tx_hash_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "tx_hash"
+      }
+    ]
+  },
+  "legacy_points": {
+    "columns": [
+      {
+        "column_name": "twitter_id",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "total_points",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "0"
+      },
+      {
+        "column_name": "username",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "display_name",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_claimed",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "claimed_by_address",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "claimed_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "legacy_points_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "twitter_id"
+      }
+    ]
+  },
+  "tasks": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('tasks_id_seq'::regclass)"
+      },
+      {
+        "column_name": "type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "title",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "reward_points",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "0"
+      },
+      {
+        "column_name": "verification_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "verification_data",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "icon_url",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "is_daily",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "requires_verification",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "tasks_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      }
+    ]
+  },
+  "user_task_history": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('user_task_history_id_seq'::regclass)"
+      },
+      {
+        "column_name": "user_address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "task_id",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "completed_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "tx_hash",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "user_task_history_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      },
+      {
+        "constraint_name": "user_task_history_user_address_task_id_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "user_address"
+      },
+      {
+        "constraint_name": "user_task_history_user_address_task_id_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "task_id"
+      },
+      {
+        "constraint_name": "user_task_history_task_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "column_name": "task_id"
+      }
+    ]
+  },
+  "points_audit_log": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('points_audit_log_id_seq'::regclass)"
+      },
+      {
+        "column_name": "address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "points_awarded",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "task_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      },
+      {
+        "column_name": "tx_hash",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "metadata",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "points_audit_log_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      }
+    ]
+  },
+  "daily_streaks": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('daily_streaks_id_seq'::regclass)"
+      },
+      {
+        "column_name": "address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "streak_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "current_streak",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "last_action_date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "cooldown_start_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "daily_streaks_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      },
+      {
+        "constraint_name": "daily_streaks_address_streak_type_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "address"
+      },
+      {
+        "constraint_name": "daily_streaks_address_streak_type_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "streak_type"
+      }
+    ]
+  },
+  "referrals": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('referrals_id_seq'::regclass)"
+      },
+      {
+        "column_name": "referrer_address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "referee_address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "referral_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "registered_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      },
+      {
+        "column_name": "first_faucet_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "first_zug_stake_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "first_vzug_stake_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "faucet_bonus_paid",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "zug_stake_bonus_paid",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "vzug_stake_bonus_paid",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "referrals_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      },
+      {
+        "constraint_name": "referrals_referee_address_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "referee_address"
+      }
+    ]
+  },
+  "sync_state": {
+    "columns": [
+      {
+        "column_name": "key",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "last_block",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "sync_state_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "key"
+      }
+    ]
+  },
+  "telegram_auth_sessions": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('telegram_auth_sessions_id_seq'::regclass)"
+      },
+      {
+        "column_name": "code",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "address",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "telegram_id",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "telegram_username",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": "'PENDING'::character varying"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "CURRENT_TIMESTAMP"
+      },
+      {
+        "column_name": "expires_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "telegram_auth_sessions_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "id"
+      },
+      {
+        "constraint_name": "telegram_auth_sessions_code_key",
+        "constraint_type": "UNIQUE",
+        "column_name": "code"
+      }
+    ]
+  },
+  "bot_settings": {
+    "columns": [
+      {
+        "column_name": "key",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "value",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_name": "bot_settings_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "column_name": "key"
+      }
+    ]
+  },
+  "_materialized_views": [
+    {
+      "view_name": "leaderboard_view"
+    },
+    {
+      "view_name": "mv_referral_stats"
+    }
+  ]
+}
