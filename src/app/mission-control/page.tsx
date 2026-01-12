@@ -10,7 +10,6 @@ import { StreakTracker } from '@/components/MissionControl/StreakTracker';
 import { MissionCard } from '@/components/MissionControl/MissionCard';
 import { LegacyClaimModal } from '@/components/MissionControl/LegacyClaimModal';
 import StreakSuccessModal from '@/components/MissionControl/StreakSuccessModal';
-import { RedisDebug } from '@/components/RedisDebug';
 import { TelegramVerifyModal } from '@/components/TelegramVerifyModal';
 
 // Format large XP numbers: 22,005,639 -> "22.0M"
@@ -536,7 +535,7 @@ function MissionControlContent() {
 
 
 
-                <RedisDebug />
+
             </div>
         </DashboardLayout>
     );

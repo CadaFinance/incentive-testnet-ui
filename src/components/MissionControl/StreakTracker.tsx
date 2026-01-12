@@ -38,14 +38,7 @@ export function StreakTracker({ faucetStreak, stakeStreak, lastFaucetDate, lastS
     return (
         <div className="w-full border-b border-white/5 pb-8 mb-8 lg:pb-12 lg:mb-12 relative">
             {/* DEBUG OVERLAY */}
-            <div className="absolute top-0 right-0 p-2 bg-red-500/20 text-[10px] text-red-200 font-mono z-100">
-                DEBUG INFO:<br />
-                RawStreak: {rawStreak}<br />
-                Today(UTC): {today}<br />
-                LastFaucet: {lastFaucet}<br />
-                IsTodayDone: {isTodayDone.toString()}<br />
-                DisplayStep: {displayStep}
-            </div>
+
 
             <div className="flex flex-col md:flex-row items-baseline justify-between mb-6 lg:mb-8 gap-2">
                 <h2 className="text-3xl lg:text-4xl font-black uppercase text-white tracking-tighter m-0">
