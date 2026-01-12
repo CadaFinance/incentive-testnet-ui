@@ -69,7 +69,7 @@ export default function Header() {
                 <div className="container mx-auto max-w-7xl px-6 lg:px-8">
                     <div className="flex h-16 items-center justify-between">
                         <div className="flex items-center gap-x-10">
-                            <Link href="http://10.10.10.245:3001/" className="flex items-center group relative">
+                            <Link href="https://zugchain.org/" className="flex items-center group relative">
                                 {/* Mobile: Show text logo */}
                                 <div className="relative h-6 w-24 lg:hidden">
                                     <Image
