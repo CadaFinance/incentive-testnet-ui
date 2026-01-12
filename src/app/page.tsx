@@ -10,7 +10,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const params = await searchParams;
   const ref = params.ref;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://zugchain.org';
+  const baseUrl = process.env.NEXT_PUBLIC_TESTNET_APP || 'https://testnet.zugchain.org';
 
   const baseMetadata: Metadata = {
     metadataBase: new URL(baseUrl),

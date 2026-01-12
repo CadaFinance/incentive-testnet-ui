@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+const TESTNET = process.env.NEXT_PUBLIC_TESTNET_APP || 'https://testnet.zugchain.org';
+
 interface ReferralHubProps {
     referralCode?: string;
     totalReferrals: number;
@@ -14,7 +16,7 @@ export function ReferralHub({ referralCode, totalReferrals, totalPoints, tierDat
 
     const handleCopy = () => {
         if (!referralCode) return;
-        const link = `https://zugchain.org/?ref=${referralCode}`;
+        const link = `${TESTNET}/?ref=${referralCode}`;
         navigator.clipboard.writeText(link);
         setCopied(true);
         toast.success("Link Copied");

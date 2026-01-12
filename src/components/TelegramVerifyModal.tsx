@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Send, ExternalLink, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+const TELEGRAM = process.env.NEXT_PUBLIC_TELEGRAM || 'https://t.me/zugchain';
+
 interface TelegramVerifyModalProps {
     open: boolean;
     onClose: () => void;
@@ -192,7 +194,7 @@ export function TelegramVerifyModal({ open, onClose, walletAddress, onVerified }
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <a
-                                        href="https://t.me/zugchain"
+                                        href={TELEGRAM}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="py-3 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold uppercase rounded flex items-center justify-center gap-2"

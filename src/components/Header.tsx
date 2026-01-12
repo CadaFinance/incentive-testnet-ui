@@ -8,17 +8,20 @@ import Link from 'next/link'
 import Image from 'next/image'
 import WalletConnectButton from './WalletConnectButton'
 
-const navigation: { name: string; href: string; external?: boolean }[] = [
+const MAIN_SITE = process.env.NEXT_PUBLIC_MAIN_SITE || 'https://zugchain.org'
+const EXPLORER = process.env.NEXT_PUBLIC_EXPLORER || 'https://explorer.zugchain.org'
+const TWITTER = process.env.NEXT_PUBLIC_TWITTER || 'https://twitter.com/ZugChain_org'
+const TELEGRAM = process.env.NEXT_PUBLIC_TELEGRAM || 'https://t.me/zugchain'
 
+const navigation: { name: string; href: string; external?: boolean }[] = [
     { name: 'STAKE', href: '/' },
     { name: 'VAULT', href: '/staking/vzug' },
     { name: 'FAUCET', href: '/faucet' },
-    { name: 'EXPLORER', href: 'https://explorer.zugchain.org' },
+    { name: 'EXPLORER', href: EXPLORER, external: true },
     { name: 'LEADERBOARD', href: '/leaderboard' },
-    { name: 'WHITEPAPER', href: 'https://zugchain.org/whitepaper' },
+    { name: 'WHITEPAPER', href: `${MAIN_SITE}/whitepaper`, external: true },
     { name: 'AIRDROP', href: '/mission-control' },
     { name: 'DOCS', href: '/docs' },
-
 ]
 
 import { useAccount } from 'wagmi'
@@ -69,7 +72,7 @@ export default function Header() {
                 <div className="container mx-auto max-w-7xl px-6 lg:px-8">
                     <div className="flex h-16 items-center justify-between">
                         <div className="flex items-center gap-x-10">
-                            <Link href="https://zugchain.org/" className="flex items-center group relative">
+                            <Link href={MAIN_SITE} className="flex items-center group relative">
                                 {/* Mobile: Show text logo */}
                                 <div className="relative h-6 w-24 lg:hidden">
                                     <Image
@@ -134,7 +137,7 @@ export default function Header() {
                             {/* Social Icons - More Minimalist */}
                             <div className="hidden sm:flex items-center gap-1.5 ml-2 border-l border-white/10 pl-4">
                                 <a
-                                    href="https://twitter.com/ZugChain_org"
+                                    href={TWITTER}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-8 h-8 flex items-center justify-center rounded border border-white/5 hover:border-[#e2ff3d]/30 hover:bg-[#e2ff3d]/5 transition-all group"
@@ -142,7 +145,7 @@ export default function Header() {
                                     <Image src="/twitter.png" alt="X" width={12} height={12} className="opacity-30 group-hover:opacity-100 transition-opacity invert" />
                                 </a>
                                 <a
-                                    href="https://t.me/zugchain"
+                                    href={TELEGRAM}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-8 h-8 flex items-center justify-center rounded border border-white/5 hover:border-[#e2ff3d]/30 hover:bg-[#e2ff3d]/5 transition-all group"
@@ -200,10 +203,10 @@ export default function Header() {
                         <div className="mt-8 pt-2 border-t border-white/5">
 
                             <div className="mt-6 flex justify-start gap-4 px-3">
-                                <a href="https://twitter.com/ZugChain_org" target="_blank" rel="noopener noreferrer">
+                                <a href={TWITTER} target="_blank" rel="noopener noreferrer">
                                     <Image src="/twitter.png" alt="X" width={18} height={18} className="invert opacity-40" />
                                 </a>
-                                <a href="https://t.me/zugchain" target="_blank" rel="noopener noreferrer">
+                                <a href={TELEGRAM} target="_blank" rel="noopener noreferrer">
                                     <Image src="/telegram.png" alt="TG" width={18} height={18} className="invert opacity-40" />
                                 </a>
                             </div>

@@ -4,42 +4,47 @@ import { motion } from 'framer-motion'
 import { Twitter, Github, MessageCircle, BookOpen, FileText, Shield, Code, Zap, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 
+const MAIN_SITE = process.env.NEXT_PUBLIC_MAIN_SITE || 'https://zugchain.org'
+const EXPLORER = process.env.NEXT_PUBLIC_EXPLORER || 'https://explorer.zugchain.org'
+const TWITTER = process.env.NEXT_PUBLIC_TWITTER || 'https://twitter.com/ZugChain_org'
+const GITHUB = process.env.NEXT_PUBLIC_GITHUB || 'https://github.com/zugchain'
+const TELEGRAM = process.env.NEXT_PUBLIC_TELEGRAM || 'https://t.me/zugchain'
+const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || '824642'
+
 const footerLinks = {
     product: [
-        { name: 'Whitepaper', href: '/zugwhitepaper.pdf', external: true },
-        { name: 'Block Explorer', href: 'https://scan.zugchain.org', external: true },
-        { name: 'Documentation', href: 'https://docs.zugchain.org', external: true },
-        { name: 'Staking Portal', href: '/staking', external: false },
+        { name: 'Whitepaper', href: `${MAIN_SITE}/whitepaper`, external: true },
+        { name: 'Block Explorer', href: EXPLORER, external: true },
+        { name: 'Documentation', href: '/docs', external: false },
+        { name: 'Staking Portal', href: '/staking/vzug', external: false },
     ],
     developers: [
-        { name: 'GitHub', href: 'https://github.com/zugchain', external: true },
-        { name: 'Developer Docs', href: 'https://docs.zugchain.org/developers', external: true },
-        { name: 'Testnet Faucet', href: 'https://faucet.zugchain.org', external: true },
-        { name: 'Smart Contracts', href: 'https://github.com/zugchain/contracts', external: true },
+        { name: 'GitHub', href: GITHUB, external: true },
+        { name: 'Developer Docs', href: '/docs', external: false },
+        { name: 'Testnet Faucet', href: '/faucet', external: false },
+        { name: 'Smart Contracts', href: '/docs', external: false },
     ],
     network: [
-        { name: 'Validator Setup', href: 'https://docs.zugchain.org/validators', external: true },
-        { name: 'Network Stats', href: 'https://stats.zugchain.org', external: true },
-        { name: 'Airdrop Program', href: '/Airdrop', external: false },
-        { name: 'Boost Rewards', href: '/boost', external: false },
+        { name: 'Validator Setup', href: '/docs', external: false },
+        { name: 'Network Stats', href: EXPLORER, external: true },
+        { name: 'Airdrop Program', href: '/mission-control', external: false },
+        { name: 'Boost Rewards', href: '/mission-control', external: false },
     ],
     company: [
-        { name: 'About ZUG Chain', href: '/#about', external: false },
-        { name: 'Tokenomics', href: '/#tokenomics', external: false },
-        { name: 'FAQ', href: '/#faq', external: false },
-        { name: 'Contact', href: '/Airdrop', external: false },
+        { name: 'About ZUG Chain', href: '/docs', external: false },
+        { name: 'Tokenomics', href: '/docs', external: false },
+        { name: 'FAQ', href: '/docs', external: false },
     ]
 };
 
 const socialLinks = [
-    { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/zugchain', color: '#1DA1F2' },
-    { name: 'Discord', icon: MessageCircle, href: 'https://discord.gg/zugchain', color: '#5865F2' },
-    { name: 'GitHub', icon: Github, href: 'https://github.com/zugchain', color: '#ffffff' },
-    { name: 'Telegram', icon: Zap, href: 'https://t.me/zugchain', color: '#0088cc' },
+    { name: 'Twitter', icon: Twitter, href: TWITTER, color: '#1DA1F2' },
+    { name: 'GitHub', icon: Github, href: GITHUB, color: '#ffffff' },
+    { name: 'Telegram', icon: Zap, href: TELEGRAM, color: '#0088cc' },
 ];
 
 const networkSpecs = [
-    { label: 'Chain ID', value: '102219' },
+    { label: 'Chain ID', value: CHAIN_ID },
     { label: 'Block Time', value: '6s' },
     { label: 'Consensus', value: 'PoS' },
     { label: 'Currency', value: 'ZUG' },

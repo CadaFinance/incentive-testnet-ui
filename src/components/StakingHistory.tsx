@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { History, ExternalLink, Terminal, ArrowRight, Loader2, Database, Zap } from 'lucide-react';
 
+const EXPLORER = process.env.NEXT_PUBLIC_EXPLORER || 'https://explorer.zugchain.org';
+
 interface HistoryItem {
     id: number;
     address: string;
@@ -178,7 +180,7 @@ export function StakingHistory({ type, refreshTrigger = 0 }: { type: 'ZUG' | 'vZ
                                         {item.tx_hash.substring(0, 8)}...{item.tx_hash.substring(60)}
                                     </span>
                                     <a
-                                        href={`https://explorer.zugchain.org/tx/${item.tx_hash}`}
+                                        href={`${EXPLORER}/tx/${item.tx_hash}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="p-2.5 border border-white/5 hover:border-[#e2ff3d]/50 text-gray-800 hover:text-white hover:bg-[#e2ff3d]/10 transition-all rounded shadow-sm"
