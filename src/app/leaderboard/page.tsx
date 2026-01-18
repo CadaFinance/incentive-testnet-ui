@@ -112,7 +112,7 @@ export default function LeaderboardPage() {
                         >
                             <div className="flex items-center justify-between max-w-sm mx-auto">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-[#e2ff3d]/10 border border-[#e2ff3d]/20 flex items-center justify-center">
+                                    <div className="w-10 h-10 flex items-center justify-center">
                                         <span className="text-[#e2ff3d] font-black text-lg">#{userRank.rank}</span>
                                     </div>
                                     <div className="flex flex-col">
