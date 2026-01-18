@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from "react";
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance } from "wagmi";
 import { parseEther, formatEther, erc20Abi } from "viem";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -98,6 +98,14 @@ export default function TokenStakingPage() {
         address: VZUG_TOKEN_ADDRESS, abi: erc20Abi, functionName: "balanceOf", args: [address || "0x"],
         query: { enabled: !!address, refetchInterval: 5000 }
     });
+
+    // FETCH TVL (Contract Balance of vZUG)
+    const { data: tvlData } = useBalance({
+        address: STAKING_CONTRACT,
+        token: VZUG_TOKEN_ADDRESS,
+        query: { refetchInterval: 10000 }
+    });
+
     const { data: allowance, refetch: refetchAllowance } = useReadContract({
         address: VZUG_TOKEN_ADDRESS, abi: erc20Abi, functionName: "allowance", args: [address || "0x", STAKING_CONTRACT],
         query: { enabled: !!address, refetchInterval: 5000 }
@@ -380,6 +388,13 @@ export default function TokenStakingPage() {
                                 <span className="text-[7px] font-mono text-gray-600 font-bold uppercase tracking-widest block mb-1">Total_Yield</span>
                                 <div className="text-3xl font-black text-[#e2ff3d] tracking-tighter tabular-nums leading-none">
                                     +{formatEther(typeof totalPending === 'bigint' ? totalPending : 0n).substring(0, 8)}
+                                </div>
+                            </div>
+                            {/* NEW: PROTOCOL TVL */}
+                            <div className="space-y-0 border-l border-white/5 pl-6">
+                                <span className="text-[7px] font-mono text-[#e2ff3d]/60 font-bold uppercase tracking-widest block mb-1">Protocol_TVL</span>
+                                <div className="text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
+                                    {tvlData ? formatZug(Number(formatEther(tvlData.value))) : "Loading..."}
                                 </div>
                             </div>
                         </div>

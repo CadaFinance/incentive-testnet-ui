@@ -92,6 +92,12 @@ export default function NativeStakingPage() {
     // Contract Reads
     const { data: balanceData, refetch: refetchBalance } = useBalance({ address });
 
+    // FETCH TVL (Contract Balance)
+    const { data: tvlData } = useBalance({
+        address: STAKING_CONTRACT,
+        query: { refetchInterval: 10000 }
+    });
+
     const { data: rawDeposits, refetch: refetchDeposits } = useReadContract({
         address: STAKING_CONTRACT, abi: STAKING_ABI, functionName: "getUserDeposits", args: [address],
         query: { enabled: !!address, refetchInterval: 5000 }
@@ -336,6 +342,13 @@ export default function NativeStakingPage() {
                                 <span className="text-[7px] font-mono text-gray-600 font-bold uppercase tracking-widest block mb-1">Total_Yield</span>
                                 <div className="text-3xl font-black text-[#e2ff3d] tracking-tighter tabular-nums leading-none">
                                     +{formatEther(typeof totalPending === 'bigint' ? totalPending : 0n).substring(0, 8)}
+                                </div>
+                            </div>
+                            {/* NEW: PROTOCOL TVL */}
+                            <div className="space-y-0 border-l border-white/5 pl-6">
+                                <span className="text-[7px] font-mono text-[#e2ff3d]/60 font-bold uppercase tracking-widest block mb-1">Protocol_TVL</span>
+                                <div className="text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
+                                    {tvlData ? formatZug(Number(formatEther(tvlData.value))) : "Loading..."}
                                 </div>
                             </div>
                         </div>
