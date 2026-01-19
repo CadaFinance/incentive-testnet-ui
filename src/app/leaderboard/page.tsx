@@ -92,8 +92,8 @@ export default function LeaderboardPage() {
 
                                 <div className="space-y-2 pt-4 border-t border-white/5">
                                     <div className="flex items-center justify-between text-[10px] font-mono">
-                                        <span className="text-gray-600 uppercase font-bold tracking-widest">Protocol_Points</span>
-                                        <span className="text-white font-black">{parseInt(userRank.points || 0).toLocaleString()}</span>
+                                        <span className="text-[#e2ff3d] uppercase font-bold tracking-widest">Estimated_$USDZ</span>
+                                        <span className="text-[#e2ff3d] font-black">${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     <div className="flex items-center justify-between text-[10px] font-mono">
                                         <span className="text-gray-600 uppercase font-bold tracking-widest">Verification_ID</span>
@@ -121,8 +121,10 @@ export default function LeaderboardPage() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-2xl font-black text-white tracking-tighter leading-none">{parseInt(userRank.points || 0).toLocaleString()}</div>
-                                    <span className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.2em] block mt-0.5">Points</span>
+                                    <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter leading-none">
+                                        ${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </div>
+                                    <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-[0.2em] block mt-0.5">$USDZ Amount</span>
                                 </div>
                             </div>
                         </motion.div>
