@@ -186,6 +186,7 @@ export default function LeaderboardPage() {
                                         <th className="py-3 sm:py-4 px-3 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest w-16 sm:w-24 text-center">Rank</th>
                                         <th className="py-3 sm:py-4 px-3 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest pl-6 sm:pl-6 text-center sm:text-left">Contributor_Address</th>
                                         <th className="py-3 sm:py-4 px-3 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest text-right">Points</th>
+                                        <th className="py-3 sm:py-4 px-3 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-[#e2ff3d] uppercase tracking-widest text-right">$USDZ</th>
                                     </tr>
                                 </thead>
 
@@ -223,8 +224,13 @@ export default function LeaderboardPage() {
                                                     </div>
                                                 </td>
                                                 <td className="py-4 sm:py-5 px-3 sm:px-6 text-right">
-                                                    <span className={`text-[13px] sm:text-[16px] font-black tabular-nums tracking-tighter transition-colors ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'text-[#e2ff3d]' : 'text-white'}`}>
+                                                    <span className={`text-[13px] sm:text-[16px] font-black tabular-nums tracking-tighter transition-colors ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'text-[#e2ff3d]' : 'text-white/80'}`}>
                                                         {parseInt(leader.points as any).toLocaleString()}
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 sm:py-5 px-3 sm:px-6 text-right">
+                                                    <span className={`text-[13px] sm:text-[16px] font-black tabular-nums tracking-tighter transition-colors ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'text-[#e2ff3d]' : 'text-[#e2ff3d]/60'}`}>
+                                                        ${(parseInt(leader.points as any) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                     </span>
                                                 </td>
                                             </motion.tr>
