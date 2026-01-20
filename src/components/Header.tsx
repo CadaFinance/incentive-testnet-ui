@@ -25,23 +25,28 @@ const navigation: { name: string; href: string; external?: boolean }[] = [
 ]
 
 import { useAccount } from 'wagmi'
-
-import { useSearchParams, usePathname } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 export default function Header() {
+    const router = useRouter()
     const { address } = useAccount()
     const searchParams = useSearchParams()
     const pathname = usePathname()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
 
-    // Capture Ref from URL
+    // Capture Ref from URL & Redirect
     useEffect(() => {
         const refParam = searchParams.get('ref')
         if (refParam) {
             localStorage.setItem('zug_ref_code', refParam)
+
+            // Redirect to Mission Control if on homepage
+            if (pathname === '/') {
+                router.replace('/mission-control')
+            }
         }
-    }, [searchParams])
+    }, [searchParams, pathname, router])
 
     // Sync User on Connect
     useEffect(() => {

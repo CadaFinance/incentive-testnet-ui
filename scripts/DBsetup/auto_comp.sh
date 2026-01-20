@@ -100,7 +100,7 @@ const CONFIG = {
     PRIVATE_KEY: process.env.DEPLOYER_PRIVATE_KEY || "0x766627b44fc2afc101672a7d34697993bcd91b84c25069d2f48f75b186562da7",
     DB_URL: process.env.DATABASE_URL || 'postgres://blockscout:zugchain_explorer_2024@127.0.0.1:7433/zug_incentive',
     CONCURRENCY: 50,
-    POLL_INTERVAL: 30000,
+    POLL_INTERVAL: 7200000, // 2 Hours
     GAS_BUFFER_RATIO: 2.0,
 };
 
