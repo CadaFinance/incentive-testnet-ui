@@ -132,8 +132,8 @@ export async function POST(request: Request) {
             if (row.discord_id && row.twitter_id && DISCORD_GUILD_ID && DISCORD_BOT_TOKEN && DISCORD_SOCIAL_ELITE_ROLE_ID) {
                 console.log(`🌟 User ${address} achieved Trifecta via Telegram! Assigning role...`);
                 // Assign Role via Discord API
-                // Fire and forget (don't await)
-                fetch(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${row.discord_id}/roles/${DISCORD_SOCIAL_ELITE_ROLE_ID}`, {
+                // MUST AWAIT in Serverless/Next.js API routes or process might exit before request finishes
+                await fetch(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${row.discord_id}/roles/${DISCORD_SOCIAL_ELITE_ROLE_ID}`, {
                     method: 'PUT',
                     headers: {
                         Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
