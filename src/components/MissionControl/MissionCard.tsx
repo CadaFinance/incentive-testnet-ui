@@ -205,7 +205,7 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
                 ) : isLocked ? (
                     <div className="flex items-center justify-between bg-red-500/[0.03] px-3 py-2 border border-red-500/10">
                         <span className="text-red-500/40 text-[9px] font-black uppercase tracking-[0.15em] font-mono">
-                            {lockedMessage}
+                            {displayMessage}
                         </span>
                         <Lock size={12} className="text-red-500/40" />
                     </div>
