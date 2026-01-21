@@ -18,14 +18,16 @@ interface MissionCardProps {
     isUserVerified?: boolean;
     multiplier?: number;
     onTelegramVerify?: () => void;
+    locked?: boolean;
+    lockedMessage?: string;
 }
 
-export function MissionCard({ id, title, description, reward, isCompleted, verificationLink, timeLeft: initialTimeLeft, onComplete, requiresVerification, isUserVerified, multiplier = 1.0, onTelegramVerify }: MissionCardProps) {
+export function MissionCard({ id, title, description, reward, isCompleted, verificationLink, timeLeft: initialTimeLeft, onComplete, requiresVerification, isUserVerified, multiplier = 1.0, onTelegramVerify, locked = false, lockedMessage = '// ACCESS DENIED' }: MissionCardProps) {
     const { address } = useAccount();
     const [loading, setLoading] = useState(false);
     const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
 
-    const isLocked = requiresVerification && !isUserVerified;
+    const isLocked = locked || (requiresVerification && !isUserVerified);
 
     // ... (keep useEffects) ...
 
@@ -193,7 +195,7 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
                 ) : isLocked ? (
                     <div className="flex items-center justify-between bg-red-500/[0.03] px-3 py-2 border border-red-500/10">
                         <span className="text-red-500/40 text-[9px] font-black uppercase tracking-[0.15em] font-mono">
-                             // X CONNECTION REQUIRED
+                            {lockedMessage}
                         </span>
                         <Lock size={12} className="text-red-500/40" />
                     </div>

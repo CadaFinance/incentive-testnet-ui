@@ -167,13 +167,23 @@ function MissionControlContent() {
     }, [searchParams, router]);
 
     // Auto-Trigger for Discord Verification (from external link)
+    // Auto-Trigger for Discord Verification (from external link)
     useEffect(() => {
         const trigger = searchParams?.get('trigger');
-        if (address && trigger === 'discord_verify') {
+        if (address && trigger === 'discord_verify' && data) {
+            // Check dependency: Telegram (-101)
+            const telegramMission = data.missions.find((m: any) => m.id === -101);
+
+            if (!telegramMission?.is_completed) {
+                toast.error("SECURITY PROTOCOL: Telegram verification required first.");
+                router.replace('/mission-control'); // Clear param
+                return;
+            }
+
             // Redirect immediately to start auth flow
             window.location.href = `/api/auth/discord/login?address=${address}&trigger=auto_back`;
         }
-    }, [address, searchParams]);
+    }, [address, searchParams, data, router]);
 
     const fetchData = async () => {
         if (!address) return;
@@ -567,21 +577,37 @@ function MissionControlContent() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {activeMissions.map((mission: any) => (
-                            <MissionCard
-                                key={mission.id}
-                                {...mission}
-                                reward={mission.reward_points}
-                                isCompleted={mission.is_completed}
-                                verificationLink={mission.verification_data}
-                                timeLeft={mission.time_left}
-                                requiresVerification={mission.requires_verification}
-                                isUserVerified={!!userProfile?.twitter_id}
-                                multiplier={referralInfo?.tier?.current_multiplier || 1.0}
-                                onComplete={() => fetchData()}
-                                onTelegramVerify={() => setShowTelegramModal(true)}
-                            />
-                        ))}
+                        {activeMissions.map((mission: any) => {
+                            // Dependency Logic: Discord (-102) requires Telegram (-101)
+                            let locked = false;
+                            let lockedMessage = undefined;
+
+                            if (mission.id === -102) {
+                                const telegramMission = missions.find((m: any) => m.id === -101);
+                                if (!telegramMission?.is_completed) {
+                                    locked = true;
+                                    lockedMessage = '// TELEGRAM REQUIRED';
+                                }
+                            }
+
+                            return (
+                                <MissionCard
+                                    key={mission.id}
+                                    {...mission}
+                                    reward={mission.reward_points}
+                                    isCompleted={mission.is_completed}
+                                    verificationLink={mission.verification_data}
+                                    timeLeft={mission.time_left}
+                                    requiresVerification={mission.requires_verification}
+                                    isUserVerified={!!userProfile?.twitter_id}
+                                    multiplier={referralInfo?.tier?.current_multiplier || 1.0}
+                                    onComplete={() => fetchData()}
+                                    onTelegramVerify={() => setShowTelegramModal(true)}
+                                    locked={locked}
+                                    lockedMessage={lockedMessage}
+                                />
+                            );
+                        })}
                         {activeMissions.length === 0 && (
                             <div className="col-span-full py-16 flex items-center justify-center border border-white/5 bg-[#0b0b0b] text-gray-600 font-mono text-xs">
                                 // ALL ASSIGNMENTS COMPLETED //
