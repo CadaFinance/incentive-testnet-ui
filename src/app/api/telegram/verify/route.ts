@@ -117,6 +117,32 @@ export async function POST(request: Request) {
             );
         }
 
+        // 6. TRIFECTA CHECK (Telegram just linked, check Discord + Twitter)
+        const socialCheck = await db.query(
+            "SELECT discord_id, twitter_id FROM users WHERE address = $1",
+            [address]
+        );
+
+        if (socialCheck.rows.length > 0) {
+            const row = socialCheck.rows[0];
+            const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID;
+            const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+            const DISCORD_SOCIAL_ELITE_ROLE_ID = process.env.DISCORD_SOCIAL_ELITE_ROLE_ID;
+
+            if (row.discord_id && row.twitter_id && DISCORD_GUILD_ID && DISCORD_BOT_TOKEN && DISCORD_SOCIAL_ELITE_ROLE_ID) {
+                console.log(`🌟 User ${address} achieved Trifecta via Telegram! Assigning role...`);
+                // Assign Role via Discord API
+                // Fire and forget (don't await)
+                fetch(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${row.discord_id}/roles/${DISCORD_SOCIAL_ELITE_ROLE_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                }).catch(err => console.error("Trifecta Role Error (Telegram):", err));
+            }
+        }
+
         return NextResponse.json({
             success: true,
             isMember: true,

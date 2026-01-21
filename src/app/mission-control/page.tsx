@@ -148,6 +148,11 @@ function MissionControlContent() {
             router.replace('/mission-control');
         }
 
+        if (success === 'discord_linked') {
+            toast.success("Identity Verified: Discord Account Linked");
+            router.replace('/mission-control');
+        }
+
         if (error) {
             const msgs: Record<string, string> = {
                 'twitter_already_linked': 'This X account is already linked to another wallet.',
@@ -160,6 +165,15 @@ function MissionControlContent() {
             router.replace('/mission-control');
         }
     }, [searchParams, router]);
+
+    // Auto-Trigger for Discord Verification (from external link)
+    useEffect(() => {
+        const trigger = searchParams?.get('trigger');
+        if (address && trigger === 'discord_verify') {
+            // Redirect immediately to start auth flow
+            window.location.href = `/api/auth/discord/login?address=${address}&trigger=auto_back`;
+        }
+    }, [address, searchParams]);
 
     const fetchData = async () => {
         if (!address) return;

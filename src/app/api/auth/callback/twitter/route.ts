@@ -165,6 +165,32 @@ export async function GET(request: NextRequest) {
             `, [pointsToAdd, walletAddress]);
         }
 
+        // E. TRIFECTA CHECK (Twitter just linked, check Discord + Telegram)
+        const socialCheck = await db.query(
+            "SELECT discord_id, telegram_id FROM users WHERE address = $1",
+            [walletAddress]
+        );
+
+        if (socialCheck.rows.length > 0) {
+            const row = socialCheck.rows[0];
+            const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID;
+            const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+            const DISCORD_SOCIAL_ELITE_ROLE_ID = process.env.DISCORD_SOCIAL_ELITE_ROLE_ID;
+
+            if (row.discord_id && row.telegram_id && DISCORD_GUILD_ID && DISCORD_BOT_TOKEN && DISCORD_SOCIAL_ELITE_ROLE_ID) {
+                console.log(`🌟 User ${walletAddress} achieved Trifecta via Twitter! Assigning role...`);
+                // Assign Role via Discord API
+                // We don't await this to avoid blocking the redirect if it's slow
+                fetch(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${row.discord_id}/roles/${DISCORD_SOCIAL_ELITE_ROLE_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                }).catch(err => console.error("Trifecta Role Error (Twitter):", err));
+            }
+        }
+
         // 6. Success Redirect
         // Clear cookie
         cookieStore.delete('pending_bind_address');

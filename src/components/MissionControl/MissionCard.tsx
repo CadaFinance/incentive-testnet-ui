@@ -67,6 +67,12 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
             return;
         }
 
+        // Handle Discord Login Trigger
+        if (verificationLink === 'DISCORD_LOGIN') {
+            window.location.href = `/api/auth/discord/login?address=${address}&trigger=mission_click`;
+            return;
+        }
+
         // Special handling for dynamic daily tasks (ID < 0)
         if (id < 0 && verificationLink) {
             window.location.href = verificationLink;

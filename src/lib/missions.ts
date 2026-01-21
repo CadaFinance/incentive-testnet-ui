@@ -227,6 +227,37 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
         });
     }
 
+    // 6. Fetch Discord Status
+    const discordProfile = await getUserDiscordProfile(normalizedAddress);
+
+    // Dynamic Task 5: Join Discord Community
+    // ID: -102 (Special ID for Discord)
+    if (!discordProfile?.discord_id) {
+        dynamicMissions.push({
+            id: -102,
+            type: 'SOCIAL',
+            title: 'Join Discord',
+            description: 'Join the ZugChain server to verify your status.',
+            reward_points: 100,
+            verification_type: 'API_VERIFY',
+            verification_data: 'DISCORD_LOGIN',
+            is_completed: false,
+            icon_url: 'https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
+        });
+    } else {
+        dynamicMissions.push({
+            id: -102,
+            type: 'SOCIAL',
+            title: 'Join Discord',
+            description: `Verified as @${discordProfile.discord_username}`,
+            reward_points: 100,
+            verification_type: 'MANUAL',
+            verification_data: '#',
+            is_completed: true,
+            icon_url: 'https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
+        });
+    }
+
     const res = await db.query(query, [normalizedAddress]);
 
     // Filter out completed static missions (One-Time)
@@ -254,6 +285,18 @@ export async function getUserTelegramProfile(address: string) {
     const normalizedAddress = address.toLowerCase();
     const res = await db.query(
         "SELECT telegram_id, telegram_username FROM users WHERE address = $1",
+        [normalizedAddress]
+    );
+    return res.rows[0] || null;
+}
+
+/**
+ * Get User's Discord Profile Info
+ */
+export async function getUserDiscordProfile(address: string) {
+    const normalizedAddress = address.toLowerCase();
+    const res = await db.query(
+        "SELECT discord_id, discord_username FROM users WHERE address = $1",
         [normalizedAddress]
     );
     return res.rows[0] || null;
