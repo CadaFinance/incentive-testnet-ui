@@ -7,9 +7,10 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get('code');
     const state = searchParams.get('state'); // format: "address" or "address__trigger"
+    const APP_URL = process.env.NEXT_PUBLIC_TESTNET_APP || process.env.NEXT_PUBLIC_APP_URL;
 
     if (!code || !state) {
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/mission-control?error=missing_params`);
+        return NextResponse.redirect(`${APP_URL}/mission-control?error=missing_params`);
     }
 
     // Decode state to get address
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
                 client_secret: process.env.DISCORD_CLIENT_SECRET!,
                 grant_type: 'authorization_code',
                 code,
-                redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/discord/callback`
+                redirect_uri: `${APP_URL}/api/auth/discord/callback`
             }),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
 
         if (tokens.error) {
             console.error('Discord Token Error:', tokens);
-            return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/mission-control?error=discord_token_failed`);
+            return NextResponse.redirect(`${APP_URL}/mission-control?error=discord_token_failed`);
         }
 
         // 2. Get User Profile
@@ -44,14 +45,14 @@ export async function GET(req: NextRequest) {
 
         if (!user.id) {
             console.error('Failed to fetch user profile', user);
-            return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/mission-control?error=discord_profile_failed`);
+            return NextResponse.redirect(`${APP_URL}/mission-control?error=discord_profile_failed`);
         }
 
         // 3. Update Database
         // Check if this Discord ID is already linked to ANOTHER address to prevent abuse
         const existing = await db.query("SELECT address FROM users WHERE discord_id = $1 AND address != $2", [user.id, address.toLowerCase()]);
         if (existing.rows.length > 0) {
-            return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/mission-control?error=discord_already_linked`);
+            return NextResponse.redirect(`${APP_URL}/mission-control?error=discord_already_linked`);
         }
 
         // Check if user is NEW to Discord (for points logic later)
@@ -128,10 +129,10 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/mission-control?success=discord_linked`);
+        return NextResponse.redirect(`${APP_URL}/mission-control?success=discord_linked`);
 
     } catch (e) {
         console.error(e);
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/mission-control?error=server_error`);
+        return NextResponse.redirect(`${APP_URL}/mission-control?error=server_error`);
     }
 }
