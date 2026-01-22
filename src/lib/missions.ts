@@ -248,7 +248,7 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
         dynamicMissions.push({
             id: -102,
             type: 'SOCIAL',
-            title: 'Claim Your Official Discord Role',
+            title: 'Claim Discord Role',
             description: `Verified as @${discordProfile.discord_username}`,
             reward_points: 500,
             verification_type: 'MANUAL',

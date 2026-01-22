@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get('code');
     const state = searchParams.get('state'); // format: "address" or "address__trigger"
-    const APP_URL = process.env.NEXT_PUBLIC_TESTNET_APP || process.env.NEXT_PUBLIC_APP_URL;
+    const APP_URL = process.env.NEXT_PUBLIC_TESTNET_APP;
 
     if (!code || !state) {
         return NextResponse.redirect(`${APP_URL}/mission-control?error=missing_params`);
@@ -63,25 +63,27 @@ export async function GET(req: NextRequest) {
             ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
             : `https://cdn.discordapp.com/embed/avatars/${(parseInt(user.discriminator) || 0) % 5}.png`;
 
+        // Ensure user exists first (INSERT if needed)
         await db.query(
-            `UPDATE users 
-             SET discord_id = $1, discord_username = $2, discord_image = $3 
-             WHERE address = $4`,
-            [user.id, user.username, avatarUrl, address.toLowerCase()]
+            `INSERT INTO users (address, discord_id, discord_username, discord_image) 
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (address) DO UPDATE 
+             SET discord_id = $2, discord_username = $3, discord_image = $4`,
+            [address.toLowerCase(), user.id, user.username, avatarUrl]
         );
 
-        // Award Points (+100) if new connection
+        // Award Points (+500) if new connection
         if (isNewConnection) {
             await db.query(`
                 UPDATE users 
-                SET points = COALESCE(points, 0) + 100
+                SET points = COALESCE(points, 0) + 500
                 WHERE address = $1
             `, [address.toLowerCase()]);
 
             // Audit Log
             await db.query(
                 "INSERT INTO points_audit_log (address, points_awarded, task_type) VALUES ($1, $2, $3)",
-                [address.toLowerCase(), 100, 'MISSION_SOCIAL_CONNECT_DISCORD']
+                [address.toLowerCase(), 500, 'MISSION_SOCIAL_CONNECT_DISCORD']
             );
         }
 
