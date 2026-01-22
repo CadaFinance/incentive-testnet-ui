@@ -17,6 +17,8 @@ export interface Task {
     time_left?: number; // For daily tasks on cooldown (seconds)
     next_available_at?: number; // Timestamp
     requires_verification?: boolean;
+    requires_telegram?: boolean;
+    requires_discord?: boolean;
 }
 
 export interface DailyStreak {
@@ -45,6 +47,7 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
     const query = `
         SELECT 
             t.id, t.type, t.title, t.description, t.reward_points, t.verification_type, t.verification_data, t.icon_url, t.is_active, t.requires_verification,
+            t.requires_telegram, t.requires_discord,
             to_char(t.created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at,
             CASE WHEN uth.id IS NOT NULL THEN TRUE ELSE FALSE END as is_completed
         FROM tasks t
@@ -272,7 +275,7 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
 export async function getUserTwitterProfile(address: string) {
     const normalizedAddress = address.toLowerCase();
     const res = await db.query(
-        "SELECT twitter_id, twitter_username, twitter_image, legacy_claimed, has_pending_streak_modal FROM users WHERE address = $1",
+        "SELECT twitter_id, twitter_username, twitter_image, legacy_claimed, has_pending_streak_modal, telegram_id, discord_id FROM users WHERE address = $1",
         [normalizedAddress]
     );
     return res.rows[0] || null;

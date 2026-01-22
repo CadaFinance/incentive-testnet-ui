@@ -11,7 +11,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     try {
         const { id } = await params;
         const body = await req.json();
-        const { title, description, reward_points, verification_data, is_active, requires_verification } = body;
+        const { title, description, reward_points, verification_data, is_active, requires_verification, requires_telegram, requires_discord } = body;
 
         const result = await db.query(
             `UPDATE tasks 
@@ -20,10 +20,12 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
                  reward_points = COALESCE($3, reward_points),
                  verification_data = COALESCE($4, verification_data),
                  is_active = COALESCE($5, is_active),
-                 requires_verification = COALESCE($6, requires_verification)
-             WHERE id = $7
+                 requires_verification = COALESCE($6, requires_verification),
+                 requires_telegram = COALESCE($7, requires_telegram),
+                 requires_discord = COALESCE($8, requires_discord)
+             WHERE id = $9
              RETURNING *`,
-            [title, description, reward_points, verification_data, is_active, requires_verification, id]
+            [title, description, reward_points, verification_data, is_active, requires_verification, requires_telegram, requires_discord, id]
         );
 
         if (result.rows.length === 0) {

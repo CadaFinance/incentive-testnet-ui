@@ -78,6 +78,8 @@ interface MissionData {
         twitter_id?: string;
         twitter_username?: string;
         legacy_claimed?: boolean;
+        telegram_id?: string;
+        discord_id?: string;
     };
     streakBonusEarned?: boolean;
     streakBonusModalPending?: boolean;
@@ -578,6 +580,17 @@ function MissionControlContent() {
                                     locked = true;
                                     lockedMessage = '// TELEGRAM REQUIRED';
                                 }
+                            }
+
+                            // Dynamic Requirements (Admin Configured)
+                            if (mission.requires_telegram && !userProfile?.telegram_id) {
+                                locked = true;
+                                lockedMessage = '// TELEGRAM REQUIRED';
+                            }
+
+                            if (mission.requires_discord && !userProfile?.discord_id) {
+                                locked = true;
+                                lockedMessage = '// DISCORD REQUIRED';
                             }
 
                             return (

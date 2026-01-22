@@ -19,6 +19,8 @@ interface Task {
     verification_data: string;
     is_active: boolean;
     requires_verification?: boolean;
+    requires_telegram?: boolean;
+    requires_discord?: boolean;
 }
 
 export default function AdminPage() {
@@ -39,7 +41,9 @@ export default function AdminPage() {
         verification_type: 'LINK_CLICK',
         verification_data: '',
         icon_url: '',
-        requires_verification: false
+        requires_verification: false,
+        requires_telegram: false,
+        requires_discord: false
     });
 
     // Presale Settings State
@@ -126,7 +130,9 @@ export default function AdminPage() {
                     verification_type: 'LINK_CLICK',
                     verification_data: '',
                     icon_url: '',
-                    requires_verification: false
+                    requires_verification: false,
+                    requires_telegram: false,
+                    requires_discord: false
                 });
             } else {
                 alert('Failed to create task');
@@ -152,7 +158,9 @@ export default function AdminPage() {
                     description: editingTask.description,
                     reward_points: editingTask.reward_points,
                     verification_data: editingTask.verification_data,
-                    requires_verification: editingTask.requires_verification
+                    requires_verification: editingTask.requires_verification,
+                    requires_telegram: editingTask.requires_telegram,
+                    requires_discord: editingTask.requires_discord
                 })
             });
             if (res.ok) {
@@ -293,7 +301,9 @@ export default function AdminPage() {
                                             {task.is_active ? 'ACTIVE' : 'INACTIVE'}
                                         </span>
                                         <span className="text-xs font-mono text-gray-500 uppercase">{task.type}</span>
-                                        {task.requires_verification && <span className="text-[10px] bg-blue-500/10 text-blue-400 px-1 border border-blue-500/20">VERIFIED ONLY</span>}
+                                        {task.requires_verification && <span className="text-[10px] bg-blue-500/10 text-blue-400 px-1 border border-blue-500/20">X CHECK</span>}
+                                        {task.requires_telegram && <span className="text-[10px] bg-blue-400/10 text-blue-300 px-1 border border-blue-400/20">TG CHECK</span>}
+                                        {task.requires_discord && <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-1 border border-indigo-500/20">DS CHECK</span>}
                                         {task.id < 0 && <span className="text-[10px] bg-red-500/10 text-red-400 px-1">SYSTEM (READ ONLY)</span>}
                                     </div>
                                     <h3 className="text-white font-bold">{task.title}</h3>
@@ -383,15 +393,37 @@ export default function AdminPage() {
                                     onChange={(e) => setNewTask({ ...newTask, verification_data: e.target.value })}
                                 />
                             </div>
-                            <div className="flex items-center gap-2 pt-2">
-                                <input
-                                    type="checkbox"
-                                    id="req_ver"
-                                    className="w-4 h-4 accent-[#e2ff3d] bg-zinc-900 border-white/10"
-                                    checked={newTask.requires_verification}
-                                    onChange={(e) => setNewTask({ ...newTask, requires_verification: e.target.checked })}
-                                />
-                                <label htmlFor="req_ver" className="text-xs font-mono text-gray-300">Restrict to Verified Users Only? (@Handle Linked)</label>
+                            <div className="flex flex-col gap-2 pt-2">
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="req_ver"
+                                        className="w-4 h-4 accent-[#e2ff3d] bg-zinc-900 border-white/10"
+                                        checked={newTask.requires_verification}
+                                        onChange={(e) => setNewTask({ ...newTask, requires_verification: e.target.checked })}
+                                    />
+                                    <label htmlFor="req_ver" className="text-xs font-mono text-gray-300">Requires Twitter (X)?</label>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="req_tg"
+                                        className="w-4 h-4 accent-[#e2ff3d] bg-zinc-900 border-white/10"
+                                        checked={newTask.requires_telegram}
+                                        onChange={(e) => setNewTask({ ...newTask, requires_telegram: e.target.checked })}
+                                    />
+                                    <label htmlFor="req_tg" className="text-xs font-mono text-gray-300">Requires Telegram?</label>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="req_ds"
+                                        className="w-4 h-4 accent-[#e2ff3d] bg-zinc-900 border-white/10"
+                                        checked={newTask.requires_discord}
+                                        onChange={(e) => setNewTask({ ...newTask, requires_discord: e.target.checked })}
+                                    />
+                                    <label htmlFor="req_ds" className="text-xs font-mono text-gray-300">Requires Discord?</label>
+                                </div>
                             </div>
                         </div>
 
@@ -463,15 +495,37 @@ export default function AdminPage() {
                                         onChange={(e) => setEditingTask({ ...editingTask, verification_data: e.target.value })}
                                     />
                                 </div>
-                                <div className="flex items-center gap-2 pt-2">
-                                    <input
-                                        type="checkbox"
-                                        id="edit_req_ver"
-                                        className="w-4 h-4 accent-[#e2ff3d] bg-zinc-900 border-white/10"
-                                        checked={editingTask.requires_verification || false}
-                                        onChange={(e) => setEditingTask({ ...editingTask, requires_verification: e.target.checked })}
-                                    />
-                                    <label htmlFor="edit_req_ver" className="text-xs font-mono text-gray-300">Restrict to Verified Users Only?</label>
+                                <div className="flex flex-col gap-2 pt-2">
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="edit_req_ver"
+                                            className="w-4 h-4 accent-[#e2ff3d] bg-zinc-900 border-white/10"
+                                            checked={editingTask.requires_verification || false}
+                                            onChange={(e) => setEditingTask({ ...editingTask, requires_verification: e.target.checked })}
+                                        />
+                                        <label htmlFor="edit_req_ver" className="text-xs font-mono text-gray-300">Requires Twitter (X)?</label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="edit_req_tg"
+                                            className="w-4 h-4 accent-[#e2ff3d] bg-zinc-900 border-white/10"
+                                            checked={editingTask.requires_telegram || false}
+                                            onChange={(e) => setEditingTask({ ...editingTask, requires_telegram: e.target.checked })}
+                                        />
+                                        <label htmlFor="edit_req_tg" className="text-xs font-mono text-gray-300">Requires Telegram?</label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="edit_req_ds"
+                                            className="w-4 h-4 accent-[#e2ff3d] bg-zinc-900 border-white/10"
+                                            checked={editingTask.requires_discord || false}
+                                            onChange={(e) => setEditingTask({ ...editingTask, requires_discord: e.target.checked })}
+                                        />
+                                        <label htmlFor="edit_req_ds" className="text-xs font-mono text-gray-300">Requires Discord?</label>
+                                    </div>
                                 </div>
                             </div>
                         )}

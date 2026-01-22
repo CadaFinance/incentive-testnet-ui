@@ -14,17 +14,17 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { type, title, description, reward_points, verification_type, verification_data, icon_url, requires_verification } = body;
+        const { type, title, description, reward_points, verification_type, verification_data, icon_url, requires_verification, requires_telegram, requires_discord } = body;
 
         if (!title || !reward_points || !type) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
         const result = await db.query(
-            `INSERT INTO tasks (type, title, description, reward_points, verification_type, verification_data, icon_url, is_active, requires_verification)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, $8)
+            `INSERT INTO tasks (type, title, description, reward_points, verification_type, verification_data, icon_url, is_active, requires_verification, requires_telegram, requires_discord)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, $8, $9, $10)
              RETURNING *`,
-            [type, title, description, reward_points, verification_type || 'MANUAL', verification_data, icon_url, requires_verification || false]
+            [type, title, description, reward_points, verification_type || 'MANUAL', verification_data, icon_url, requires_verification || false, requires_telegram || false, requires_discord || false]
         );
 
         return NextResponse.json(result.rows[0]);
