@@ -101,8 +101,11 @@ export async function GET(request: Request) {
             }
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Missions API Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+        }, { status: 500 });
     }
 }

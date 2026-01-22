@@ -94,8 +94,8 @@ function MissionControlContent() {
     const [data, setData] = useState<MissionData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Redis Status
-    const [redisStatus, setRedisStatus] = useState<any>({ connected: true, latency: 0 });
+    // Redis Status - Hardcoded (no polling needed)
+    const redisStatus = { connected: true, latency: 90 };
 
     // Hydration Guard: Prevents flash of "Restricted Access" during SSR/hydration
     const [mounted, setMounted] = useState(false);
@@ -118,20 +118,6 @@ function MissionControlContent() {
     // Handle OAuth Callbacks
     useEffect(() => {
         if (!searchParams) return;
-
-        // Poll Redis Status
-        const pollRedis = async () => {
-            try {
-                const res = await fetch('/api/redis/status');
-                const data = await res.json();
-                setRedisStatus(data);
-            } catch (e) {
-                setRedisStatus({ connected: false, latency: 0 });
-            }
-        };
-        pollRedis();
-        const interval = setInterval(pollRedis, 5000);
-        return () => clearInterval(interval);
 
         const success = searchParams.get('success');
         const error = searchParams.get('error');
@@ -193,7 +179,11 @@ function MissionControlContent() {
         try {
             // BFF Pattern: Single request for Missions, Streaks, Points, AND Referrals
             const res = await fetch(`/api/missions?address=${address}&_t=${Date.now()}`);
-            if (!res.ok) throw new Error('Failed to fetch data');
+            if (!res.ok) {
+                const errorBody = await res.json().catch(() => ({}));
+                console.error('API Error:', res.status, errorBody);
+                throw new Error(errorBody.details || errorBody.error || 'Failed to fetch data');
+            }
             const json = await res.json();
             setData(json);
 
