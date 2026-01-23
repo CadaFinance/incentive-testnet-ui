@@ -11,6 +11,7 @@ import { MissionCard } from '@/components/MissionControl/MissionCard';
 import { LegacyClaimModal } from '@/components/MissionControl/LegacyClaimModal';
 import StreakSuccessModal from '@/components/MissionControl/StreakSuccessModal';
 import { TelegramVerifyModal } from '@/components/TelegramVerifyModal';
+import { InviteMilestones } from '@/components/MissionControl/InviteMilestones';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity } from 'lucide-react';
 import { formatAddress } from '@/lib/utils';
@@ -375,8 +376,10 @@ function MissionControlContent() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-2xl font-black text-white tracking-tighter leading-none">{parseInt(userRank.points || 0).toLocaleString()}</div>
-                                    <span className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.2em] block mt-0.5">Points</span>
+                                    <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter leading-none">
+                                        ${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </div>
+                                    <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-[0.2em] block mt-0.5">$USDZ Amount</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -617,6 +620,34 @@ function MissionControlContent() {
                             </div>
                         )}
                     </div>
+                </section>
+
+                {/* 3. INVITE MILESTONE REWARDS */}
+                <section className="border-t border-white/5 pt-8 lg:pt-12">
+                    <div className="flex flex-col lg:flex-row items-start lg:items-baseline justify-between mb-6 lg:mb-8 gap-3">
+                        <div>
+                            <h2 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tighter">
+                                Invite Milestone Rewards
+                            </h2>
+                            <p className="text-[10px] font-mono text-zinc-600 mt-1 tracking-wide">
+                                Earn bonus XP for hitting verified invite milestones
+                            </p>
+                        </div>
+                        <div className="flex gap-3">
+                            {/* Total Invites */}
+                            <div className="bg-zinc-900/50 border border-white/10 px-4 py-2 min-w-[120px]">
+                                <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest block">Total Invites</span>
+                                <span className="text-2xl font-black text-zinc-400 font-mono">{referralInfo?.stats?.total_referrals || 0}</span>
+                            </div>
+                            {/* Verified Invites */}
+                            <div className="bg-[#e2ff3d]/5 border border-[#e2ff3d]/20 px-4 py-2 min-w-[120px]">
+                                <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest block">Verified Invites</span>
+                                <span className="text-2xl font-black text-[#e2ff3d] font-mono">{referralInfo?.stats?.verified_referrals || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <InviteMilestones address={address || ''} />
                 </section>
 
                 <TelegramVerifyModal

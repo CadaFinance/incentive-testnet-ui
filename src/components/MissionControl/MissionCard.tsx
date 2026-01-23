@@ -118,12 +118,12 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
         <div
             onClick={!isCompleted && !isLocked ? handleAction : undefined}
             className={`
-                group relative border p-4 lg:p-6 cursor-pointer transition-all duration-300 overflow-hidden
+                group relative border p-4 lg:p-6 transition-all duration-300 overflow-hidden
                 ${isCompleted
-                    ? 'bg-[#060606] border-white/[0.03] opacity-40'
+                    ? 'bg-[#060606] border-white/[0.03] opacity-40 cursor-not-allowed'
                     : isLocked
-                        ? 'bg-[#0a0a0a] border-red-500/10 cursor-not-allowed filter grayscale-[0.8] opacity-70'
-                        : 'bg-[#080808] border-white/5 hover:border-[#e2ff3d]/50 hover:bg-[#e2ff3d]/[0.01]'
+                        ? 'bg-[#0a0a0a] border-white/5 cursor-not-allowed filter grayscale opacity-70'
+                        : 'bg-[#080808] border-[#e2ff3d]/30 hover:border-[#e2ff3d]/50 hover:bg-[#e2ff3d]/[0.02] cursor-pointer shadow-[0_0_30px_rgba(226,255,61,0.08)]'
                 }
             `}
         >
@@ -147,7 +147,10 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
 
             {/* Horizontal Line Indicator for Premium feel */}
             {!isCompleted && !isLocked && (
-                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#e2ff3d]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <>
+                    <div className="absolute inset-0 bg-[#e2ff3d]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#e2ff3d] to-transparent animate-pulse" />
+                </>
             )}
 
             <div className="flex justify-between items-center mb-3 relative z-10">
@@ -157,7 +160,7 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
                         ? 'border-white/5 text-gray-700'
                         : isLocked
                             ? 'border-red-500/20 text-red-500/50 bg-red-500/5'
-                            : 'border-white/10 text-zinc-500 group-hover:text-[#e2ff3d] group-hover:border-[#e2ff3d]/20'
+                            : 'border-[#e2ff3d]/20 text-[#e2ff3d] bg-[#e2ff3d]/10 animate-pulse'
                     }
                 `}>
                     {isCompleted ? 'ARCHIVED' : isLocked ? 'LOCKED' : 'PROTOCOL_REQ'}
