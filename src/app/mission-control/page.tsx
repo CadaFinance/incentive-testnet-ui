@@ -347,8 +347,8 @@ function MissionControlContent() {
 
                                 <div className="space-y-2 pt-4 border-t border-white/5">
                                     <div className="flex items-center justify-between text-[10px] font-mono">
-                                        <span className="text-gray-600 uppercase font-bold tracking-widest">Protocol_Points</span>
-                                        <span className="text-white font-black">{parseInt(userRank.points || 0).toLocaleString()}</span>
+                                        <span className="text-[#e2ff3d] uppercase font-bold tracking-widest">Estimated_$USDZ</span>
+                                        <span className="text-[#e2ff3d] font-black">${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     <div className="flex items-center justify-between text-[10px] font-mono">
                                         <span className="text-gray-600 uppercase font-bold tracking-widest">Verification_ID</span>
