@@ -27,13 +27,13 @@ export async function generateMetadata(
         title,
         description,
         url: `https://testnet.zugchain.org/?ref=${ref}`,
-        images: ['/refOG.png'],
+        images: ['/refOG.png?v=2'],
       },
       twitter: {
         card: 'summary_large_image',
         title,
         description,
-        images: ['/refOG.png'],
+        images: ['/refOG.png?v=2'],
       },
     }
   }
@@ -42,6 +42,13 @@ export async function generateMetadata(
     ...baseMetadata,
     title: 'Zug Chain | Incentivized Genesis Phase',
     description: 'Earn Genesis Points on the Zug Chain Core Network. Faucet, Stake, and Validate to define your future allocation.',
+    openGraph: {
+      images: ['/refOG.png?v=2'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: ['/refOG.png?v=2'],
+    },
   }
 }
 

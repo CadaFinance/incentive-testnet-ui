@@ -611,6 +611,7 @@ function MissionControlContent() {
                                     onTelegramVerify={() => setShowTelegramModal(true)}
                                     locked={locked}
                                     lockedMessage={lockedMessage}
+                                    referralCode={referralInfo?.code}
                                 />
                             );
                         })}

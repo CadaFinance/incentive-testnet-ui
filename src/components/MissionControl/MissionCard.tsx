@@ -20,9 +20,10 @@ interface MissionCardProps {
     onTelegramVerify?: () => void;
     locked?: boolean;
     lockedMessage?: string;
+    referralCode?: string;
 }
 
-export function MissionCard({ id, title, description, reward, isCompleted, verificationLink, timeLeft: initialTimeLeft, onComplete, requiresVerification, isUserVerified, multiplier = 1.0, onTelegramVerify, locked = false, lockedMessage = '// ACCESS DENIED' }: MissionCardProps) {
+export function MissionCard({ id, title, description, reward, isCompleted, verificationLink, timeLeft: initialTimeLeft, onComplete, requiresVerification, isUserVerified, multiplier = 1.0, onTelegramVerify, locked = false, lockedMessage = '// ACCESS DENIED', referralCode }: MissionCardProps) {
     const { address } = useAccount();
     const [loading, setLoading] = useState(false);
     const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
@@ -81,7 +82,12 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
             return;
         }
 
-        if (verificationLink) {
+        // Handle Dynamic Twitter Reply Intent
+        if (verificationLink?.startsWith('TWITTER_INTENT_REPLY:')) {
+            const tweetId = verificationLink.split(':')[1];
+            const text = encodeURIComponent(`Joining the @ZugChain_org Incentivized Testnet! 🚀\n\nJoin my squad: https://testnet.zugchain.org/?ref=${referralCode || 'ZUG'}`);
+            window.open(`https://twitter.com/intent/tweet?in_reply_to=${tweetId}&text=${text}`, '_blank');
+        } else if (verificationLink) {
             window.open(verificationLink, '_blank');
         }
 
