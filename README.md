@@ -34,3 +34,29 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+
+**OFFICIAL ZUGCHAIN LINKS**
+`Verify before you trust.`
+
+> :warning: **SECURITY WARNING:**
+> We will **NEVER** ask for your Seed Phrase or Private Key.
+> We will **NEVER** DM you first about "Support" or "Airdrops."
+> Check the URL carefully. Scammers use similar characters (e.g., `zugchaìn.org`).
+
+### :globe_with_meridians: CORE NETWORK
+*   **Official Website:** <https://zugchain.org>
+*   **Mission Control:** <https://testnet.zugchain.org/mission-control>
+*   **Block Explorer:** <https://explorer.zugchain.org>
+*   **Documents:** <https://testnet.zugchain.org/docs>
+*   **Faucet:** <https://testnet.zugchain.org/faucet>
+*   **Whitepaper:** <https://www.zugchain.org/whitepaper>
+*   **Staking:** <https://testnet.zugchain.org/>
+
+### :calling: SOCIAL CHANNELS
+*   **X (Twitter):** <https://twitter.com/ZugChain_org>
+*   **Telegram:** <https://t.me/zugchain>
+
+*Trust only what you see here.*

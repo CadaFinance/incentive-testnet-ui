@@ -495,13 +495,13 @@ function MissionControlContent() {
                                 <div className="flex items-center gap-0 group/link border border-white/10 hover:border-[#e2ff3d]/30 transition-all bg-black/40 p-1">
                                     <div className="flex-1 font-mono text-[10px] text-zinc-400 px-4 truncate select-all py-3 tracking-wide">
                                         {referralInfo?.code && referralInfo.code !== 'LOADING'
-                                            ? `${window.location.origin}/?ref=${referralInfo.code}`
+                                            ? `https://testnet.zugchain.org/?ref=${referralInfo.code}`
                                             : 'awaiting_deployment...'
                                         }
                                     </div>
                                     <button
                                         onClick={() => {
-                                            const url = `${window.location.origin}/?ref=${referralInfo.code}`;
+                                            const url = `https://testnet.zugchain.org/?ref=${referralInfo.code}`;
                                             navigator.clipboard.writeText(url);
                                             toast.success('Uplink copied to clipboard');
                                         }}

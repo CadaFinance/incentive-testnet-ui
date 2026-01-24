@@ -111,7 +111,7 @@ export async function processReferralBonus(referee: string, code: string) {
 // Centralized Tier Definitions
 import { REFERRAL_TIERS } from './referral_constants';
 
-export async function getReferralStats(address: string, origin: string = 'https://zug.network') {
+export async function getReferralStats(address: string, origin: string = 'https://testnet.zugchain.org') {
     const normalizedAddress = address.toLowerCase();
 
     // REDIS CACHE WRAPPER: Cache for 5 minutes (300s)

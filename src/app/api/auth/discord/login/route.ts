@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     }
 
     const clientId = process.env.DISCORD_CLIENT_ID;
-    const APP_URL = process.env.NEXT_PUBLIC_TESTNET_APP || process.env.NEXT_PUBLIC_APP_URL;
+    const APP_URL = process.env.NEXT_PUBLIC_TESTNET_APP;
     const redirectUri = `${APP_URL}/api/auth/discord/callback`;
 
     // State: Pass the wallet address + optional trigger encoded
