@@ -12,6 +12,7 @@ const MAIN_SITE = process.env.NEXT_PUBLIC_MAIN_SITE || 'https://zugchain.org'
 const EXPLORER = process.env.NEXT_PUBLIC_EXPLORER || 'https://explorer.zugchain.org'
 const TWITTER = process.env.NEXT_PUBLIC_TWITTER || 'https://twitter.com/ZugChain_org'
 const TELEGRAM = process.env.NEXT_PUBLIC_TELEGRAM || 'https://t.me/zugchain'
+const DISCORD = 'https://discord.com/invite/dV2sQtnQEu'
 
 const navigation: { name: string; href: string; external?: boolean }[] = [
     { name: 'STAKE', href: '/' },
@@ -157,6 +158,14 @@ export default function Header() {
                                 >
                                     <Image src="/telegram.png" alt="TG" width={12} height={12} className="opacity-30 group-hover:opacity-100 transition-opacity invert" />
                                 </a>
+                                <a
+                                    href={DISCORD}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-8 h-8 flex items-center justify-center rounded border border-white/5 hover:border-[#e2ff3d]/30 hover:bg-[#e2ff3d]/5 transition-all group"
+                                >
+                                    <Image src="/icons8-discord-50.png" alt="Discord" width={14} height={14} className="opacity-30 group-hover:opacity-100 transition-opacity invert" />
+                                </a>
                             </div>
 
                             <button
@@ -213,6 +222,9 @@ export default function Header() {
                                 </a>
                                 <a href={TELEGRAM} target="_blank" rel="noopener noreferrer">
                                     <Image src="/telegram.png" alt="TG" width={18} height={18} className="invert opacity-40" />
+                                </a>
+                                <a href={DISCORD} target="_blank" rel="noopener noreferrer">
+                                    <Image src="/icons8-discord-50.png" alt="Discord" width={18} height={18} className="invert opacity-40" />
                                 </a>
                             </div>
                         </div>

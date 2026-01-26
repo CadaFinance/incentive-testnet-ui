@@ -7,8 +7,8 @@ import Link from 'next/link'
 const MAIN_SITE = process.env.NEXT_PUBLIC_MAIN_SITE || 'https://zugchain.org'
 const EXPLORER = process.env.NEXT_PUBLIC_EXPLORER || 'https://explorer.zugchain.org'
 const TWITTER = process.env.NEXT_PUBLIC_TWITTER || 'https://twitter.com/ZugChain_org'
-const GITHUB = process.env.NEXT_PUBLIC_GITHUB || 'https://github.com/zugchain'
 const TELEGRAM = process.env.NEXT_PUBLIC_TELEGRAM || 'https://t.me/zugchain'
+const DISCORD = 'https://discord.com/invite/dV2sQtnQEu'
 const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || '824642'
 
 const footerLinks = {
@@ -19,7 +19,6 @@ const footerLinks = {
         { name: 'Staking Portal', href: '/staking/vzug', external: false },
     ],
     developers: [
-        { name: 'GitHub', href: GITHUB, external: true },
         { name: 'Developer Docs', href: '/docs', external: false },
         { name: 'Testnet Faucet', href: '/faucet', external: false },
         { name: 'Smart Contracts', href: '/docs', external: false },
@@ -38,9 +37,9 @@ const footerLinks = {
 };
 
 const socialLinks = [
-    { name: 'Twitter', icon: Twitter, href: TWITTER, color: '#1DA1F2' },
-    { name: 'GitHub', icon: Github, href: GITHUB, color: '#ffffff' },
-    { name: 'Telegram', icon: Zap, href: TELEGRAM, color: '#0088cc' },
+    { name: 'X', icon: '/twitter.png', href: TWITTER },
+    { name: 'Telegram', icon: '/telegram.png', href: TELEGRAM },
+    { name: 'Discord', icon: '/icons8-discord-50.png', href: DISCORD },
 ];
 
 const networkSpecs = [
@@ -170,9 +169,14 @@ export default function Footer() {
                                 key={social.name}
                                 href={social.href}
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="w-10 h-10 bg-white/[0.02] border border-white/10 flex items-center justify-center transition-all hover:border-[#e2ff3d]/60 hover:bg-[#e2ff3d]/5 group"
                             >
-                                <social.icon className="w-5 h-5 text-gray-700 group-hover:text-[#e2ff3d] transition-colors" strokeWidth={1} />
+                                <img
+                                    src={social.icon}
+                                    alt={social.name}
+                                    className="w-5 h-5 opacity-30 group-hover:opacity-100 transition-opacity invert"
+                                />
                             </a>
                         ))}
                     </div>

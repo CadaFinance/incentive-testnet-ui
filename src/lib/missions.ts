@@ -177,7 +177,7 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
         dynamicMissions.push({
             id: -100,
             type: 'SOCIAL',
-            title: 'Link X Identity',
+            title: 'Connect Your X',
             description: 'Connect your X account to verify eligibility for legacy airdrop points.',
             reward_points: 100, // Bonus for connecting
             verification_type: 'MANUAL',
@@ -190,7 +190,7 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
         dynamicMissions.push({
             id: -100,
             type: 'SOCIAL',
-            title: 'Link X Identity',
+            title: 'Connect Your X',
             description: `Connected as @${twitterProfile.twitter_username}`,
             reward_points: 100,
             verification_type: 'MANUAL',
@@ -239,7 +239,7 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
         dynamicMissions.push({
             id: -102,
             type: 'SOCIAL',
-            title: 'Claim Discord Role',
+            title: 'Connect Your Discord',
             description: 'Join the official ZugChain Discord server, verify your identity, and receive your contributor role.',
             reward_points: 500,
             verification_type: 'API_VERIFY',
@@ -251,7 +251,7 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
         dynamicMissions.push({
             id: -102,
             type: 'SOCIAL',
-            title: 'Claim Discord Role',
+            title: 'Connect Your Discord',
             description: `Verified as @${discordProfile.discord_username}`,
             reward_points: 500,
             verification_type: 'MANUAL',
