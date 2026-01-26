@@ -16,13 +16,15 @@ export async function GET(request: NextRequest) {
 
     console.log("Params:", { code, state, error });
 
+    const APP_URL = process.env.NEXT_PUBLIC_TESTNET_APP;
+
     // 1. Check for Errors
     if (error) {
-        return NextResponse.redirect(new URL('/mission-control?error=twitter_auth_failed', request.url));
+        return NextResponse.redirect(`${APP_URL}/mission-control?error=twitter_auth_failed`);
     }
 
     if (!code) {
-        return NextResponse.redirect(new URL('/mission-control?error=no_code', request.url));
+        return NextResponse.redirect(`${APP_URL}/mission-control?error=no_code`);
     }
 
     // 2. Get Wallet Address from Cookie
@@ -30,7 +32,7 @@ export async function GET(request: NextRequest) {
     const walletAddress = cookieStore.get('pending_bind_address')?.value;
 
     if (!walletAddress) {
-        return NextResponse.redirect(new URL('/mission-control?error=session_expired', request.url));
+        return NextResponse.redirect(`${APP_URL}/mission-control?error=session_expired`);
     }
 
     // 3. Exchange Code for Access Token
@@ -57,7 +59,7 @@ export async function GET(request: NextRequest) {
         if (!tokenResponse.ok) {
             const errText = await tokenResponse.text();
             console.error('Twitter Token Error:', errText);
-            return NextResponse.redirect(new URL('/mission-control?error=token_exchange_failed', request.url));
+            return NextResponse.redirect(`${APP_URL}/mission-control?error=token_exchange_failed`);
         }
 
         const tokenData = await tokenResponse.json();
@@ -72,7 +74,7 @@ export async function GET(request: NextRequest) {
 
         if (!userResponse.ok) {
             console.error('Twitter User Info Error');
-            return NextResponse.redirect(new URL('/mission-control?error=user_info_failed', request.url));
+            return NextResponse.redirect(`${APP_URL}/mission-control?error=user_info_failed`);
         }
 
         const userData = await userResponse.json();
@@ -97,7 +99,7 @@ export async function GET(request: NextRequest) {
         );
 
         if (existingLink.rowCount && existingLink.rowCount > 0) {
-            return NextResponse.redirect(new URL('/mission-control?error=twitter_already_linked', request.url));
+            return NextResponse.redirect(`${APP_URL}/mission-control?error=twitter_already_linked`);
         }
 
         // Upsert User with Twitter Data
@@ -195,15 +197,15 @@ export async function GET(request: NextRequest) {
         // Clear cookie
         cookieStore.delete('pending_bind_address');
 
-        let redirectUrl = `/mission-control?success=twitter_linked`;
+        let redirectUrl = `${APP_URL}/mission-control?success=twitter_linked`;
         if (legacyClaimedAmount > 0) {
             redirectUrl += `&points_claimed=${legacyClaimedAmount}`;
         }
 
-        return NextResponse.redirect(new URL(redirectUrl, request.url));
+        return NextResponse.redirect(redirectUrl);
 
     } catch (e) {
         console.error("Callback Fatal Error:", e);
-        return NextResponse.redirect(new URL('/mission-control?error=server_error', request.url));
+        return NextResponse.redirect(`${APP_URL}/mission-control?error=server_error`);
     }
 }
