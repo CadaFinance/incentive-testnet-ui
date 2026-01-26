@@ -20,6 +20,7 @@
 # production
 /build
 /db
+/scripts
 # misc
 .DS_Store
 *.pem
@@ -32,6 +33,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env
+ubuntu.env
+.env.local
 
 
 # scripts folder (contains sensitive setup scripts)
