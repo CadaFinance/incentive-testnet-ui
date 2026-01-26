@@ -147,10 +147,27 @@ function MissionControlContent() {
         if (error) {
             const msgs: Record<string, string> = {
                 'twitter_already_linked': 'This X account is already linked to another wallet.',
+                'discord_already_linked': 'This Discord account is already linked to another wallet.',
                 'session_expired': 'Session expired. Please try connecting again.',
-                'server_error': 'Server verification failed. Try again later.'
+                'server_error': 'Server verification failed. Try again later.',
+                'discord_not_member': 'Access Denied: You must join our Discord server first.'
             };
-            if (error) {
+
+            if (error === 'discord_not_member') {
+                toast.error(
+                    <div className="flex flex-col gap-2">
+                        <span>{msgs[error]}</span>
+                        <a
+                            href="https://discord.com/invite/dV2sQtnQEu"
+                            target="_blank"
+                            className="bg-[#e2ff3d] text-black px-3 py-1 text-[10px] font-black uppercase text-center hover:bg-white transition-colors"
+                        >
+                            [ JOIN DISCORD SERVER ]
+                        </a>
+                    </div>,
+                    { duration: 6000 }
+                );
+            } else {
                 toast.error(msgs[error as string] || 'Verification Failed');
             }
             router.replace('/mission-control');

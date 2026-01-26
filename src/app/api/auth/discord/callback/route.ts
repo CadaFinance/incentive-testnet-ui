@@ -125,6 +125,11 @@ export async function GET(req: NextRequest) {
                         "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
                         ['ERROR', 'DISCORD', `❌ Failed role grant: ${user.username}`, { status: roleResponse.status, error: errorData }]
                     );
+
+                    // Handle "Unknown Member" (User not in guild)
+                    if (roleResponse.status === 404) {
+                        return NextResponse.redirect(`${APP_URL}/mission-control?error=discord_not_member`);
+                    }
                 }
 
                 // B. Check for "Social Elite" (Network Scout) Criteria
