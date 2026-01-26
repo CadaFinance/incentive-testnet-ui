@@ -95,11 +95,12 @@ const DB_URL = process.env.DATABASE_URL || 'postgres://blockscout:Oh16ogZtxZtVgL
 const client = new Client({ connectionString: DB_URL });
 
 async function setupTelegramNotifications() {
+    const log = (msg) => console.log(`[${new Date().toISOString()}] ${msg}`);
     try {
         await client.connect();
-        console.log("🟢 Connected to database.\n");
+        log("🟢 Connected to database.");
 
-        console.log("📦 Creating 'telegram_outbox' table...");
+        log("📦 Creating 'telegram_outbox' table...");
         await client.query(`
             CREATE TABLE IF NOT EXISTS telegram_outbox (
                 id SERIAL PRIMARY KEY,
@@ -115,9 +116,14 @@ async function setupTelegramNotifications() {
                 CONSTRAINT fk_user FOREIGN KEY (user_address) REFERENCES users(address) ON DELETE CASCADE
             );
         `);
-        console.log("✅ Table 'telegram_outbox' ready.\n");
+        log("✅ Table 'telegram_outbox' ready.");
 
-        console.log("🔔 Creating Welcome notification trigger...");
+        log("🔔 Dropping old triggers (if any) to prevent conflicts...");
+        await client.query("DROP TRIGGER IF EXISTS trg_queue_telegram_notif ON users");
+        await client.query("DROP TRIGGER IF EXISTS trg_notify_worker ON telegram_outbox");
+        log("✅ Old triggers cleared.");
+
+        log("🔔 Creating Welcome notification function...");
         await client.query(`
             CREATE OR REPLACE FUNCTION queue_telegram_notification() 
             RETURNS TRIGGER AS $$
@@ -131,16 +137,19 @@ async function setupTelegramNotifications() {
                 RETURN NEW;
             END;
             $$ LANGUAGE plpgsql;
+        `);
+        log("✅ Function 'queue_telegram_notification' created.");
 
-            DROP TRIGGER IF EXISTS trg_queue_telegram_notif ON users;
+        log("🔔 Attaching Welcome trigger to 'users' table... (THIS MAY HANG IF TABLE IS LOCKED)");
+        await client.query(`
             CREATE TRIGGER trg_queue_telegram_notif
             AFTER UPDATE ON users
             FOR EACH ROW
             EXECUTE FUNCTION queue_telegram_notification();
         `);
-        console.log("✅ Welcome trigger ready.\n");
+        log("✅ Welcome trigger attached.");
 
-        console.log("⚡ Creating worker notification system...");
+        log("⚡ Creating worker notification function...");
         await client.query(`
             CREATE OR REPLACE FUNCTION notify_worker() 
             RETURNS TRIGGER AS $$
@@ -149,16 +158,19 @@ async function setupTelegramNotifications() {
                 RETURN NEW;
             END;
             $$ LANGUAGE plpgsql;
+        `);
+        log("✅ Function 'notify_worker' created.");
 
-            DROP TRIGGER IF EXISTS trg_notify_worker ON telegram_outbox;
+        log("⚡ Attaching Worker trigger to 'telegram_outbox' table...");
+        await client.query(`
             CREATE TRIGGER trg_notify_worker
             AFTER INSERT ON telegram_outbox
             FOR EACH ROW
             EXECUTE FUNCTION notify_worker();
         `);
-        console.log("✅ Worker notification ready.\n");
+        log("✅ Worker trigger attached.");
 
-        console.log("🎉 Telegram Notification System Setup Complete!");
+        log("🎉 Telegram Notification System Setup Complete!");
 
     } catch (err) {
         console.error("❌ Setup Failed:", err);
@@ -197,6 +209,27 @@ if (!BOT_TOKEN) {
 
 const bot = new Telegraf(BOT_TOKEN);
 const client = new Client({ connectionString: DB_URL });
+const ADMIN_ID = '7046348699'; // @someoneserious12
+
+async function notifyAdmin(error, context = '') {
+    try {
+        const time = new Date().toISOString();
+        const msg = `⚠️ *Bot Error Detected*\n\n` +
+                    `🕒 *Time:* \`${time}\`\n` +
+                    `📝 *Context:* \`${context}\`\n` +
+                    `❌ *Error:* \`${error.message || error}\`\n` +
+                    (error.stack ? `\n*Stack:* \`${error.stack.slice(0, 200)}...\`` : '');
+        await bot.telegram.sendMessage(ADMIN_ID, msg, { parse_mode: 'MarkdownV2' });
+    } catch (e) {
+        console.error('Failed to notify admin:', e);
+    }
+}
+
+// Global error handler
+bot.catch((err, ctx) => {
+    console.error(`Telegraf error for ${ctx.updateType}`, err);
+    notifyAdmin(err, `Telegraf Update: ${ctx.updateType}`);
+});
 
 function escapeMarkdown(text) {
     if (!text && text !== 0) return '';
@@ -268,39 +301,53 @@ bot.start(async (ctx) => {
     console.log('[AUTH] Processing /start with code: ' + startPayload + ' from user ' + userId + ' (@' + username + ')');
     
     try {
-        // 1. Find pending session with this code
-        const pendingRes = await client.query(
-            "SELECT * FROM telegram_auth_sessions WHERE code = $1 AND status = 'PENDING'",
+        // 1. Find session with this code (any status first for debugging)
+        const debugRes = await client.query(
+            "SELECT * FROM telegram_auth_sessions WHERE code::text = $1",
             [startPayload]
         );
-        
-        if (pendingRes.rows.length === 0) {
-            // Check if already verified (user clicked link again)
-            const verifiedRes = await client.query(
-                "SELECT * FROM telegram_auth_sessions WHERE code = $1 AND status = 'VERIFIED'",
-                [startPayload]
+
+        if (debugRes.rows.length === 0) {
+            console.log('[AUTH] ABSOLUTELY NOT FOUND in DB: ' + startPayload);
+            return ctx.replyWithMarkdownV2(
+                '❌ *Session Not Found*\n\n' +
+                'This link is invalid or doesn\'t exist in our records\\.\n\n' +
+                'Please restart the process on [zugchain\\.org](https://zugchain.org)\\.',
+                MAIN_MENU
             );
-            
-            if (verifiedRes.rows.length > 0) {
-                console.log('[AUTH] Session already verified for code: ' + startPayload);
+        }
+
+        const sessionFound = debugRes.rows[0];
+        console.log('[AUTH] Found session in DB. Status: ' + sessionFound.status + ', Expires: ' + sessionFound.expires_at);
+
+        if (sessionFound.status !== 'PENDING') {
+            if (sessionFound.status === 'VERIFIED') {
                 return ctx.replyWithMarkdownV2(
                     '✅ *Already Verified\\!*\n\n' +
-                    'Your wallet is already linked\\.\n' +
-                    '_Return to the website to continue\\._',
+                    'Your wallet is already linked\\.',
                     MAIN_MENU
                 );
             }
-            
-            console.log('[AUTH] No pending session found for code: ' + startPayload);
             return ctx.replyWithMarkdownV2(
                 '⏰ *Session Expired*\n\n' +
-                'This verification link has expired\\.\n\n' +
-                'Please return to [zugchain\\.org](https://zugchain.org) and try again\\.',
+                'This verification session has already been processed or is no longer active\\.\n\n' +
+                'Please try again from the website\\.',
+                MAIN_MENU
+            );
+        }
+
+        // Check time expiration explicitly
+        if (sessionFound.expires_at && new Date(sessionFound.expires_at) < new Date()) {
+            console.log('[AUTH] Session exists but EXPIRED by time: ' + sessionFound.expires_at);
+            return ctx.replyWithMarkdownV2(
+                '⏰ *Session Expired*\n\n' +
+                'This verification link has expired \\(10 minute limit\\)\\.\n\n' +
+                'Please try again from the website\\.',
                 MAIN_MENU
             );
         }
         
-        const session = pendingRes.rows[0];
+        const session = sessionFound;
         const sessionAddress = session.address.toLowerCase();
         console.log('[AUTH] Found session for wallet: ' + sessionAddress);
         
@@ -422,11 +469,12 @@ bot.start(async (ctx) => {
         
     } catch (e) {
         console.error('[AUTH] Error processing verification:', e);
+        notifyAdmin(e, `Auth Process Context: user=${userId}, code=${startPayload}`);
         try { await client.query("ROLLBACK"); } catch (re) {}
         return ctx.replyWithMarkdownV2(
             '❌ *Verification Error*\n\n' +
             'Something went wrong\\. Please return to the website and try again\\.\n\n' +
-            '_If this persists, contact support\\._',
+            '_Admin has been notified\\._',
             MAIN_MENU
         );
     }
@@ -441,11 +489,12 @@ bot.action('my_rank', async (ctx) => {
         const rankRes = await client.query('SELECT count(*) + 1 as rank FROM users WHERE points > $1', [points]);
         const rank = rankRes.rows[0].rank;
         const msg = `🏆 *Leaderboard Stats*\n\n🏅 *Rank:* \\#${rank}\n💰 *Points:* ${escapeMarkdown(points)}\n🔐 *Wallet:* \`${escapeMarkdown(address)}\``.trim();
+        // Answer query immediately to avoid timeout
+        await ctx.answerCbQuery().catch(() => {});
         await ctx.replyWithMarkdownV2(msg, MAIN_MENU);
-        await ctx.answerCbQuery();
     } catch (e) {
         console.error(e);
-        ctx.answerCbQuery('Error fetching rank.');
+        ctx.answerCbQuery('Error fetching rank.').catch(() => {});
     }
 });
 
@@ -473,11 +522,11 @@ bot.action('my_refs', async (ctx) => {
         if (res.rows.length === 0) return ctx.answerCbQuery('User not found.');
         const { total_referrals, referral_points } = res.rows[0];
         const msg = `👥 *Referral Statistics*\n\n👨‍👩‍👧‍👦 *Total Referrals:* ${total_referrals || 0}\n💰 *Points Earned:* ${escapeMarkdown(referral_points || 0)}`.trim();
+        await ctx.answerCbQuery().catch(() => {});
         await ctx.replyWithMarkdownV2(msg, MAIN_MENU);
-        await ctx.answerCbQuery();
     } catch (e) {
         console.error(e);
-        ctx.answerCbQuery('Error fetching referrals.');
+        ctx.answerCbQuery('Error fetching referrals.').catch(() => {});
     }
 });
 
@@ -505,11 +554,11 @@ bot.action('my_history', async (ctx) => {
             if (row.task_type.includes('REFERRAL')) icon = '👥';
             historyMsg += `${icon} *${task}*: *${pts} PTS* \\(\`${dateStr} ${timeStr}\`\\)\n`;
         });
+        await ctx.answerCbQuery().catch(() => {});
         await ctx.replyWithMarkdownV2(historyMsg, MAIN_MENU);
-        await ctx.answerCbQuery();
     } catch(e) {
         console.error(e);
-        ctx.answerCbQuery('Error fetching history.');
+        ctx.answerCbQuery('Error fetching history.').catch(() => {});
     }
 });
 
@@ -552,6 +601,10 @@ async function start() {
         await client.connect();
         console.log('🟢 DB Connected.');
         bot.launch(() => console.log('🤖 Bot Started!'));
+        
+        // Notify admin that bot is starting
+        notifyAdmin('✅ Bot is starting/restarting...');
+
         await client.query('LISTEN telegram_outbox_event');
         client.on('notification', processQueue);
         await processQueue();
@@ -559,6 +612,7 @@ async function start() {
         process.once('SIGTERM', () => { bot.stop('SIGTERM'); client.end(); });
     } catch (e) {
         console.error('Startup Error:', e);
+        notifyAdmin(e, 'Bot Startup Failure');
     }
 }
 
@@ -588,9 +642,9 @@ module.exports = {
     exec_mode: 'fork',
     autorestart: true,
     watch: false,
-    max_restarts: 10,
+    max_restarts: 50,
     min_uptime: '10s',
-    restart_delay: 3000,
+    restart_delay: 5000,
     
     error_file: '/var/log/telegram-bot-error.log',
     out_file: '/var/log/telegram-bot-out.log',

@@ -1,7 +1,7 @@
 const { Client } = require('pg');
 
 const DATABASE_URL = 'postgres://blockscout:Oh16ogZtxZtVgLx6yMpptvTYY8rhY6w11UlDwZQfjzGdxPcycO@20.160.155.158:7433/zug_incentive';
-const TARGET_ADDRESS = '0x4B16eB109f8D980DDcc6Fd493859A11f0bb0c778';
+const TARGET_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 
 const client = new Client({
     connectionString: DATABASE_URL,

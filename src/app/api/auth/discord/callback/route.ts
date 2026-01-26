@@ -95,8 +95,15 @@ export async function GET(req: NextRequest) {
 
         if (guildId && roleId && botToken) {
             try {
+                console.log(`[DISCORD] Attempting to grant role ${roleId} to user ${user.id} in guild ${guildId}...`);
+
+                await db.query(
+                    "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
+                    ['INFO', 'DISCORD', `Initiating role assignment for ${user.username}`, { userId: user.id, roleId, guildId }]
+                );
+
                 // A. Assign Verified Human Role (Always)
-                await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.id}/roles/${roleId}`, {
+                const roleResponse = await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.id}/roles/${roleId}`, {
                     method: 'PUT',
                     headers: {
                         Authorization: `Bot ${botToken}`,
@@ -104,8 +111,23 @@ export async function GET(req: NextRequest) {
                     }
                 });
 
+                if (roleResponse.ok) {
+                    console.log(`✅ [DISCORD] Successfully granted role to ${user.username}`);
+                    await db.query(
+                        "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
+                        ['INFO', 'DISCORD', `✅ Role granted: ${user.username}`, { status: roleResponse.status }]
+                    );
+                } else {
+                    const errorData = await roleResponse.json().catch(() => ({}));
+                    console.error(`❌ [DISCORD] Failed to grant role. Status: ${roleResponse.status}`, errorData);
+
+                    await db.query(
+                        "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
+                        ['ERROR', 'DISCORD', `❌ Failed role grant: ${user.username}`, { status: roleResponse.status, error: errorData }]
+                    );
+                }
+
                 // B. Check for "Social Elite" (Network Scout) Criteria
-                // User is now connecting Discord. Do they already have Twitter AND Telegram?
                 const socialCheck = await db.query(
                     "SELECT twitter_id, telegram_id FROM users WHERE address = $1",
                     [address.toLowerCase()]
@@ -114,20 +136,38 @@ export async function GET(req: NextRequest) {
                 if (socialCheck.rows.length > 0) {
                     const row = socialCheck.rows[0];
                     if (row.twitter_id && row.telegram_id && eliteRoleId) {
-                        // BINGO! Trifecta achieved. Assign Network Scout role.
-                        console.log(`🌟 User ${user.username} is a Network Scout! Assigning elite role...`);
-                        await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.id}/roles/${eliteRoleId}`, {
+                        console.log(`🌟 [DISCORD] User ${user.username} is a Network Scout! Attempting elite role...`);
+                        const eliteResponse = await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.id}/roles/${eliteRoleId}`, {
                             method: 'PUT',
                             headers: {
                                 Authorization: `Bot ${botToken}`,
                                 'Content-Type': 'application/json'
                             }
                         });
+
+                        if (eliteResponse.ok) {
+                            console.log(`✅ [DISCORD] Successfully granted Elite role to ${user.username}`);
+                            await db.query(
+                                "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
+                                ['INFO', 'DISCORD', `🌟 Elite role granted: ${user.username}`, { status: eliteResponse.status }]
+                            );
+                        } else {
+                            const errorData = await eliteResponse.json().catch(() => ({}));
+                            console.error(`❌ [DISCORD] Failed to grant Elite role. Status: ${eliteResponse.status}`, errorData);
+                            await db.query(
+                                "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
+                                ['ERROR', 'DISCORD', `❌ Failed Elite role: ${user.username}`, { status: eliteResponse.status, error: errorData }]
+                            );
+                        }
                     }
                 }
 
-            } catch (e) {
-                console.error('Bot Role Assignment Error:', e);
+            } catch (e: any) {
+                console.error('❌ [DISCORD] Bot Role Assignment Exception:', e);
+                await db.query(
+                    "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
+                    ['ERROR', 'DISCORD', `SYSTEM EXCEPTION: ${e.message}`, { stack: e.stack }]
+                );
             }
         }
 

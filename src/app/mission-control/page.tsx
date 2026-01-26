@@ -15,6 +15,8 @@ import { InviteMilestones } from '@/components/MissionControl/InviteMilestones';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity } from 'lucide-react';
 import { formatAddress } from '@/lib/utils';
+import { RequestDebugger } from '@/components/RequestDebugger';
+
 
 // Format large XP numbers: 22,005,639 -> "22.0M"
 const formatXP = (num: number): string => {
@@ -700,6 +702,8 @@ export default function MissionControlPage() {
     return (
         <Suspense fallback={<MissionControlSkeleton />}>
             <MissionControlContent />
+            <RequestDebugger />
         </Suspense>
     );
 }
+
