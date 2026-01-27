@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
                 "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
                 ['WARN', 'DISCORD', `Not a member, redirecting to invite: ${user.username}`, { userId: user.id }]
             );
-            return NextResponse.redirect(`${APP_URL}/mission-control?error=discord_not_member`);
+            return NextResponse.redirect('https://discord.com/invite/dV2sQtnQEu');
         }
 
         // B. Award Points for "Join Discord Server" (-103) if not already done
