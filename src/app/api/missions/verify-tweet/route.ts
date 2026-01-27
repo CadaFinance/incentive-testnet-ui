@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         if (linkUsername !== dbUsername) {
             return NextResponse.json({
                 success: false,
-                message: `Username mismatch. Link is from @${linkUsername}, but your linked account is @${dbUsername}.`
+                message: 'Tweet verification failed. Please make sure you posted the tweet from your linked Twitter account.'
             });
         }
 

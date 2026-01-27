@@ -112,7 +112,8 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
         }
 
         // Special handling for dynamic daily tasks (ID < 0)
-        if (id < 0 && verificationLink) {
+        // Exclude tweet task state flags (CLICKED/NOT_CLICKED) as they're handled separately below
+        if (id < 0 && verificationLink && !['CLICKED', 'NOT_CLICKED'].includes(verificationLink)) {
             window.location.href = verificationLink;
             return;
         }
@@ -153,7 +154,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
             }
         }
 
-        else if (verificationLink) {
+        else if (verificationLink && !['CLICKED', 'NOT_CLICKED'].includes(verificationLink)) {
             window.open(verificationLink, '_blank');
         }
 

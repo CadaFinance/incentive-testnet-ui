@@ -350,6 +350,15 @@ export async function completeMission(address: string, taskId: number) {
 
             basePoints = 400;
             taskType = 'SOCIAL';
+        } else if (taskId === -104) {
+            // Shoutout on X (Tweet Task): Must have twitter_id linked
+            // Note: The actual tweet verification happens in /api/missions/verify-tweet
+            // This function is called AFTER successful verification
+            const profile = await getUserTwitterProfile(normalizedAddress);
+            if (!profile?.twitter_id) return { success: false, message: 'OAuth Required: Link Twitter first.' };
+
+            basePoints = 1000;
+            taskType = 'SOCIAL';
         } else {
             return { success: false, message: 'Virtual task not found' };
         }
