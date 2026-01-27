@@ -647,6 +647,7 @@ function MissionControlContent() {
                                     locked={locked}
                                     lockedMessage={lockedMessage}
                                     referralCode={referralInfo?.code}
+                                    type={mission.type}
                                 />
                             );
                         })}

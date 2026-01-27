@@ -114,7 +114,7 @@ export default function DatabaseRowsPage() {
                                 onClick={() => setView('records')}
                                 className={`px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${view === 'records' ? 'bg-[#e2ff3d] text-black shadow-[0_0_15px_rgba(226,255,61,0.3)]' : 'text-zinc-500 hover:text-white'}`}
                             >
-                                Records_CSV
+                                Records_Live_DB
                             </button>
                             <button
                                 onClick={() => { setView('logs'); fetchLogs(); }}
@@ -328,6 +328,6 @@ export default function DatabaseRowsPage() {
                     );
                 }
             `}</style>
-        </DashboardLayout>
+        </DashboardLayout >
     );
 }
