@@ -341,7 +341,70 @@ function MissionControlContent() {
 
     return (
         <DashboardLayout>
-            {/* ... rank display remains same ... */}
+            {/* User Rank Display - Responsive Variants */}
+            <AnimatePresence>
+                {address && userRank && (
+                    <>
+                        {/* Desktop: Floating Card */}
+                        <motion.div
+                            initial={{ y: 50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 50, opacity: 0 }}
+                            className="hidden sm:block fixed bottom-10 right-10 z-[100] p-6 inst-border bg-[#050505] shadow-2xl shadow-[#e2ff3d]/10 w-[280px]"
+                        >
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between gap-6">
+                                    <div className="space-y-0.5">
+                                        <span className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em]">Contributor_Status</span>
+                                        <h4 className="text-3xl font-black text-white tracking-tighter tabular-nums">#{userRank.rank || '...'}</h4>
+                                    </div>
+                                    <div className="w-12 h-12 bg-[#e2ff3d]/10 border border-[#e2ff3d]/20 flex items-center justify-center">
+                                        <Activity className="w-6 h-6 text-[#e2ff3d]" />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2 pt-4 border-t border-white/5">
+                                    <div className="flex items-center justify-between text-[10px] font-mono">
+                                        <span className="text-[#e2ff3d] uppercase font-bold tracking-widest">Estimated_$USDZ</span>
+                                        <span className="text-[#e2ff3d] font-black">${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-[10px] font-mono">
+                                        <span className="text-gray-600 uppercase font-bold tracking-widest">Verification_ID</span>
+                                        <span className="text-white/40">{formatAddress(address || '')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Mobile: Sticky Bottom Bar */}
+                        <motion.div
+                            initial={{ y: 100 }}
+                            animate={{ y: 0 }}
+                            exit={{ y: 100 }}
+                            className="sm:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#050505] border-t border-[#e2ff3d]/20 p-4 safe-area-pb"
+                        >
+                            <div className="flex items-center justify-between max-w-sm mx-auto">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10  flex items-center justify-center">
+                                        <span className="text-[#e2ff3d] font-black text-lg">#{userRank.rank}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] text-[#e2ff3d] font-bold uppercase tracking-widest">Global Rank</span>
+                                        <span className="text-[9px] text-gray-500 font-mono tracking-wider">{formatAddress(address || '')}</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter leading-none">
+                                        ${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </div>
+                                    <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-[0.2em] block mt-0.5">$USDZ Amount</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
             <div className="space-y-8 lg:space-y-16">
 
                 {/* Institutional Command Console */}

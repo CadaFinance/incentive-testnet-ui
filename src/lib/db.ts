@@ -8,7 +8,7 @@ let pool: Pool;
 if (process.env.NODE_ENV === 'production') {
     pool = new Pool({
         connectionString,
-        max: 5, // Reduced from 20 to prevent "too many clients"
+        max: 700,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 5000,
     });
@@ -17,7 +17,7 @@ if (process.env.NODE_ENV === 'production') {
     if (!(global as any).postgres) {
         (global as any).postgres = new Pool({
             connectionString,
-            max: 5, // Reduced from 20 to prevent "too many clients"
+            max: 700,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 5000,
         });
