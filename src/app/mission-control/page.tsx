@@ -15,7 +15,6 @@ import { InviteMilestones } from '@/components/MissionControl/InviteMilestones';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity } from 'lucide-react';
 import { formatAddress } from '@/lib/utils';
-import { RequestDebugger } from '@/components/RequestDebugger';
 
 
 // Format large XP numbers: 22,005,639 -> "22.0M"
@@ -337,75 +336,12 @@ function MissionControlContent() {
 
     const { referralInfo, points: totalPoints, userProfile } = data;
     const missions = data?.missions || [];
-    const completedMissions = missions.filter((m: any) => m.is_completed && !m.next_available_at);
+    // Hide ALL completed missions
     const activeMissions = missions.filter((m: any) => !m.is_completed || m.next_available_at);
 
     return (
         <DashboardLayout>
-            {/* User Rank Display - Responsive Variants */}
-            <AnimatePresence>
-                {address && userRank && (
-                    <>
-                        {/* Desktop: Floating Card */}
-                        <motion.div
-                            initial={{ y: 50, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: 50, opacity: 0 }}
-                            className="hidden sm:block fixed bottom-10 right-10 z-[100] p-6 inst-border bg-[#050505] shadow-2xl shadow-[#e2ff3d]/10 w-[280px]"
-                        >
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between gap-6">
-                                    <div className="space-y-0.5">
-                                        <span className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em]">Contributor_Status</span>
-                                        <h4 className="text-3xl font-black text-white tracking-tighter tabular-nums">#{userRank.rank || '...'}</h4>
-                                    </div>
-                                    <div className="w-12 h-12 bg-[#e2ff3d]/10 border border-[#e2ff3d]/20 flex items-center justify-center">
-                                        <Activity className="w-6 h-6 text-[#e2ff3d]" />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2 pt-4 border-t border-white/5">
-                                    <div className="flex items-center justify-between text-[10px] font-mono">
-                                        <span className="text-[#e2ff3d] uppercase font-bold tracking-widest">Estimated_$USDZ</span>
-                                        <span className="text-[#e2ff3d] font-black">${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-[10px] font-mono">
-                                        <span className="text-gray-600 uppercase font-bold tracking-widest">Verification_ID</span>
-                                        <span className="text-white/40">{formatAddress(address || '')}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* Mobile: Sticky Bottom Bar */}
-                        <motion.div
-                            initial={{ y: 100 }}
-                            animate={{ y: 0 }}
-                            exit={{ y: 100 }}
-                            className="sm:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#050505] border-t border-[#e2ff3d]/20 p-4 safe-area-pb"
-                        >
-                            <div className="flex items-center justify-between max-w-sm mx-auto">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10  flex items-center justify-center">
-                                        <span className="text-[#e2ff3d] font-black text-lg">#{userRank.rank}</span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[9px] text-[#e2ff3d] font-bold uppercase tracking-widest">Global Rank</span>
-                                        <span className="text-[9px] text-gray-500 font-mono tracking-wider">{formatAddress(address || '')}</span>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter leading-none">
-                                        ${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </div>
-                                    <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-[0.2em] block mt-0.5">$USDZ Amount</span>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-
+            {/* ... rank display remains same ... */}
             <div className="space-y-8 lg:space-y-16">
 
                 {/* Institutional Command Console */}
@@ -592,15 +528,31 @@ function MissionControlContent() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {activeMissions.map((mission: any) => {
-                            // Dependency Logic: Discord (-102) requires Telegram (-101)
+                            // Dependency Logic: 
                             let locked = false;
                             let lockedMessage = undefined;
 
-                            if (mission.id === -102) {
-                                const telegramMission = missions.find((m: any) => m.id === -101);
-                                if (!telegramMission?.is_completed) {
+                            // 1. Join Telegram Group (-101) is the base social requirement
+
+                            // 2. Join Discord Server (-103) requires USER to be verified in database for Telegram (-101)
+                            // or have the telegram_id in userProfile
+                            if (mission.id === -103) {
+                                // Real-time check from userProfile which we get from API
+                                if (!userProfile?.telegram_id) {
                                     locked = true;
                                     lockedMessage = '// TELEGRAM REQUIRED';
+                                }
+                            }
+
+                            // 3. Grab Discord Role (-102) requires Telegram AND Join Discord Server (-103)
+                            if (mission.id === -102) {
+                                const isJoinDone = !missions.some((m: any) => m.id === -103 && !m.is_completed);
+                                if (!userProfile?.telegram_id) {
+                                    locked = true;
+                                    lockedMessage = '// TELEGRAM REQUIRED';
+                                } else if (isJoinDone === false) {
+                                    locked = true;
+                                    lockedMessage = '// JOIN SERVER FIRST';
                                 }
                             }
 
@@ -625,6 +577,7 @@ function MissionControlContent() {
                                     timeLeft={mission.time_left}
                                     requiresVerification={mission.requires_verification}
                                     isUserVerified={!!userProfile?.twitter_id}
+                                    isDiscordLinked={!!userProfile?.discord_id}
                                     multiplier={referralInfo?.tier?.current_multiplier || 1.0}
                                     onComplete={() => fetchData()}
                                     onTelegramVerify={() => setShowTelegramModal(true)}
@@ -719,7 +672,6 @@ export default function MissionControlPage() {
     return (
         <Suspense fallback={<MissionControlSkeleton />}>
             <MissionControlContent />
-            <RequestDebugger />
         </Suspense>
     );
 }

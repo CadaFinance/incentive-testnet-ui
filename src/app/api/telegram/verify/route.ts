@@ -96,10 +96,15 @@ export async function POST(request: Request) {
         let pointsAwarded = 0;
 
         if (!isAlreadyLinkedToSelf) {
-            // A. Update User Profile
+            // A. Update User Profile & Task History
             await db.query(
                 "UPDATE users SET telegram_id = $1, telegram_username = $2, points = points + 150 WHERE address = $3",
                 [telegramId, telegramUsername, address]
+            );
+
+            await db.query(
+                "INSERT INTO user_task_history (user_address, task_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                [address, -101]
             );
 
             // B. Audit Log

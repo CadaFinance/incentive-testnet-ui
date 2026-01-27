@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
 
     // We also support a 'next' param to redirect back to specific pages
     const trigger = searchParams.get('trigger'); // e.g. 'discord_verify'
+    const taskId = searchParams.get('taskId') || '';
 
     if (!address) {
         return NextResponse.json({ error: 'Wallet address required' }, { status: 400 });
@@ -17,9 +18,9 @@ export async function GET(req: NextRequest) {
     const APP_URL = process.env.NEXT_PUBLIC_TESTNET_APP;
     const redirectUri = `${APP_URL}/api/auth/discord/callback`;
 
-    // State: Pass the wallet address + optional trigger encoded
-    // Format: "address__trigger"
-    const state = trigger ? `${address}__${trigger}` : address;
+    // State: Pass the wallet address + optional trigger + optional taskId encoded
+    // Format: "address__trigger__taskId"
+    const state = `${address}__${trigger || ''}__${taskId}`;
 
     const scope = 'identify';
     // If we wanted to join them to a guild automatically, we'd need 'guilds.join' 

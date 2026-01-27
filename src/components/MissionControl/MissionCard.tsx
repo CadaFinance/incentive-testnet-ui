@@ -16,6 +16,7 @@ interface MissionCardProps {
     onComplete: () => void;
     requiresVerification?: boolean;
     isUserVerified?: boolean;
+    isDiscordLinked?: boolean;
     multiplier?: number;
     onTelegramVerify?: () => void;
     locked?: boolean;
@@ -23,7 +24,7 @@ interface MissionCardProps {
     referralCode?: string;
 }
 
-export function MissionCard({ id, title, description, reward, isCompleted, verificationLink, timeLeft: initialTimeLeft, onComplete, requiresVerification, isUserVerified, multiplier = 1.0, onTelegramVerify, locked = false, lockedMessage = '// ACCESS DENIED', referralCode }: MissionCardProps) {
+export function MissionCard({ id, title, description, reward, isCompleted, verificationLink, timeLeft: initialTimeLeft, onComplete, requiresVerification, isUserVerified, isDiscordLinked, multiplier = 1.0, onTelegramVerify, locked = false, lockedMessage = '// ACCESS DENIED', referralCode }: MissionCardProps) {
     const { address } = useAccount();
     const [loading, setLoading] = useState(false);
     const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
@@ -72,8 +73,41 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
 
         // Handle Discord Login Trigger
         if (verificationLink === 'DISCORD_LOGIN') {
-            window.location.href = `/api/auth/discord/login?address=${address}&trigger=mission_click`;
-            return;
+            if (isDiscordLinked) {
+                // SMART VERIFY: Already linked, call verify API directly
+                setLoading(true);
+                try {
+                    const res = await fetch('/api/missions/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ address, taskId: id })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        if (data.error?.includes('Join server first')) {
+                            // User is linked but not in guild -> Open invite link
+                            window.open('https://discord.com/invite/dV2sQtnQEu', '_blank');
+                            toast.info("Please join our Discord server first. After joining, click verify again!");
+                            return;
+                        }
+                        throw new Error(data.error || 'Verification Failed');
+                    }
+
+                    const earned = data.points_awarded || Math.floor(reward * multiplier);
+                    toast.success(`Mission Complete! +${earned} Points`);
+                    onComplete();
+                    return; // Exit early on success
+                } catch (e: any) {
+                    toast.error(e.message || "Something went wrong");
+                    return;
+                } finally {
+                    setLoading(false);
+                }
+            } else {
+                window.location.href = `/api/auth/discord/login?address=${address}&trigger=mission_click&taskId=${id}`;
+                return;
+            }
         }
 
         // Special handling for dynamic daily tasks (ID < 0)
@@ -122,12 +156,12 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
 
     return (
         <div
-            onClick={!isCompleted && !isLocked ? handleAction : undefined}
+            onClick={(!isCompleted && !isLocked) || id === -103 ? handleAction : undefined}
             className={`
                 group relative border p-4 lg:p-6 transition-all duration-300 overflow-hidden
-                ${isCompleted
+                ${isCompleted && id !== -103
                     ? 'bg-[#060606] border-white/[0.03] opacity-40 cursor-not-allowed'
-                    : isLocked
+                    : isLocked && id !== -103
                         ? 'bg-[#0a0a0a] border-white/5 cursor-not-allowed filter grayscale opacity-70'
                         : 'bg-[#080808] border-[#e2ff3d]/30 hover:border-[#e2ff3d]/50 hover:bg-[#e2ff3d]/[0.02] cursor-pointer shadow-[0_0_30px_rgba(226,255,61,0.08)]'
                 }
@@ -162,21 +196,19 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
             <div className="flex justify-between items-center mb-3 relative z-10">
                 <span className={`
                     text-[8px] lg:text-[9px] font-mono uppercase tracking-[0.2em] px-2 py-0.5 border 
-                    ${isCompleted
-                        ? 'border-white/5 text-gray-700'
-                        : isLocked
-                            ? 'border-red-500/20 text-red-500/50 bg-red-500/5'
-                            : 'border-[#e2ff3d]/20 text-[#e2ff3d] bg-[#e2ff3d]/10 animate-pulse'
+                    ${isLocked
+                        ? 'border-red-500/20 text-red-500/50 bg-red-500/5'
+                        : 'border-[#e2ff3d]/20 text-[#e2ff3d] bg-[#e2ff3d]/10 animate-pulse'
                     }
                 `}>
-                    {isCompleted ? 'ARCHIVED' : isLocked ? 'LOCKED' : 'PROTOCOL_REQ'}
+                    {isLocked ? 'LOCKED' : 'PROTOCOL_REQ'}
                 </span>
 
                 <div className="flex items-center gap-1.5">
-                    <span className={`text-[10px] font-mono ${isCompleted ? 'text-gray-800' : isLocked ? 'text-zinc-700' : 'text-zinc-600'}`}>REWARD:</span>
-                    <span className={`text-lg lg:text-xl font-black font-mono flex items-center gap-1 ${isCompleted ? 'text-gray-800' : isLocked ? 'text-zinc-500' : 'text-white'}`}>
+                    <span className={`text-[10px] font-mono ${isLocked ? 'text-zinc-700' : 'text-zinc-600'}`}>REWARD:</span>
+                    <span className={`text-lg lg:text-xl font-black font-mono flex items-center gap-1 ${isLocked ? 'text-zinc-500' : 'text-white'}`}>
                         <span>+{Math.floor(reward * multiplier)}</span>
-                        {multiplier > 1 && !isCompleted && !isLocked && <Zap size={10} className="text-[#e2ff3d] animate-pulse" />}
+                        {multiplier > 1 && !isLocked && <Zap size={10} className="text-[#e2ff3d] animate-pulse" />}
                     </span>
                 </div>
             </div>
@@ -191,17 +223,7 @@ export function MissionCard({ id, title, description, reward, isCompleted, verif
 
             {/* Action Area: Minimalist footer */}
             <div className="mt-5 pt-4 border-t border-white/[0.03] relative z-10">
-                {isCompleted && (secondsLeft !== null && secondsLeft > 0) ? (
-                    <div className="flex items-center justify-between">
-                        <span className="text-[8px] text-zinc-600 font-mono uppercase tracking-widest">Re-Sync Available In:</span>
-                        <span className="text-sm font-mono text-orange-500/80 tracking-tighter">{formatTime(secondsLeft)}</span>
-                    </div>
-                ) : isCompleted ? (
-                    <div className="flex items-center gap-2 text-green-500/30">
-                        <div className="w-1 h-1 rounded-full bg-green-500/50" />
-                        <span className="text-[9px] font-mono uppercase tracking-widest">Protocol_Archived</span>
-                    </div>
-                ) : isLocked ? (
+                {isLocked ? (
                     <div className="flex items-center justify-between bg-red-500/[0.03] px-3 py-2 border border-red-500/10">
                         <span className="text-red-500/40 text-[9px] font-black uppercase tracking-[0.15em] font-mono">
                             {lockedMessage}

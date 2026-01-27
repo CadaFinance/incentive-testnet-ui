@@ -13,12 +13,17 @@ export async function GET(req: NextRequest) {
         return NextResponse.redirect(`${APP_URL}/mission-control?error=missing_params`);
     }
 
-    // Decode state to get address
-    const [address, trigger] = state.split('__');
+    // Decode state to get address and mission context
+    // Format: "address__trigger__taskId"
+    const stateParts = state.split('__');
+    const address = stateParts[0].toLowerCase();
+    const trigger = stateParts[1] || '';
+    const taskIdString = stateParts[2] || '';
+    const targetTaskId = taskIdString ? parseInt(taskIdString) : null;
 
     try {
         // 1. Exchange Code for Token
-        const tokenStats = await fetch('https://discord.com/api/oauth2/token', {
+        const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
             method: 'POST',
             body: new URLSearchParams({
                 client_id: process.env.DISCORD_CLIENT_ID!,
@@ -30,7 +35,7 @@ export async function GET(req: NextRequest) {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
 
-        const tokens = await tokenStats.json();
+        const tokens = await tokenRes.json();
 
         if (tokens.error) {
             console.error('Discord Token Error:', tokens);
@@ -48,131 +53,100 @@ export async function GET(req: NextRequest) {
             return NextResponse.redirect(`${APP_URL}/mission-control?error=discord_profile_failed`);
         }
 
-        // 3. Update Database
-        // Check if this Discord ID is already linked to ANOTHER address to prevent abuse
-        const existing = await db.query("SELECT address FROM users WHERE discord_id = $1 AND address != $2", [user.id, address.toLowerCase()]);
-        if (existing.rows.length > 0) {
-            return NextResponse.redirect(`${APP_URL}/mission-control?error=discord_already_linked`);
-        }
-
-        // Check if user is NEW to Discord (for points logic later)
-        const currentUserRes = await db.query("SELECT discord_id FROM users WHERE address = $1", [address.toLowerCase()]);
-        const isNewConnection = currentUserRes.rowCount === 0 || !currentUserRes.rows[0].discord_id;
-
+        // 3. Link/Update Database (Basic Info)
         const avatarUrl = user.avatar
             ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
             : `https://cdn.discordapp.com/embed/avatars/${(parseInt(user.discriminator) || 0) % 5}.png`;
 
-        // Ensure user exists first (INSERT if needed)
-        await db.query(
-            `INSERT INTO users (address, discord_id, discord_username, discord_image) 
-             VALUES ($1, $2, $3, $4)
-             ON CONFLICT (address) DO UPDATE 
-             SET discord_id = $2, discord_username = $3, discord_image = $4`,
-            [address.toLowerCase(), user.id, user.username, avatarUrl]
+        await db.query(`
+            UPDATE users 
+            SET discord_id = $1, discord_username = $2, discord_image = $3 
+            WHERE address = $4
+        `, [user.id, user.username, avatarUrl, address]);
+
+        // 4. Verification & Role Action (Bot Action)
+        const guildId = process.env.DISCORD_GUILD_ID;
+        const roleId = process.env.DISCORD_VERIFIED_ROLE_ID;
+        const botToken = process.env.DISCORD_BOT_TOKEN;
+
+        if (!guildId || !botToken) {
+            console.error("Missing Discord Config (Guild/Bot Token)");
+            return NextResponse.redirect(`${APP_URL}/mission-control?error=server_error`);
+        }
+
+        // A. Primary Membership Check
+        // Attempt to grant role (this will fail with 404 if not a member)
+        const roleResponse = await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.id}/roles/${roleId}`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bot ${botToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (roleResponse.status === 404) {
+            // User Not in Server! Redirect directly to Discord Invite
+            await db.query(
+                "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
+                ['WARN', 'DISCORD', `Not a member, redirecting to invite: ${user.username}`, { userId: user.id }]
+            );
+            return NextResponse.redirect('https://discord.com/invite/dV2sQtnQEu');
+        }
+
+        // B. Award Points for "Join Discord Server" (-103) if not already done
+        const joinCheck = await db.query(
+            "SELECT 1 FROM user_task_history WHERE user_address = $1 AND task_id = -103",
+            [address]
         );
 
-        // Award Points (+500) if new connection
-        if (isNewConnection) {
-            await db.query(`
-                UPDATE users 
-                SET points = COALESCE(points, 0) + 500
-                WHERE address = $1
-            `, [address.toLowerCase()]);
-
-            // Audit Log
+        if (joinCheck.rowCount === 0) {
+            console.log(`🎁 Awarding Join Points (+100) to ${user.username}`);
+            await db.query("BEGIN");
+            await db.query("INSERT INTO user_task_history (user_address, task_id) VALUES ($1, -103)", [address]);
+            await db.query("UPDATE users SET points = COALESCE(points, 0) + 100 WHERE address = $1", [address]);
             await db.query(
-                "INSERT INTO points_audit_log (address, points_awarded, task_type) VALUES ($1, $2, $3)",
-                [address.toLowerCase(), 500, 'MISSION_SOCIAL_CONNECT_DISCORD']
+                "INSERT INTO points_audit_log (address, points_awarded, task_type) VALUES ($1, 100, $2)",
+                [address, 'MISSION_SOCIAL_-103']
+            );
+            await db.query("COMMIT");
+
+            await db.query(
+                "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
+                ['INFO', 'DISCORD', `✅ Mission -103 Completed: ${user.username}`, { address }]
             );
         }
 
-        // 4. Assign Role (Bot Action)
-        const guildId = process.env.DISCORD_GUILD_ID;
-        const roleId = process.env.DISCORD_VERIFIED_ROLE_ID;
-        const eliteRoleId = process.env.DISCORD_SOCIAL_ELITE_ROLE_ID;
-        const botToken = process.env.DISCORD_BOT_TOKEN;
+        // C. Award Points for "Grab Discord Role" (-102) if this was the target
+        if (targetTaskId === -102) {
+            const roleCheck = await db.query(
+                "SELECT 1 FROM user_task_history WHERE user_address = $1 AND task_id = -102",
+                [address]
+            );
 
-        if (guildId && roleId && botToken) {
-            try {
-                console.log(`[DISCORD] Attempting to grant role ${roleId} to user ${user.id} in guild ${guildId}...`);
-
-                await db.query(
-                    "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
-                    ['INFO', 'DISCORD', `Initiating role assignment for ${user.username}`, { userId: user.id, roleId, guildId }]
-                );
-
-                // A. Assign Verified Human Role (Always)
-                const roleResponse = await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.id}/roles/${roleId}`, {
-                    method: 'PUT',
-                    headers: {
-                        Authorization: `Bot ${botToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
+            if (roleCheck.rowCount === 0) {
                 if (roleResponse.ok) {
-                    console.log(`✅ [DISCORD] Successfully granted role to ${user.username}`);
+                    console.log(`🎁 Awarding Role Points (+400) to ${user.username}`);
+                    await db.query("BEGIN");
+                    await db.query("INSERT INTO user_task_history (user_address, task_id) VALUES ($1, -102)", [address]);
+                    await db.query("UPDATE users SET points = COALESCE(points, 0) + 400 WHERE address = $1", [address]);
+                    await db.query(
+                        "INSERT INTO points_audit_log (address, points_awarded, task_type) VALUES ($1, 400, $2)",
+                        [address, 'MISSION_SOCIAL_-102']
+                    );
+                    await db.query("COMMIT");
+
                     await db.query(
                         "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
-                        ['INFO', 'DISCORD', `✅ Role granted: ${user.username}`, { status: roleResponse.status }]
+                        ['INFO', 'DISCORD', `✅ Mission -102 Completed: ${user.username}`, { address, status: roleResponse.status }]
                     );
                 } else {
                     const errorData = await roleResponse.json().catch(() => ({}));
                     console.error(`❌ [DISCORD] Failed to grant role. Status: ${roleResponse.status}`, errorData);
-
                     await db.query(
                         "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
                         ['ERROR', 'DISCORD', `❌ Failed role grant: ${user.username}`, { status: roleResponse.status, error: errorData }]
                     );
-
-                    // Handle "Unknown Member" (User not in guild)
-                    if (roleResponse.status === 404) {
-                        return NextResponse.redirect(`${APP_URL}/mission-control?error=discord_not_member`);
-                    }
                 }
-
-                // B. Check for "Social Elite" (Network Scout) Criteria
-                const socialCheck = await db.query(
-                    "SELECT twitter_id, telegram_id FROM users WHERE address = $1",
-                    [address.toLowerCase()]
-                );
-
-                if (socialCheck.rows.length > 0) {
-                    const row = socialCheck.rows[0];
-                    if (row.twitter_id && row.telegram_id && eliteRoleId) {
-                        console.log(`🌟 [DISCORD] User ${user.username} is a Network Scout! Attempting elite role...`);
-                        const eliteResponse = await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.id}/roles/${eliteRoleId}`, {
-                            method: 'PUT',
-                            headers: {
-                                Authorization: `Bot ${botToken}`,
-                                'Content-Type': 'application/json'
-                            }
-                        });
-
-                        if (eliteResponse.ok) {
-                            console.log(`✅ [DISCORD] Successfully granted Elite role to ${user.username}`);
-                            await db.query(
-                                "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
-                                ['INFO', 'DISCORD', `🌟 Elite role granted: ${user.username}`, { status: eliteResponse.status }]
-                            );
-                        } else {
-                            const errorData = await eliteResponse.json().catch(() => ({}));
-                            console.error(`❌ [DISCORD] Failed to grant Elite role. Status: ${eliteResponse.status}`, errorData);
-                            await db.query(
-                                "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
-                                ['ERROR', 'DISCORD', `❌ Failed Elite role: ${user.username}`, { status: eliteResponse.status, error: errorData }]
-                            );
-                        }
-                    }
-                }
-
-            } catch (e: any) {
-                console.error('❌ [DISCORD] Bot Role Assignment Exception:', e);
-                await db.query(
-                    "INSERT INTO app_logs (level, component, message, details) VALUES ($1, $2, $3, $4)",
-                    ['ERROR', 'DISCORD', `SYSTEM EXCEPTION: ${e.message}`, { stack: e.stack }]
-                );
             }
         }
 

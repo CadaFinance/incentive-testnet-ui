@@ -43,17 +43,20 @@ export async function getUserMissions(address: string): Promise<Task[]> {
 async function getUserMissionsUncached(address: string): Promise<Task[]> {
     const normalizedAddress = address.toLowerCase();
 
-    // 1. Fetch Static Missions (Excluding IS_DAILY concept for now as requested to revert)
+    // 1. Fetch PENDING Static Missions
     const query = `
         SELECT 
             t.id, t.type, t.title, t.description, t.reward_points, t.verification_type, t.verification_data, t.icon_url, t.is_active, t.requires_verification,
             t.requires_telegram, t.requires_discord,
             to_char(t.created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at,
-            CASE WHEN uth.id IS NOT NULL THEN TRUE ELSE FALSE END as is_completed
+            FALSE as is_completed
         FROM tasks t
         LEFT JOIN user_task_history uth 
             ON t.id = uth.task_id AND uth.user_address = $1
-        WHERE t.is_active = TRUE
+        WHERE t.is_active = TRUE 
+        AND t.id >= 0 
+        AND t.title NOT ILIKE '%Discord%'
+        AND uth.id IS NULL -- ONLY PENDING
         ORDER BY t.created_at DESC;
     `;
 
@@ -61,87 +64,44 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
     const streaks = await getUserStreaks(normalizedAddress);
     const dynamicMissions: Task[] = [];
 
-    // Source of Truth for FAUCET: Use PostgreSQL for UTC date comparison (matches Faucet API logic exactly)
+    // Source of Truth for FAUCET: Use PostgreSQL for UTC date comparison
     const faucetHist = await db.query(
         `SELECT 
             CASE 
                 WHEN (claimed_at AT TIME ZONE 'UTC')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date 
                 THEN TRUE 
                 ELSE FALSE 
-            END as is_claimed_today,
-            claimed_at AT TIME ZONE 'UTC' as claimed_at_utc
-         FROM faucet_history 
-         WHERE address = $1 
-         ORDER BY claimed_at DESC LIMIT 1`,
+            END as is_claimed_today
+         FROM faucet_history WHERE address = $1 ORDER BY claimed_at DESC LIMIT 1`,
         [normalizedAddress]
     );
 
-    let isFaucetDoneToday = false;
-    if (faucetHist.rows.length > 0) {
-        isFaucetDoneToday = faucetHist.rows[0].is_claimed_today;
-    }
-
-    // Common time reference for countdown calculations
+    let isFaucetDoneToday = faucetHist.rows.length > 0 && faucetHist.rows[0].is_claimed_today;
     const now = new Date();
 
-    // Dynamic Task 1: Daily Faucet
     if (!isFaucetDoneToday) {
-        dynamicMissions.push({
-            id: -1, // Special ID
-            type: 'DAILY',
-            title: 'Daily Protocol Access',
-            description: 'Claim your daily allowance from the faucet to maintain network activity.',
-            reward_points: 25,
-            verification_type: 'MANUAL', // Redirects
-            verification_data: '/faucet',
-            is_completed: false
-        });
-    } else {
-        // Calculate Time Until Next UTC Midnight
-        // Tomorrow UTC 00:00:00
-        // Re-calculate 'now' to be safe or use existing if scope allows. 
-        // 'now' is defined in the parent scope in my previous edit?
-        // Let's assume 'now' is available from line 64.
-        const tomorrowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
-        const msUntilMidnight = tomorrowUTC.getTime() - now.getTime();
-        const secondsLeft = Math.ceil(msUntilMidnight / 1000);
-
         dynamicMissions.push({
             id: -1,
             type: 'DAILY',
             title: 'Daily Protocol Access',
-            description: 'Cooldown Active (Resets at 00:00 UTC)',
+            description: 'Claim your daily allowance from the faucet to maintain network activity.',
             reward_points: 25,
             verification_type: 'MANUAL',
             verification_data: '/faucet',
-            is_completed: true,
-            time_left: secondsLeft,
-            next_available_at: tomorrowUTC.getTime()
+            is_completed: false
         });
     }
 
     // Source of Truth for STAKE: Use PostgreSQL for UTC date comparison
     const stakeRes = await db.query(
-        `SELECT 
-            CASE 
-                WHEN last_action_date = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date 
-                THEN TRUE 
-                ELSE FALSE 
-            END as is_done_today
-         FROM daily_streaks 
-         WHERE address = $1 AND streak_type = 'STAKE'`,
+        `SELECT 1 FROM daily_streaks 
+         WHERE address = $1 AND streak_type = 'STAKE' 
+         AND last_action_date = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date`,
         [normalizedAddress]
     );
-
-    let isStakeDoneToday = false;
-    if (stakeRes.rows.length > 0) {
-        isStakeDoneToday = stakeRes.rows[0].is_done_today;
-    }
-
-    // Dynamic Task 2: Daily Stake
-    if (!isStakeDoneToday) {
+    if (stakeRes.rowCount === 0) {
         dynamicMissions.push({
-            id: -2, // Special ID
+            id: -2,
             type: 'DAILY',
             title: 'Secure the Network',
             description: 'Stake your ZUG tokens to validation nodes to increase security.',
@@ -150,61 +110,33 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
             verification_data: '/',
             is_completed: false
         });
-    } else {
-        const tomorrowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
-        const msUntilMidnight = tomorrowUTC.getTime() - now.getTime();
-        const secondsLeft = Math.ceil(msUntilMidnight / 1000);
-
-        dynamicMissions.push({
-            id: -2,
-            type: 'DAILY',
-            title: 'Secure the Network',
-            description: 'Cooldown Active (Resets at 00:00 UTC)',
-            reward_points: 50,
-            verification_type: 'MANUAL',
-            verification_data: '/',
-            is_completed: true,
-            time_left: secondsLeft,
-            next_available_at: tomorrowUTC.getTime()
-        });
     }
 
-    // 4. Fetch Twitter Status for "Connect X" Mission
-    const twitterProfile = await getUserTwitterProfile(normalizedAddress);
+    // 6. Fetch Discord Status & Completion History
+    const discordProfile = await getUserDiscordProfile(normalizedAddress);
+    const completedTaskIds = await db.query(
+        "SELECT task_id FROM user_task_history WHERE user_address = $1",
+        [normalizedAddress]
+    ).then(r => r.rows.map(row => row.task_id));
 
     // Dynamic Task 3: Connect X (Virtual)
-    if (!twitterProfile?.twitter_id) {
+    const twitterProfile = await getUserTwitterProfile(normalizedAddress);
+    if (!twitterProfile?.twitter_id && !completedTaskIds.includes(-100)) {
         dynamicMissions.push({
             id: -100,
             type: 'SOCIAL',
             title: 'Connect Your X',
             description: 'Connect your X account to verify eligibility for legacy airdrop points.',
-            reward_points: 100, // Bonus for connecting
+            reward_points: 100,
             verification_type: 'MANUAL',
             verification_data: `/api/auth/twitter/login?address=${normalizedAddress}`,
             is_completed: false,
-            icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico' // quick icon placeholder
-        });
-    } else {
-        // Optional: Show as completed
-        dynamicMissions.push({
-            id: -100,
-            type: 'SOCIAL',
-            title: 'Connect Your X',
-            description: `Connected as @${twitterProfile.twitter_username}`,
-            reward_points: 100,
-            verification_type: 'MANUAL',
-            verification_data: '#',
-            is_completed: true
+            icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico'
         });
     }
 
-    // 5. Fetch Telegram Status
-    const telegramProfile = await getUserTelegramProfile(normalizedAddress);
-
     // Dynamic Task 4: Join Telegram Group
-    // ID: -101 (Special ID for Telegram)
-    if (!telegramProfile?.telegram_id) {
+    if (!twitterProfile?.telegram_id && !completedTaskIds.includes(-101)) {
         dynamicMissions.push({
             id: -101,
             type: 'SOCIAL',
@@ -212,61 +144,46 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
             description: 'Join the official ZugChain private group to stay updated.',
             reward_points: 150,
             verification_type: 'API_VERIFY',
-            verification_data: 'TELEGRAM_LOGIN', // Special signal for UI to show Telegram Widget
+            verification_data: 'TELEGRAM_LOGIN',
             is_completed: false,
-            icon_url: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg'
-        });
-    } else {
-        dynamicMissions.push({
-            id: -101,
-            type: 'SOCIAL',
-            title: 'Join Telegram Community',
-            description: `Verified as @${telegramProfile.telegram_username}`,
-            reward_points: 150,
-            verification_type: 'MANUAL',
-            verification_data: '#',
-            is_completed: true,
             icon_url: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg'
         });
     }
 
-    // 6. Fetch Discord Status
-    const discordProfile = await getUserDiscordProfile(normalizedAddress);
-
-    // Dynamic Task 5: Join Discord Community
-    // ID: -102 (Special ID for Discord)
-    if (!discordProfile?.discord_id) {
+    // Dynamic Task 5: Join Discord Server (Phase 1)
+    if (!twitterProfile?.discord_id && !completedTaskIds.includes(-103)) {
         dynamicMissions.push({
-            id: -102,
+            id: -103,
             type: 'SOCIAL',
-            title: 'Connect Your Discord',
-            description: 'Join the official ZugChain Discord server, verify your identity, and receive your contributor role.',
-            reward_points: 500,
+            title: 'Join Discord Server',
+            description: 'Join the official ZugChain Discord server and verify your membership.',
+            reward_points: 100,
             verification_type: 'API_VERIFY',
             verification_data: 'DISCORD_LOGIN',
             is_completed: false,
             icon_url: 'https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
         });
-    } else {
+    }
+
+    // Dynamic Task 6: Grab Discord Role (Phase 2)
+    // Only show if NOT completed in history (since it depends on specific role check)
+    if (!completedTaskIds.includes(-102)) {
         dynamicMissions.push({
             id: -102,
             type: 'SOCIAL',
-            title: 'Connect Your Discord',
-            description: `Verified as @${discordProfile.discord_username}`,
-            reward_points: 500,
-            verification_type: 'MANUAL',
-            verification_data: '#',
-            is_completed: true,
+            title: 'Grab Discord Role',
+            description: 'Claim your Verified Contributor role on the Discord server.',
+            reward_points: 400,
+            verification_type: 'API_VERIFY',
+            verification_data: 'DISCORD_LOGIN',
+            is_completed: false,
             icon_url: 'https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
         });
     }
 
     const res = await db.query(query, [normalizedAddress]);
 
-    // Filter out completed static missions (One-Time)
-    const activeStaticMissions = res.rows.filter((t: any) => !t.is_completed);
-
-    return [...dynamicMissions, ...activeStaticMissions];
+    return [...dynamicMissions, ...res.rows];
 }
 
 /**
@@ -363,15 +280,62 @@ export async function completeMission(address: string, taskId: number) {
         return { success: false, message: 'Already completed' };
     }
 
-    // 2. Get Task Details
-    const taskRes = await db.query("SELECT * FROM tasks WHERE id = $1", [taskId]);
-    if (taskRes.rows.length === 0) return { success: false, message: 'Task not found' };
+    // 2. Get Task Details (Handle Virtual/Negative IDs)
+    let basePoints = 0;
+    let taskType = '';
 
-    const task = taskRes.rows[0];
-    const basePoints = task.reward_points;
+    if (taskId < 0) {
+        // Special Handling for Virtual Missions
+        if (taskId === -103) {
+            // Join Discord Server: We actually verify this in the OAuth callback, 
+            // but if they call this manually, we should check if they have a discord_id linked.
+            const profile = await getUserDiscordProfile(normalizedAddress);
+            if (!profile?.discord_id) return { success: false, message: 'OAuth Required: Link Discord first.' };
 
-    // 3. Verification Logic (Simplified for click-verify)
-    // In production, check API here depending on task.verification_type
+            // Check if they are actually in the guild
+            const guildId = process.env.DISCORD_GUILD_ID;
+            const roleId = process.env.DISCORD_VERIFIED_ROLE_ID;
+            const botToken = process.env.DISCORD_BOT_TOKEN;
+
+            const checkRes = await fetch(`https://discord.com/api/guilds/${guildId}/members/${profile.discord_id}`, {
+                headers: { Authorization: `Bot ${botToken}` }
+            });
+
+            if (checkRes.status === 404) return { success: false, message: 'Membership not confirmed. Join server first!' };
+
+            basePoints = 100;
+            taskType = 'SOCIAL';
+        } else if (taskId === -102) {
+            // Grab Discord Role: Must have discord_id and be in guild
+            const profile = await getUserDiscordProfile(normalizedAddress);
+            if (!profile?.discord_id) return { success: false, message: 'OAuth Required: Link Discord first.' };
+
+            const guildId = process.env.DISCORD_GUILD_ID;
+            const roleId = process.env.DISCORD_VERIFIED_ROLE_ID;
+            const botToken = process.env.DISCORD_BOT_TOKEN;
+
+            const roleResponse = await fetch(`https://discord.com/api/guilds/${guildId}/members/${profile.discord_id}/roles/${roleId}`, {
+                method: 'PUT',
+                headers: { Authorization: `Bot ${botToken}`, 'Content-Type': 'application/json' }
+            });
+
+            if (!roleResponse.ok) {
+                if (roleResponse.status === 404) return { success: false, message: 'Membership not found. Join server first!' };
+                return { success: false, message: 'Discord API Error. Try again later.' };
+            }
+
+            basePoints = 400;
+            taskType = 'SOCIAL';
+        } else {
+            return { success: false, message: 'Virtual task not found' };
+        }
+    } else {
+        const taskRes = await db.query("SELECT * FROM tasks WHERE id = $1", [taskId]);
+        if (taskRes.rows.length === 0) return { success: false, message: 'Task not found' };
+        const task = taskRes.rows[0];
+        basePoints = task.reward_points;
+        taskType = task.type;
+    }
 
     // 4. Atomic Transaction: Log History + Award Points
     try {
@@ -399,7 +363,7 @@ export async function completeMission(address: string, taskId: number) {
         // Audit Log
         await db.query(
             "INSERT INTO points_audit_log (address, points_awarded, task_type) VALUES ($1, $2, $3)",
-            [normalizedAddress, boostedPoints, `MISSION_${task.type}_${taskId}`]
+            [normalizedAddress, boostedPoints, `MISSION_${taskType}_${taskId}`]
         );
 
         // Invalidate Cache
