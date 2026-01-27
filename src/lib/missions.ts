@@ -2,7 +2,7 @@ import { db } from '@/lib/db';
 import { getCached, invalidateCache } from '@/lib/redis';
 
 export type TaskType = 'SOCIAL' | 'PARTNER' | 'DAILY';
-export type VerificationType = 'LINK_CLICK' | 'API_VERIFY' | 'MANUAL';
+export type VerificationType = 'LINK_CLICK' | 'API_VERIFY' | 'MANUAL' | 'TWEET_VERIFY';
 
 export interface Task {
     id: number;
@@ -178,6 +178,30 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
             verification_data: 'DISCORD_LOGIN',
             is_completed: false,
             icon_url: 'https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
+        });
+    }
+
+    // Dynamic Task 7: Shoutout on X (Tweet Task)
+    if (!completedTaskIds.includes(-104)) {
+        // Check if user has "CLICKED" this task
+        const progressRes = await db.query(
+            "SELECT state FROM user_task_progress WHERE user_address = $1 AND task_id = -104",
+            [normalizedAddress]
+        );
+        const hasClicked = progressRes.rows.length > 0 && progressRes.rows[0].state === 'CLICKED';
+
+        dynamicMissions.push({
+            id: -104,
+            type: 'SOCIAL',
+            title: 'Shoutout on X',
+            description: 'Tweet about your participation to earn points.',
+            reward_points: 1000,
+            verification_type: 'TWEET_VERIFY', // Special frontend handling
+            verification_data: hasClicked ? 'CLICKED' : 'NOT_CLICKED', // Logic flag for Frontend
+            is_completed: false,
+            // Lock if Twitter not connected
+            requires_verification: !twitterProfile?.twitter_id,
+            icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico'
         });
     }
 
