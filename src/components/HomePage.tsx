@@ -84,7 +84,7 @@ const itemVariants = {
 
 export default function NativeStakingPage() {
     const { address, isConnected, chainId } = useAccount();
-    const { switchChain } = useSwitchChain();
+    const { switchChainAsync } = useSwitchChain();
     const [stakeAmount, setStakeAmount] = useState("");
     const [selectedTier, setSelectedTier] = useState(0);
     const [autoCompoundPref, setAutoCompoundPref] = useState(true);
@@ -135,20 +135,13 @@ export default function NativeStakingPage() {
     const handleSwitchNetwork = async () => {
         try {
             if (walletClient) {
-                await walletClient.addChain({ chain: zugChain });
+                try {
+                    await walletClient.addChain({ chain: zugChain });
+                } catch (ignored) { }
             }
-            switchChain({
-                chainId: CHAIN_ID,
-                addEthereumChainParameter: {
-                    chainName: zugChain.name,
-                    nativeCurrency: zugChain.nativeCurrency,
-                    rpcUrls: [...zugChain.rpcUrls.default.http],
-                    blockExplorerUrls: [zugChain.blockExplorers.default.url],
-                }
-            });
+            await switchChainAsync({ chainId: CHAIN_ID });
         } catch (e) {
-            console.error(e);
-            switchChain({ chainId: CHAIN_ID });
+            console.error("Switch error", e);
         }
     };
 

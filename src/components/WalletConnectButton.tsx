@@ -16,7 +16,7 @@ export default function WalletConnectButton({ fullWidth = false }: WalletConnect
     const dropdownRef = useRef<HTMLDivElement>(null)
     const { address, isConnected, chainId } = useAccount()
     const { disconnect } = useDisconnect()
-    const { switchChain } = useSwitchChain()
+    const { switchChainAsync } = useSwitchChain()
     const { data: balance } = useBalance({ address })
 
     useEffect(() => {
@@ -39,44 +39,56 @@ export default function WalletConnectButton({ fullWidth = false }: WalletConnect
 
     const handleSwitchNetwork = async () => {
         try {
-            // Try to add the chain first (Explicit "Add Custom Network" behavior)
-            if (walletClient) {
-                await walletClient.addChain({ chain: zugChain })
-            }
-            // Then switch (or fallback if addChain isn't supported/failed but switch might work)
-            switchChain({
-                chainId: CHAIN_ID,
-                addEthereumChainParameter: {
-                    chainName: zugChain.name,
-                    nativeCurrency: zugChain.nativeCurrency,
-                    rpcUrls: [...zugChain.rpcUrls.default.http],
-                    blockExplorerUrls: [zugChain.blockExplorers.default.url],
-                }
-            })
+            // 1. Try to switch directly (works if chain exists)
+            await switchChainAsync({ chainId: CHAIN_ID })
         } catch (e) {
-            console.error("Manual add chain failed, trying standard switch params", e)
-            switchChain({
-                chainId: CHAIN_ID,
-                addEthereumChainParameter: {
-                    chainName: zugChain.name,
-                    nativeCurrency: zugChain.nativeCurrency,
-                    rpcUrls: [...zugChain.rpcUrls.default.http],
-                    blockExplorerUrls: [zugChain.blockExplorers.default.url],
+            console.log("Switch failed, attempting to add chain...", e)
+            try {
+                // 2. If switch failed, try adding the chain
+                if (walletClient) {
+                    await walletClient.addChain({ chain: zugChain })
+                    // 3. Try switching again after add
+                    await switchChainAsync({ chainId: CHAIN_ID })
                 }
-            })
+            } catch (addError) {
+                console.error("Manual add chain failed", addError)
+            }
         }
     }
 
     if (isConnected && address) {
         if (chainId !== CHAIN_ID) {
             return (
-                <button
-                    onClick={handleSwitchNetwork}
-                    className="flex items-center gap-2 bg-red-500/10 border border-red-500/50 text-red-500 px-6 py-2 rounded-sm font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-red-500/20 transition-all tech-glow-red"
-                >
-                    <ExclamationTriangleIcon className="w-4 h-4" />
-                    <span>WRONG_NETWORK</span>
-                </button>
+                <div className="relative" ref={dropdownRef}>
+                    <button
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        className="flex items-center gap-2 bg-red-500/10 border border-red-500/50 text-red-500 px-3 py-2 rounded-sm font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-red-500/20 transition-all tech-glow-red"
+                    >
+                        <ExclamationTriangleIcon className="w-4 h-4" />
+                        <ChevronDownIcon className={`w-3.5 h-3.5 ml-1 transition-transform duration-300 ${showDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showDropdown && (
+                        <div className="absolute right-0 mt-3 w-56 bg-[#050505] rounded-sm inst-border z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                            <button
+                                onClick={() => {
+                                    handleSwitchNetwork();
+                                    setShowDropdown(false);
+                                }}
+                                className="w-full text-left px-5 py-4 border-b border-white/[0.03] text-[10px] font-bold tracking-[0.2em] text-[#e2ff3d] hover:bg-white/[0.02] transition-colors uppercase"
+                            >
+                                SWITCH_TO_ZUG
+                            </button>
+                            <button
+                                onClick={handleDisconnect}
+                                className="w-full flex items-center justify-between px-5 py-4 text-[10px] font-bold tracking-[0.2em] text-red-500 hover:bg-red-500/5 transition-colors uppercase group"
+                            >
+                                TERMINATE_SESSION
+                                <ArrowRightOnRectangleIcon className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+                            </button>
+                        </div>
+                    )}
+                </div>
             )
         }
 
