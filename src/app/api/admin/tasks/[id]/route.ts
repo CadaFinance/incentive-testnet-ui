@@ -20,9 +20,9 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
                  reward_points = COALESCE($3, reward_points),
                  verification_data = COALESCE($4, verification_data),
                  is_active = COALESCE($5, is_active),
-                 requires_verification = COALESCE($6, requires_verification),
-                 requires_telegram = COALESCE($7, requires_telegram),
-                 requires_discord = COALESCE($8, requires_discord)
+                 requires_verification = CASE WHEN $6::boolean IS NOT NULL THEN $6 ELSE requires_verification END,
+                 requires_telegram = CASE WHEN $7::boolean IS NOT NULL THEN $7 ELSE requires_telegram END,
+                 requires_discord = CASE WHEN $8::boolean IS NOT NULL THEN $8 ELSE requires_discord END
              WHERE id = $9
              RETURNING *`,
             [title, description, reward_points, verification_data, is_active, requires_verification, requires_telegram, requires_discord, id]
