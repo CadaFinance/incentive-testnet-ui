@@ -42,7 +42,7 @@ LOG_FILE="/var/log/auto-compound-bot.log"
 # ==============================
 DEPLOYER_PRIVATE_KEY="${DEPLOYER_PRIVATE_KEY:-0x766627b44fc2afc101672a7d34697993bcd91b84c25069d2f48f75b186562da7}"
 DATABASE_URL="${DATABASE_URL:-postgres://blockscout:Oh16ogZtxZtVgLx6yMpptvTYY8rhY6w11UlDwZQfjzGdxPcycO@127.0.0.1:7433/zug_incentive}"
-RPC_URL="${RPC_URL:-https://rpm123.zugchain.org}"
+RPC_URL="${RPC_URL:-https://rpcm.zugchain.org}"
 
 # Contract Addresses (can be overridden)
 NATIVE_STAKING="${NATIVE_STAKING:-0x4ed9828ba8487b9160C820C8b72c573E74eBbD0A}"
@@ -92,7 +92,7 @@ const { Pool } = require('pg');
 
 // --- CONFIGURATION FROM ENVIRONMENT ---
 const CONFIG = {
-    RPC_URL: process.env.RPC_URL || "https://rpm123.zugchain.org",
+    RPC_URL: process.env.RPC_URL || "https://rpcm.zugchain.org",
     NATIVE_STAKING: process.env.NATIVE_STAKING || "0x4ed9828ba8487b9160C820C8b72c573E74eBbD0A",
     TOKEN_STAKING: process.env.TOKEN_STAKING || "0x58D3E94a4D7C0D3F4B0c03861F7E9d81d71EDC0F",
     VZUG_TOKEN: process.env.VZUG_TOKEN || "0xB5662993e77513393322A1A59651108CD5eFB787",

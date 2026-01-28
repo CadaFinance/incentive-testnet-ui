@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from "react";
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance, useSwitchChain } from "wagmi";
 import { parseEther, formatEther, erc20Abi } from "viem";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -21,12 +21,14 @@ import {
     Activity,
     Lock as LockIcon,
     ShieldCheck,
-    ArrowUpRight
+    ArrowUpRight,
+    AlertTriangle
 } from 'lucide-react';
 import { StakingHistory } from '@/components/StakingHistory';
 import { formatZug } from "@/lib/utils";
 import WalletModal from "@/components/WalletModal";
 import { STAKING_CONTRACT_VZUG, VZUG_TOKEN } from "@/contracts";
+import { CHAIN_ID } from "../../../config";
 
 // --- V4 CONFIG ---
 const STAKING_CONTRACT = STAKING_CONTRACT_VZUG as `0x${string}`;
@@ -85,7 +87,8 @@ const itemVariants = {
 };
 
 export default function TokenStakingPage() {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected, chainId } = useAccount();
+    const { switchChain } = useSwitchChain();
     const [stakeAmount, setStakeAmount] = useState("");
     const [selectedTier, setSelectedTier] = useState(0);
     const [autoCompoundPref, setAutoCompoundPref] = useState(true);
@@ -488,6 +491,14 @@ export default function TokenStakingPage() {
                                             className="w-full py-5 bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all hover:bg-[#e2ff3d]"
                                         >
                                             CONNECT_WALLET
+                                        </button>
+                                    ) : chainId !== CHAIN_ID ? (
+                                        <button
+                                            onClick={() => switchChain({ chainId: CHAIN_ID })}
+                                            className="w-full py-5 bg-red-500/10 border border-red-500/50 hover:bg-red-500/20 text-red-500 font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <AlertTriangle className="w-5 h-5" />
+                                            SWITCH_NETWORK
                                         </button>
                                     ) : needsApproval ? (
                                         <button

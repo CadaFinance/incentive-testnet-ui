@@ -123,7 +123,6 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
             const tweetId = verificationLink.split(':')[1];
             const text = encodeURIComponent(`Joining the @ZugChain_org Incentivized Testnet! 🚀\n\nJoin my squad: https://testnet.zugchain.org/?ref=${referralCode || 'ZUG'}`);
             window.open(`https://twitter.com/intent/tweet?in_reply_to=${tweetId}&text=${text}`, '_blank');
-            return;
         }
 
         // Handle New "Shoutout on X" (Tweet Task)
@@ -154,7 +153,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
             }
         }
 
-        else if (verificationLink && !['CLICKED', 'NOT_CLICKED'].includes(verificationLink)) {
+        else if (verificationLink && !['CLICKED', 'NOT_CLICKED'].includes(verificationLink) && !verificationLink.startsWith('TWITTER_INTENT_REPLY:')) {
             window.open(verificationLink, '_blank');
         }
 
