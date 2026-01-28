@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance, useSwitchChain } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance, useSwitchChain, useWalletClient } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -130,6 +130,27 @@ export default function NativeStakingPage() {
 
     const { writeContract, data: txHash, isPending } = useWriteContract();
     const { isSuccess: isTxSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+    const { data: walletClient } = useWalletClient();
+
+    const handleSwitchNetwork = async () => {
+        try {
+            if (walletClient) {
+                await walletClient.addChain({ chain: zugChain });
+            }
+            switchChain({
+                chainId: CHAIN_ID,
+                addEthereumChainParameter: {
+                    chainName: zugChain.name,
+                    nativeCurrency: zugChain.nativeCurrency,
+                    rpcUrls: [...zugChain.rpcUrls.default.http],
+                    blockExplorerUrls: [zugChain.blockExplorers.default.url],
+                }
+            });
+        } catch (e) {
+            console.error(e);
+            switchChain({ chainId: CHAIN_ID });
+        }
+    };
 
     useEffect(() => {
         if (isTxSuccess && txHash) {
@@ -451,15 +472,7 @@ export default function NativeStakingPage() {
                                         </button>
                                     ) : chainId !== CHAIN_ID ? (
                                         <button
-                                            onClick={() => switchChain({
-                                                chainId: CHAIN_ID,
-                                                addEthereumChainParameter: {
-                                                    chainName: zugChain.name,
-                                                    nativeCurrency: zugChain.nativeCurrency,
-                                                    rpcUrls: [...zugChain.rpcUrls.default.http],
-                                                    blockExplorerUrls: [zugChain.blockExplorers.default.url],
-                                                }
-                                            })}
+                                            onClick={handleSwitchNetwork}
                                             className="w-full py-5 bg-red-500/10 border border-red-500/50 hover:bg-red-500/20 text-red-500 font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2"
                                         >
                                             <AlertTriangle className="w-5 h-5" />

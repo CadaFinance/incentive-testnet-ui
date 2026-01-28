@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useAccount, useDisconnect, useBalance, useSwitchChain } from 'wagmi'
+import { useAccount, useDisconnect, useBalance, useSwitchChain, useWalletClient } from 'wagmi'
 import { ChevronDownIcon, ArrowRightOnRectangleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import WalletModal from './WalletModal'
 import { CHAIN_ID, zugChain } from '../config'
@@ -35,19 +35,43 @@ export default function WalletConnectButton({ fullWidth = false }: WalletConnect
         setShowDropdown(false)
     }
 
+    const { data: walletClient } = useWalletClient()
+
+    const handleSwitchNetwork = async () => {
+        try {
+            // Try to add the chain first (Explicit "Add Custom Network" behavior)
+            if (walletClient) {
+                await walletClient.addChain({ chain: zugChain })
+            }
+            // Then switch (or fallback if addChain isn't supported/failed but switch might work)
+            switchChain({
+                chainId: CHAIN_ID,
+                addEthereumChainParameter: {
+                    chainName: zugChain.name,
+                    nativeCurrency: zugChain.nativeCurrency,
+                    rpcUrls: [...zugChain.rpcUrls.default.http],
+                    blockExplorerUrls: [zugChain.blockExplorers.default.url],
+                }
+            })
+        } catch (e) {
+            console.error("Manual add chain failed, trying standard switch params", e)
+            switchChain({
+                chainId: CHAIN_ID,
+                addEthereumChainParameter: {
+                    chainName: zugChain.name,
+                    nativeCurrency: zugChain.nativeCurrency,
+                    rpcUrls: [...zugChain.rpcUrls.default.http],
+                    blockExplorerUrls: [zugChain.blockExplorers.default.url],
+                }
+            })
+        }
+    }
+
     if (isConnected && address) {
         if (chainId !== CHAIN_ID) {
             return (
                 <button
-                    onClick={() => switchChain({
-                        chainId: CHAIN_ID,
-                        addEthereumChainParameter: {
-                            chainName: zugChain.name,
-                            nativeCurrency: zugChain.nativeCurrency,
-                            rpcUrls: [...zugChain.rpcUrls.default.http],
-                            blockExplorerUrls: [zugChain.blockExplorers.default.url],
-                        }
-                    })}
+                    onClick={handleSwitchNetwork}
                     className="flex items-center gap-2 bg-red-500/10 border border-red-500/50 text-red-500 px-6 py-2 rounded-sm font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-red-500/20 transition-all tech-glow-red"
                 >
                     <ExclamationTriangleIcon className="w-4 h-4" />
