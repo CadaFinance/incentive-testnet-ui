@@ -241,6 +241,7 @@ export default function TokenStakingPage() {
     const currentAllowance = allowance ? Number(formatEther(allowance)) : 0;
     const amt = parseFloat(stakeAmount || "0");
     const needsApproval = amt > 0 && amt > currentAllowance;
+    const hasInsufficientBalance = amt > 0 && amt > vBalance;
 
     const deposits = (rawDeposits as any[])
         ?.map((d, i) => ({ ...d, originalIndex: i }))
@@ -514,6 +515,22 @@ export default function TokenStakingPage() {
                                             <AlertTriangle className="w-5 h-5" />
                                             SWITCH_NETWORK
                                         </button>
+                                    ) : hasInsufficientBalance ? (
+                                        <div className="space-y-2">
+                                            <button
+                                                onClick={() => window.open('https://zugchain.org', '_blank')}
+                                                className="w-full py-5 bg-[#e2ff3d] hover:bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <ArrowUpRight className="w-5 h-5" />
+                                                GET_VZUG
+                                            </button>
+                                            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-red-500/10 border border-red-500/20 text-red-400">
+                                                <AlertTriangle className="w-4 h-4" />
+                                                <span className="text-[9px] font-mono uppercase tracking-wide">
+                                                    Insufficient vZUG balance. You need {(amt - vBalance).toFixed(2)} more vZUG.
+                                                </span>
+                                            </div>
+                                        </div>
                                     ) : needsApproval ? (
                                         <button
                                             onClick={handleApprove}

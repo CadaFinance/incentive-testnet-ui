@@ -207,6 +207,11 @@ export default function NativeStakingPage() {
     const unbondingStaked = deposits.filter(d => Number(d.unbondingEnd) > 0).reduce((acc, curr) => acc + Number(formatEther(curr.amount)), 0);
     const totalStaked = activeStaked + unbondingStaked;
 
+    // Balance check for insufficient balance
+    const zugBalance = balanceData?.value ? Number(formatEther(balanceData.value)) : 0;
+    const amt = parseFloat(stakeAmount || "0");
+    const hasInsufficientBalance = amt > 0 && amt > zugBalance;
+
     // Position Card Component
     const PositionCard = ({ deposit, index }: { deposit: any, index: number }) => {
         const originalId = BigInt(deposit.originalIndex);
@@ -471,6 +476,22 @@ export default function NativeStakingPage() {
                                             <AlertTriangle className="w-5 h-5" />
                                             SWITCH_NETWORK
                                         </button>
+                                    ) : hasInsufficientBalance ? (
+                                        <div className="space-y-2">
+                                            <button
+                                                onClick={() => window.open('https://zugchain.org', '_blank')}
+                                                className="w-full py-5 bg-[#e2ff3d] hover:bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <ArrowUpRight className="w-5 h-5" />
+                                                GET_ZUG
+                                            </button>
+                                            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-red-500/10 border border-red-500/20 text-red-400">
+                                                <AlertTriangle className="w-4 h-4" />
+                                                <span className="text-[9px] font-mono uppercase tracking-wide">
+                                                    Insufficient ZUG balance. You need {(amt - zugBalance).toFixed(2)} more ZUG.
+                                                </span>
+                                            </div>
+                                        </div>
                                     ) : (
                                         <button
                                             onClick={handleStake}
