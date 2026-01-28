@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useAccount, useDisconnect, useBalance, useSwitchChain } from 'wagmi'
 import { ChevronDownIcon, ArrowRightOnRectangleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import WalletModal from './WalletModal'
-import { CHAIN_ID } from '../config'
+import { CHAIN_ID, zugChain } from '../config'
 
 interface WalletConnectButtonProps {
     fullWidth?: boolean;
@@ -39,7 +39,15 @@ export default function WalletConnectButton({ fullWidth = false }: WalletConnect
         if (chainId !== CHAIN_ID) {
             return (
                 <button
-                    onClick={() => switchChain({ chainId: CHAIN_ID })}
+                    onClick={() => switchChain({
+                        chainId: CHAIN_ID,
+                        addEthereumChainParameter: {
+                            chainName: zugChain.name,
+                            nativeCurrency: zugChain.nativeCurrency,
+                            rpcUrls: [...zugChain.rpcUrls.default.http],
+                            blockExplorerUrls: [zugChain.blockExplorers.default.url],
+                        }
+                    })}
                     className="flex items-center gap-2 bg-red-500/10 border border-red-500/50 text-red-500 px-6 py-2 rounded-sm font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-red-500/20 transition-all tech-glow-red"
                 >
                     <ExclamationTriangleIcon className="w-4 h-4" />

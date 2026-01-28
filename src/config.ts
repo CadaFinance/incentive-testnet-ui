@@ -7,7 +7,7 @@ const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
 const EXPLORER_URL = process.env.NEXT_PUBLIC_EXPLORER_URL!
 const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!
 
-const zugChain = {
+export const zugChain = {
   id: CHAIN_ID,
   name: 'ZugChain',
   nativeCurrency: { name: 'Zug', symbol: 'ZUG', decimals: 18 },

@@ -25,7 +25,7 @@ import { StakingHistory } from '@/components/StakingHistory';
 import { formatZug } from "@/lib/utils";
 import WalletModal from "@/components/WalletModal";
 import { STAKING_CONTRACT_NATIVE } from "@/contracts";
-import { CHAIN_ID } from "../config";
+import { CHAIN_ID, zugChain } from "../config";
 
 // --- V4 CONTRACT CONFIG ---
 const STAKING_CONTRACT = STAKING_CONTRACT_NATIVE as `0x${string}`;
@@ -451,7 +451,15 @@ export default function NativeStakingPage() {
                                         </button>
                                     ) : chainId !== CHAIN_ID ? (
                                         <button
-                                            onClick={() => switchChain({ chainId: CHAIN_ID })}
+                                            onClick={() => switchChain({
+                                                chainId: CHAIN_ID,
+                                                addEthereumChainParameter: {
+                                                    chainName: zugChain.name,
+                                                    nativeCurrency: zugChain.nativeCurrency,
+                                                    rpcUrls: [...zugChain.rpcUrls.default.http],
+                                                    blockExplorerUrls: [zugChain.blockExplorers.default.url],
+                                                }
+                                            })}
                                             className="w-full py-5 bg-red-500/10 border border-red-500/50 hover:bg-red-500/20 text-red-500 font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2"
                                         >
                                             <AlertTriangle className="w-5 h-5" />
