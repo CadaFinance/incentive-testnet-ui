@@ -121,9 +121,9 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
         // Handle Dynamic Twitter Reply Intent
         if (verificationLink?.startsWith('TWITTER_INTENT_REPLY:')) {
             const tweetId = verificationLink.split(':')[1];
-            const text = encodeURIComponent(`Just joined the @ZugChain_org Incentivized Testnet! 💎\n\nBuilding the sovereign layer for digital capital. Join me here: https://testnet.zugchain.org/?ref=${referralCode || 'ZUG'}\n\n#ZugChain $ZUG #Testnet #Crypto`);
-            window.open(`https://x.com/intent/post?in_reply_to=${tweetId}&text=${text}`, '_blank');
-            // Removed early return to allow verification process to continue
+            const text = encodeURIComponent(`Joining the @ZugChain_org Incentivized Testnet! 🚀\n\nJoin my squad: https://testnet.zugchain.org/?ref=${referralCode || 'ZUG'}`);
+            window.open(`https://twitter.com/intent/tweet?in_reply_to=${tweetId}&text=${text}`, '_blank');
+            return;
         }
 
         // Handle New "Shoutout on X" (Tweet Task)
