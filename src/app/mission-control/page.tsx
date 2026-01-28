@@ -15,6 +15,7 @@ import { InviteMilestones } from '@/components/MissionControl/InviteMilestones';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity } from 'lucide-react';
 import { formatAddress } from '@/lib/utils';
+import WalletConnectButton from '@/components/WalletConnectButton';
 
 
 // Format large XP numbers: 22,005,639 -> "22.0M"
@@ -296,20 +297,7 @@ function MissionControlContent() {
                             </p>
 
                             <div className="pt-4">
-                                <button
-                                    onClick={() => {
-                                        // Standard way to trigger wallet connection if not using RainbowKit components
-                                        const connectBtn = document.querySelector('[data-testid="rk-connect-button"]') as HTMLButtonElement;
-                                        if (connectBtn) connectBtn.click();
-                                        else (window as any).ethereum?.request({ method: 'eth_requestAccounts' });
-                                    }}
-                                    className="group relative w-full bg-[#e2ff3d] hover:bg-white text-black font-black uppercase tracking-[0.2em] py-5 text-[10px] transition-all overflow-hidden"
-                                >
-                                    <span className="relative z-10 flex items-center justify-center gap-2">
-                                        [ CONNECT WALLET ]
-                                    </span>
-                                    <div className="absolute inset-x-0 bottom-0 h-[2px] bg-black/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-                                </button>
+                                <WalletConnectButton fullWidth />
                             </div>
 
                             <div className="flex justify-center gap-6 opacity-30 text-[8px] font-mono text-zinc-600 uppercase tracking-widest">

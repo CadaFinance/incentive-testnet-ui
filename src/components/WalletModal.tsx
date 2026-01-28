@@ -1,9 +1,9 @@
-'use client'
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConnect, useAccount, type Connector } from 'wagmi';
-import { FaTimes, FaShieldAlt } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
+import { FaWallet, FaShieldHalved } from 'react-icons/fa6';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { createPortal } from 'react-dom';
 
 interface WalletModalProps {
@@ -23,6 +23,7 @@ export default function WalletModal({ open, onClose }: WalletModalProps) {
 
     useEffect(() => {
         if (isConnected && address && open) {
+            toast.success('Protocol Secured Successfully');
             onClose();
         }
     }, [isConnected, address, open, onClose]);
@@ -45,6 +46,7 @@ export default function WalletModal({ open, onClose }: WalletModalProps) {
             await connect({ connector });
         } catch (err) {
             console.error(err);
+            toast.error('Authentication Error');
         }
     };
 
@@ -84,7 +86,7 @@ export default function WalletModal({ open, onClose }: WalletModalProps) {
 
                             <div className="text-left mb-12">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/[0.02] border border-white/5 mb-8">
-                                    <FaShieldAlt className="text-[#e2ff3d] w-2.5 h-2.5" />
+                                    <FaShieldHalved className="text-[#e2ff3d] w-2.5 h-2.5" />
                                     <span className="text-[8px] font-mono font-bold tracking-[0.3em] text-[#e2ff3d] uppercase">SECURED_LINK_v2.0</span>
                                 </div>
                                 <h2 className="text-2xl font-bold text-white tracking-tighter mb-4 uppercase">

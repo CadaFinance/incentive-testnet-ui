@@ -1,7 +1,7 @@
-import { createConfig, http, cookieStorage, createStorage } from 'wagmi'
-import { getDefaultConfig } from 'connectkit'
+import { createConfig, http } from 'wagmi'
+import { walletConnect, metaMask } from 'wagmi/connectors'
 
-// Read from environment variables (no fallbacks - must be set in .env)
+// Read from environment variables
 export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID)
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
 const EXPLORER_URL = process.env.NEXT_PUBLIC_EXPLORER_URL!
@@ -19,20 +19,19 @@ const zugChain = {
   },
 } as const
 
-export const config = createConfig(
-  getDefaultConfig({
-    chains: [zugChain],
-    transports: {
-      [zugChain.id]: http(RPC_URL),
-    },
-    walletConnectProjectId: WALLETCONNECT_PROJECT_ID || "",
-    appName: process.env.NEXT_PUBLIC_APP_NAME || "",
-    appDescription: process.env.NEXT_PUBLIC_APP_DESCRIPTION || "",
-    appUrl: process.env.NEXT_PUBLIC_APP_URL || "",
-    appIcon: process.env.NEXT_PUBLIC_APP_ICON || "",
-    ssr: true,
-    storage: createStorage({
-      storage: cookieStorage,
-    }),
-  }),
-)
+export const config = createConfig({
+  chains: [zugChain],
+  connectors: [
+    walletConnect({ projectId: WALLETCONNECT_PROJECT_ID }),
+    metaMask(),
+  ],
+  transports: {
+    [zugChain.id]: http(RPC_URL),
+  },
+})
+
+declare module 'wagmi' {
+  interface Register {
+    config: typeof config
+  }
+}
