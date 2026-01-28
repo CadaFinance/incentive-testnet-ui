@@ -2,10 +2,10 @@ import { createConfig, http } from 'wagmi'
 import { walletConnect, metaMask } from 'wagmi/connectors'
 
 // Read from environment variables
-export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID)
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
-const EXPLORER_URL = process.env.NEXT_PUBLIC_EXPLORER_URL!
-const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!
+export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 824642)
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.zugchain.org'
+const EXPLORER_URL = process.env.NEXT_PUBLIC_EXPLORER_URL || 'https://explorer.zugchain.org'
+const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'd6df325bb126ba1a5bcf6576a692bde4'
 
 export const zugChain = {
   id: CHAIN_ID,
