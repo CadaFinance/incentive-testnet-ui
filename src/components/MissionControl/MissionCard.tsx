@@ -121,7 +121,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
         // Handle Dynamic Twitter Reply Intent
         if (verificationLink?.startsWith('TWITTER_INTENT_REPLY:')) {
             const tweetId = verificationLink.split(':')[1];
-            const text = encodeURIComponent(`Joining the @ZugChain_org Incentivized Testnet! 🚀\n\nJoin my squad: https://testnet.zugchain.org/?ref=${referralCode || 'ZUG'}`);
+            const text = encodeURIComponent(`Just joined the @ZugChain_org Incentivized Testnet 🚀  \n\nActively testing staking & reward mechanics ahead of TGE.  \n\nJoin here 👇 https://testnet.zugchain.org/?ref=${referralCode || 'ZUG'}`);
             window.open(`https://twitter.com/intent/tweet?in_reply_to=${tweetId}&text=${text}`, '_blank');
         }
 
@@ -129,7 +129,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
         if (type === 'SOCIAL' && verificationLink && ['CLICKED', 'NOT_CLICKED'].includes(verificationLink)) {
             // First time click: Open Intent & Track
             if (verificationLink === 'NOT_CLICKED') {
-                const TWEET_TEXT = `Started my journey on the @ZugChain_org Incentive Testnet! 🚀\n\nEarning points, securing the network, and claiming my place in the genesis. Don't miss the early access phase.\n\nGet started here 👇\nhttps://testnet.zugchain.org/?ref=${referralCode || 'early'}\n\n#ZugChain $ZUG #ZUG`;
+                const TWEET_TEXT = `Started my journey on the @ZugChain_org Incentive Testnet! 🚀\n\nEarning points, securing the network, and claiming my place in the genesis. Don't miss the early access phase.\n\nGet started here 👇\nhttps://testnet.zugchain.org/?ref=${referralCode || 'early'}\n\n#ZugChain`;
                 const INTENT_URL = `https://twitter.com/intent/tweet?text=${encodeURIComponent(TWEET_TEXT)}`;
 
                 window.open(INTENT_URL, '_blank');
