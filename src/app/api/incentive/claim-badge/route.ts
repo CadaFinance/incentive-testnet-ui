@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
         // 1. Fetch User Stats
         const userRes = await db.query(
-            "SELECT badges, vzug_staked, vzug_compounded, vzug_claimed FROM users WHERE address = $1",
+            "SELECT discord_id, badges, vzug_staked, vzug_compounded, vzug_claimed FROM users WHERE address = $1",
             [address]
         );
 
@@ -80,6 +80,35 @@ export async function POST(req: NextRequest) {
         );
 
         await db.query('COMMIT');
+
+        // 5. Discord Role Assignment (Background Action)
+        if (badgeId === 'INSTITUTIONAL_STAKER' && user.discord_id) {
+            const guildId = process.env.DISCORD_GUILD_ID;
+            const titanRoleId = process.env.DISCORD_TITAN_ROLE_ID;
+            const botToken = process.env.DISCORD_BOT_TOKEN;
+
+            if (guildId && titanRoleId && botToken) {
+                try {
+                    console.log(`[DISCORD] Attempting to grant Titan role to ${user.discord_id}`);
+                    const roleResponse = await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.discord_id}/roles/${titanRoleId}`, {
+                        method: 'PUT',
+                        headers: {
+                            Authorization: `Bot ${botToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (roleResponse.ok) {
+                        console.log(`[DISCORD] Successfully granted Titan role to user ${user.discord_id}`);
+                    } else {
+                        const errorData = await roleResponse.json().catch(() => ({}));
+                        console.error(`[DISCORD] Failed to grant Titan role. Status: ${roleResponse.status}`, errorData);
+                    }
+                } catch (discordError) {
+                    console.error('[DISCORD] API error during role assignment:', discordError);
+                }
+            }
+        }
 
         return NextResponse.json({
             success: true,
