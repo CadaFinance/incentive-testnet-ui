@@ -263,6 +263,18 @@ export default function TokenStakingPage() {
             query: { enabled: !!address, refetchInterval: 3000 }
         });
 
+        // 7-Day Minimum Stake Duration Logic
+        const tierDurations = [0, 30 * 24 * 60 * 60, 90 * 24 * 60 * 60]; // seconds
+        const stakedAt = Number(deposit.lockEndTime) - tierDurations[deposit.tierId];
+        const minHoldingPeriod = 7 * 24 * 60 * 60; // 7 days in seconds
+        const minExitTime = stakedAt + minHoldingPeriod;
+        const currentTime = Math.floor(Date.now() / 1000);
+        const isHeldUnder7Days = currentTime < minExitTime;
+
+        // Calculate remaining time for the 7-day cooldown
+        const remainingSeconds = minExitTime - currentTime;
+        const remainingDays = Math.ceil(remainingSeconds / (24 * 60 * 60));
+
         return (
             <div className="p-6 bg-[#050505]/40 inst-border relative group hover:border-[#e2ff3d]/20 transition-all">
                 <div className="flex justify-between items-start mb-6">
@@ -354,10 +366,10 @@ export default function TokenStakingPage() {
                                 </button>
                                 <button
                                     onClick={() => handleUnstake(Number(originalId))}
-                                    disabled={isPending || isLocked}
-                                    className={`py-3 border text-[9px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-30 ${isLocked ? 'bg-transparent border-white/5 text-gray-700 cursor-not-allowed' : 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white'}`}
+                                    disabled={isPending || isLocked || isHeldUnder7Days}
+                                    className={`py-3 border text-[9px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-30 ${isLocked || isHeldUnder7Days ? 'bg-transparent border-white/5 text-gray-700 cursor-not-allowed' : 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white'}`}
                                 >
-                                    EXIT
+                                    {isHeldUnder7Days && !isLocked ? `LOCKED_${remainingDays}D` : "EXIT"}
                                 </button>
                             </div>
                         </div>

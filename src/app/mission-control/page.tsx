@@ -711,7 +711,7 @@ function MissionControlContent() {
                     }
                 `}</style>
 
-                {/* 1. STREAK */}
+                {/* 1. DAILY STREAK */}
                 <section className="mt-4 lg:mt-0 border-t border-white/5 pt-4">
                     <StreakTracker
                         faucetStreak={data?.streaks?.faucet_streak || 0}
@@ -721,14 +721,8 @@ function MissionControlContent() {
                     />
                 </section>
 
-                {/* 2. MISSIONS */}
-                <section>
-                    <InstitutionalTasks
-                        userProfile={userProfile}
-                        address={address || ''}
-                        onUpdate={() => fetchData()}
-                    />
-
+                {/* 2. ACTIVE MISSIONS */}
+                <section className=" pt-8 lg:pt-12">
                     <div className="flex items-center gap-4 mb-6 lg:mb-8">
                         <h2 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tighter">
                             Active <span className="text-[#e2ff3d]">Assignments</span>
@@ -809,7 +803,16 @@ function MissionControlContent() {
                     </div>
                 </section>
 
-                {/* 3. INVITE MILESTONE REWARDS */}
+                {/* 3. STAKING MISSIONS */}
+                <div className="border-t border-white/5 pt-8 lg:pt-12">
+                    <InstitutionalTasks
+                        userProfile={userProfile}
+                        address={address || ''}
+                        onUpdate={() => fetchData()}
+                    />
+                </div>
+
+                {/* 4. INVITE MILESTONE REWARDS */}
                 <section className="border-t border-white/5 pt-8 lg:pt-12">
                     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 lg:mb-8 gap-3">
                         <div className="flex items-center gap-4 flex-1">
