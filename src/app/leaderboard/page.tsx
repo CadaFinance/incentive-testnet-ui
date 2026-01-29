@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trophy, User, Activity, Zap, Radio, ChartNoAxesColumn } from 'lucide-react'
+import { Trophy, User, Activity, Gift, Radio, ChartNoAxesColumn, Zap } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import { formatAddress } from '@/lib/utils'
 
@@ -226,7 +226,7 @@ export default function LeaderboardPage() {
                     <div className="grid grid-cols-3 gap-2 sm:gap-4 flex-1 max-w-xl">
                         {[
                             { label: 'Contributors', fullLabel: 'Total_Contributors', value: stats?.total_users || '...', icon: User },
-                            { label: 'Net_Points', fullLabel: 'Network_Points', value: stats?.total_points?.toLocaleString() || '...', icon: Zap },
+                            { label: 'Airdrop_Pool', fullLabel: 'Total_Airdrop_Pool', value: stats?.total_points ? '$' + (stats.total_points * 0.01).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '...', icon: Gift },
                             { label: 'Activity', fullLabel: 'Protocol_Activity', value: stats?.total_activity || '...', icon: Activity }
                         ].map((stat, i) => (
                             <div key={i} className="p-3 sm:p-4 bg-white/[0.01] border border-white/5 rounded-sm flex flex-col justify-between h-full min-h-[70px] sm:min-h-[80px]">
