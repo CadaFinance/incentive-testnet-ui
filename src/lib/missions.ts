@@ -216,7 +216,7 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
 export async function getUserTwitterProfile(address: string) {
     const normalizedAddress = address.toLowerCase();
     const res = await db.query(
-        "SELECT twitter_id, twitter_username, twitter_image, legacy_claimed, has_pending_streak_modal, telegram_id, discord_id FROM users WHERE address = $1",
+        "SELECT twitter_id, twitter_username, twitter_image, legacy_claimed, has_pending_streak_modal, telegram_id, discord_id, badges, vzug_staked, vzug_compounded, vzug_claimed FROM users WHERE address = $1",
         [normalizedAddress]
     );
     return res.rows[0] || null;

@@ -99,7 +99,6 @@ export default function WalletConnectButton({ fullWidth = false }: WalletConnect
                     className="flex items-center gap-4 bg-white/[0.02] border border-white/10 text-white px-6 py-2 rounded-sm font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-white/[0.05] transition-all group"
                 >
                     <div className="flex flex-col items-start leading-none gap-1">
-                        <span className="text-gray-700 font-mono text-[8px] tracking-[0.2em] uppercase font-bold">L1_SECURED</span>
                         <span className="font-mono text-white text-[12px] tabular-nums tracking-tighter">
                             {balance?.formatted ? parseFloat(balance.formatted).toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0.00'}<span className="text-[#e2ff3d] ml-1 opacity-80">{balance?.symbol}</span>
                         </span>

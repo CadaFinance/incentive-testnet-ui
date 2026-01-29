@@ -154,3 +154,22 @@ input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+/* Animated rotating border */
+@keyframes border-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-border-spin {
+  animation: border-spin 3s linear infinite;
+}
+
+.bg-neon-conic {
+  background: conic-gradient(from 0deg, transparent 40%, #e2ff3d 50%, transparent 60%);
+}

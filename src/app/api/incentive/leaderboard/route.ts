@@ -13,10 +13,10 @@ export async function GET() {
                     address, 
                     points, 
                     total_claims,
+                    badges,
                     DENSE_RANK() OVER (
                         ORDER BY 
-                            points DESC, 
-                            total_claims DESC, 
+                            (points * CASE WHEN badges @> '["INSTITUTIONAL_STAKER"]' THEN 0.01 ELSE 0.0025 END) DESC, 
                             last_active DESC
                     ) as rank
                 FROM users

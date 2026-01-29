@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trophy, User, Activity, Zap, Radio } from 'lucide-react'
+import { Trophy, User, Activity, Zap, Radio, ChartNoAxesColumn } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import { formatAddress } from '@/lib/utils'
 
@@ -23,9 +23,33 @@ interface LeaderboardEntry {
     points: number
     total_claims: number
     rank: number
+    badges: string[] // Added badges array
 }
 
+import { INSTITUTIONAL_BADGES, getUSDZMultiplier } from '@/lib/badges';
+
 const POLLING_INTERVAL = 5000;
+
+// Format points for mobile: 1,234,567 -> 1.2M
+const formatPoints = (points: number, isMobile = false): string => {
+    if (isMobile && points >= 1000000) {
+        return (points / 1000000).toFixed(1) + 'M';
+    }
+    return points.toLocaleString();
+};
+
+// Format USDZ for mobile: 99,999+ -> XK
+const formatUSDZ = (value: number, isMobile = false): string => {
+    if (isMobile && value >= 100000) {
+        return '$' + (value / 1000).toFixed(0) + 'K';
+    }
+    return '$' + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+// Shorter mobile address: 0x1234...5678 -> 0x12...78
+const formatMobileAddress = (address: string): string => {
+    return `${address.slice(0, 4)}...${address.slice(-2)}`;
+};
 
 export default function LeaderboardPage() {
     const { address: userAddress, isConnected } = useAccount()
@@ -77,54 +101,94 @@ export default function LeaderboardPage() {
                             initial={{ y: 50, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 50, opacity: 0 }}
-                            className="hidden sm:block fixed bottom-10 right-10 z-[100] p-6 inst-border bg-[#050505] shadow-2xl shadow-[#e2ff3d]/10 w-[280px]"
+                            className="hidden sm:block fixed bottom-10 right-10 z-[100] w-[300px]"
                         >
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between gap-6">
-                                    <div className="space-y-0.5">
-                                        <span className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em]">Contributor_Status</span>
-                                        <h4 className="text-3xl font-black text-white tracking-tighter tabular-nums">#{userRank.rank || '...'}</h4>
-                                    </div>
-                                    <div className="w-12 h-12 bg-[#e2ff3d]/10 border border-[#e2ff3d]/20 flex items-center justify-center">
-                                        <Activity className="w-6 h-6 text-[#e2ff3d]" />
-                                    </div>
-                                </div>
+                            {/* Animated Border Container */}
+                            <div className="relative p-[1px] overflow-hidden">
+                                <div className="absolute -inset-[200%] animate-border-spin bg-neon-conic" />
+                                <div className="relative bg-[#050505] p-6 z-10">
+                                    <div className="space-y-4">
+                                        {/* Header */}
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="space-y-1">
+                                                <span className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em]">Your_Rank</span>
+                                                <h4 className="text-4xl font-black text-white tracking-tighter tabular-nums">#{userRank.rank || '...'}</h4>
+                                            </div>
+                                            <div className="w-14 h-14  flex items-center justify-center">
+                                                <ChartNoAxesColumn className="w-7 h-7 text-[#e2ff3d]" />
+                                            </div>
+                                        </div>
 
-                                <div className="space-y-2 pt-4 border-t border-white/5">
-                                    <div className="flex items-center justify-between text-[10px] font-mono">
-                                        <span className="text-[#e2ff3d] uppercase font-bold tracking-widest">Estimated_$USDZ</span>
-                                        <span className="text-[#e2ff3d] font-black">${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-[10px] font-mono">
-                                        <span className="text-gray-600 uppercase font-bold tracking-widest">Verification_ID</span>
-                                        <span className="text-white/40">{formatAddress(userAddress || '')}</span>
+                                        {/* Badges Row */}
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {userRank.rank === 1 && <span className="text-[8px] bg-[#e2ff3d] text-black px-2 py-1 font-black uppercase">SUPREME</span>}
+                                            {userRank.rank === 2 && <span className="text-[8px] bg-white text-black px-2 py-1 font-black uppercase">MASTER</span>}
+                                            {userRank.rank === 3 && <span className="text-[8px] bg-[#e2ff3d]/10 text-[#e2ff3d] px-2 py-1 font-black uppercase border border-[#e2ff3d]/20">ELITE</span>}
+                                            {userRank.badges?.map((badgeId: string) => {
+                                                const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
+                                                if (!badge) return null;
+                                                return (
+                                                    <span key={badgeId} className={`text-[8px] bg-white/5 ${badge.color} px-2 py-1 font-black uppercase border border-white/10 flex items-center gap-1`}>
+                                                        {badge.icon} {badge.name}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Stats */}
+                                        <div className="space-y-2 pt-4 border-t border-white/5">
+                                            <div className="flex items-center justify-between text-[10px] font-mono">
+                                                <span className="text-[#e2ff3d] uppercase font-bold tracking-widest">$USDZ_Value</span>
+                                                <span className="text-[#e2ff3d] font-black text-sm">${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between text-[10px] font-mono">
+                                                <span className="text-gray-600 uppercase font-bold tracking-widest">Wallet_ID</span>
+                                                <span className="text-white/40">{formatAddress(userAddress || '')}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </motion.div>
 
-                        {/* Mobile: Sticky Bottom Bar */}
+                        {/* Mobile: Professional Floating Rank Card */}
                         <motion.div
-                            initial={{ y: 100 }}
-                            animate={{ y: 0 }}
-                            exit={{ y: 100 }}
-                            className="sm:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#050505] border-t border-[#e2ff3d]/20 p-4 safe-area-pb"
+                            initial={{ y: 50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 50, opacity: 0 }}
+                            className="sm:hidden fixed bottom-1 left-1 right-1 z-[100] p-[1.5px] overflow-hidden rounded-md shadow-[0_10px_40px_rgba(0,0,0,0.8)]"
                         >
-                            <div className="flex items-center justify-between max-w-sm mx-auto">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 flex items-center justify-center">
-                                        <span className="text-[#e2ff3d] font-black text-lg">#{userRank.rank}</span>
-                                    </div>
+                            {/* Rotating Border Base */}
+                            <div className="absolute -inset-[300%] animate-border-spin bg-neon-conic" />
+
+                            <div className="relative z-10 bg-[#050505] p-4 rounded-[5px]">
+                                <div className="flex items-center justify-between gap-4">
                                     <div className="flex flex-col">
-                                        <span className="text-[9px] text-[#e2ff3d] font-bold uppercase tracking-widest">Global Rank</span>
-                                        <span className="text-[9px] text-gray-500 font-mono tracking-wider">{formatAddress(userAddress || '')}</span>
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-4xl font-black text-[#e2ff3d] tracking-tighter leading-none">#{userRank.rank}</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-widest leading-none mt-1">Your Rank</span>
+                                                <span className="text-[10px] text-gray-600 font-mono leading-none mt-2 opacity-50">{formatMobileAddress(userAddress || '')}</span>
+                                            </div>
+                                        </div>
+                                        {/* User Badges - Icon only on mobile card */}
+                                        <div className="flex flex-wrap gap-1 mt-3">
+                                            {userRank.rank === 1 && <span className="w-5 h-5 bg-[#e2ff3d] rounded-full flex items-center justify-center text-[7px] font-black text-black">S</span>}
+                                            {userRank.rank === 2 && <span className="w-5 h-5 bg-white rounded-full flex items-center justify-center text-[7px] font-black text-black">M</span>}
+                                            {userRank.rank === 3 && <span className="w-5 h-5 bg-[#e2ff3d]/10 border border-[#e2ff3d]/30 rounded-full flex items-center justify-center text-[7px] font-black text-[#e2ff3d]">E</span>}
+                                            {userRank.badges?.map((badgeId: string) => {
+                                                const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
+                                                return badge ? <span key={badgeId} className={`w-5 h-5 bg-white/5 border border-white/10 rounded-full flex items-center justify-center ${badge.color} text-[10px]`}>{badge.icon}</span> : null;
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter leading-none">
-                                        ${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+                                    <div className="text-right flex flex-col items-end justify-center">
+                                        <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter leading-none">
+                                            ${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </div>
+                                        <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-widest leading-none mt-2">Estimated $USDZ</span>
                                     </div>
-                                    <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-[0.2em] block mt-0.5">$USDZ Amount</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -185,10 +249,10 @@ export default function LeaderboardPage() {
                             <table className="w-full text-left border-collapse min-w-[340px] sm:min-w-[500px]">
                                 <thead>
                                     <tr className="border-b border-white/[0.03] bg-white/[0.01]">
-                                        <th className="py-3 sm:py-4 px-3 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest w-16 sm:w-24 text-center">Rank</th>
-                                        <th className="py-3 sm:py-4 px-3 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest pl-6 sm:pl-6 text-center sm:text-left">Contributor_Address</th>
-                                        <th className="py-3 sm:py-4 px-3 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest text-right">Points</th>
-                                        <th className="py-3 sm:py-4 px-3 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-[#e2ff3d] uppercase tracking-widest text-right">$USDZ</th>
+                                        <th className="py-3 sm:py-4 pl-2 pr-1 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest w-10 sm:w-24 text-left">Rank</th>
+                                        <th className="py-3 sm:py-4 px-1 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest text-left">Contributor_Address</th>
+                                        <th className="py-3 sm:py-4 px-2 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest text-right">Points</th>
+                                        <th className="py-3 sm:py-4 px-2 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-[#e2ff3d] uppercase tracking-widest text-right">$USDZ</th>
                                     </tr>
                                 </thead>
 
@@ -202,37 +266,50 @@ export default function LeaderboardPage() {
                                                 animate={{ opacity: 1, x: 0 }}
                                                 exit={{ opacity: 0, x: 20 }}
                                                 transition={{ duration: 0.3 }}
-                                                className={`group hover:bg-white/[0.01] transition-all ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'bg-[#e2ff3d]/[0.03]' : ''}`}
+                                                className={`group hover:bg-white/[0.01] transition-all ${leader.badges?.includes('INSTITUTIONAL_STAKER')
+                                                    ? 'inst-border bg-[#e2ff3d]/[0.02] shadow-[0_0_15px_-5px_#e2ff3d20]' // Neon Glow Hook
+                                                    : userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'bg-[#e2ff3d]/[0.03]' : ''
+                                                    }`}
                                             >
-                                                <td className="py-4 sm:py-5 px-3 sm:px-6">
-                                                    <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                                                        <span className={`text-[12px] sm:text-[13px] font-mono font-black transition-colors ${Number(leader.rank) <= 3 ? 'text-[#e2ff3d]' : 'text-gray-600 group-hover:text-white'}`}>#{leader.rank}</span>
-                                                    </div>
+                                                <td className="py-3 sm:py-5 pl-2 pr-1 sm:px-6">
+                                                    <span className={`text-[11px] sm:text-[13px] font-mono font-black transition-colors ${Number(leader.rank) <= 3 ? 'text-[#e2ff3d]' : 'text-gray-600 group-hover:text-white'}`}>#{leader.rank}</span>
                                                 </td>
-                                                <td className="py-4 sm:py-5 px-3 sm:px-6">
-                                                    <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
-                                                        <div className="hidden sm:flex w-6 h-6 rounded-full bg-white/[0.03] border border-white/5 items-center justify-center">
+                                                <td className="py-3 sm:py-5 px-1 sm:px-6">
+                                                    <div className="flex items-center gap-1 sm:gap-2 flex-nowrap">
+                                                        <div className="hidden sm:flex w-6 h-6 rounded-full bg-white/[0.03] border border-white/5 items-center justify-center shrink-0">
                                                             <User className="w-2.5 h-2.5 text-gray-600" />
                                                         </div>
-                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                                                            <span className={`text-[12px] sm:text-[13px] font-mono group-hover:text-white transition-colors ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'text-[#e2ff3d] font-bold' : 'text-white/40'}`}>
-                                                                {formatAddress(leader.address)}
-                                                            </span>
-                                                            <div className="flex items-center gap-1">
-                                                                {i < 3 && <span className="text-[7px] sm:text-[8px] bg-[#e2ff3d]/10 text-[#e2ff3d] px-1.5 sm:px-2 py-0.5 font-black uppercase tracking-tighter border border-[#e2ff3d]/20 rounded-[1px]">Elite</span>}
-                                                                {userAddress?.toLowerCase() === leader.address.toLowerCase() && <span className="text-[7px] sm:text-[8px] bg-white/10 text-white px-1.5 sm:px-2 py-0.5 font-black uppercase tracking-tighter italic border border-white/20 rounded-[1px]">YOU</span>}
-                                                            </div>
-                                                        </div>
+                                                        <span className={`text-[10px] sm:text-[13px] font-mono group-hover:text-white transition-colors shrink-0 ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'text-[#e2ff3d] font-bold' : 'text-white/40'}`}>
+                                                            <span className="sm:hidden">{formatMobileAddress(leader.address)}</span>
+                                                            <span className="hidden sm:inline">{formatAddress(leader.address)}</span>
+                                                        </span>
+                                                        {/* Rank Badge inline */}
+                                                        {i === 0 && <span className="h-4 text-[6px] sm:text-[8px] bg-[#e2ff3d] text-black px-1 sm:px-1.5 font-black uppercase shrink-0 flex items-center">SUPREME</span>}
+                                                        {i === 1 && <span className="h-4 text-[6px] sm:text-[8px] bg-white text-black px-1 sm:px-1.5 font-black uppercase shrink-0 flex items-center">MASTER</span>}
+                                                        {i === 2 && <span className="h-4 text-[6px] sm:text-[8px] bg-[#e2ff3d]/10 text-[#e2ff3d] px-1 sm:px-1.5 font-black uppercase border border-[#e2ff3d]/20 shrink-0 flex items-center">ELITE</span>}
+                                                        {/* Institutional Badges inline */}
+                                                        {leader.badges?.map(badgeId => {
+                                                            const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
+                                                            if (!badge) return null;
+                                                            return (
+                                                                <span key={badgeId} className={`h-4 text-[6px] sm:text-[8px] bg-white/5 ${badge.color} px-1 sm:px-1.5 font-black uppercase border border-white/10 flex items-center gap-0.5 shrink-0`}>
+                                                                    {badge.icon}
+                                                                </span>
+                                                            )
+                                                        })}
+                                                        {userAddress?.toLowerCase() === leader.address.toLowerCase() && <span className="h-4 text-[6px] sm:text-[8px] bg-white/10 text-white px-1 sm:px-1.5 font-black uppercase italic shrink-0 flex items-center">YOU</span>}
                                                     </div>
                                                 </td>
-                                                <td className="py-4 sm:py-5 px-3 sm:px-6 text-right">
-                                                    <span className={`text-[13px] sm:text-[16px] font-black tabular-nums tracking-tighter transition-colors ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'text-[#e2ff3d]' : 'text-white/80'}`}>
-                                                        {parseInt(leader.points as any).toLocaleString()}
+                                                <td className="py-4 sm:py-5 px-2 sm:px-6 text-right">
+                                                    <span className={`text-[12px] sm:text-[16px] font-black tabular-nums tracking-tighter transition-colors ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'text-[#e2ff3d]' : 'text-white/80'}`}>
+                                                        <span className="sm:hidden">{formatPoints(parseInt(leader.points as any), true)}</span>
+                                                        <span className="hidden sm:inline">{formatPoints(parseInt(leader.points as any), false)}</span>
                                                     </span>
                                                 </td>
-                                                <td className="py-4 sm:py-5 px-3 sm:px-6 text-right">
-                                                    <span className={`text-[13px] sm:text-[16px] font-black tabular-nums tracking-tighter transition-colors ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'text-[#e2ff3d]' : 'text-[#e2ff3d]/60'}`}>
-                                                        ${(parseInt(leader.points as any) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                <td className="py-4 sm:py-5 px-1 sm:px-6 text-right">
+                                                    <span className={`text-[11px] sm:text-[16px] font-black tabular-nums tracking-tighter transition-colors ${userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'text-[#e2ff3d]' : 'text-[#e2ff3d]/60'}`}>
+                                                        <span className="sm:hidden">{formatUSDZ(parseInt(leader.points as any) * getUSDZMultiplier(leader.badges), true)}</span>
+                                                        <span className="hidden sm:inline">{formatUSDZ(parseInt(leader.points as any) * getUSDZMultiplier(leader.badges), false)}</span>
                                                     </span>
                                                 </td>
                                             </motion.tr>

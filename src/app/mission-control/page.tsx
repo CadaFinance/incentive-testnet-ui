@@ -12,10 +12,12 @@ import { LegacyClaimModal } from '@/components/MissionControl/LegacyClaimModal';
 import StreakSuccessModal from '@/components/MissionControl/StreakSuccessModal';
 import { TelegramVerifyModal } from '@/components/TelegramVerifyModal';
 import { InviteMilestones } from '@/components/MissionControl/InviteMilestones';
+import { InstitutionalTasks } from '@/components/MissionControl/InstitutionalTasks';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity } from 'lucide-react';
+import { Activity, ChartNoAxesColumn, User } from 'lucide-react';
 import { formatAddress } from '@/lib/utils';
 import WalletConnectButton from '@/components/WalletConnectButton';
+import { INSTITUTIONAL_BADGES, getUSDZMultiplier } from '@/lib/badges';
 
 
 // Format large XP numbers: 22,005,639 -> "22.0M"
@@ -24,6 +26,10 @@ const formatXP = (num: number): string => {
         return (num / 1_000_000).toFixed(1) + 'M';
     }
     return num.toLocaleString();
+};
+
+const formatMobileAddress = (address: string): string => {
+    return `${address.slice(0, 4)}...${address.slice(-2)}`;
 };
 
 // Skeleton Component for Instant Perceived Loading
@@ -325,7 +331,25 @@ function MissionControlContent() {
     const { referralInfo, points: totalPoints, userProfile } = data;
     const missions = data?.missions || [];
     // Hide ALL completed missions
-    const activeMissions = missions.filter((m: any) => !m.is_completed || m.next_available_at);
+    // Filter and Sort Missions: Unlocked first, then Locked
+    const activeMissions = missions
+        .filter((m: any) => !m.is_completed || m.next_available_at)
+        .sort((a, b) => {
+            const isLocked = (m: any) => {
+                return (m.id === -103 && !userProfile?.telegram_id) ||
+                    (m.id === -102 && (!userProfile?.telegram_id || missions.some((subM: any) => subM.id === -103 && !subM.is_completed))) ||
+                    (m.requires_telegram && !userProfile?.telegram_id) ||
+                    (m.requires_discord && !userProfile?.discord_id) ||
+                    (m.requires_verification && !userProfile?.twitter_id);
+            };
+
+            const aLocked = isLocked(a);
+            const bLocked = isLocked(b);
+
+            if (aLocked && !bLocked) return 1;
+            if (!aLocked && bLocked) return -1;
+            return 0;
+        });
 
     return (
         <DashboardLayout>
@@ -338,54 +362,94 @@ function MissionControlContent() {
                             initial={{ y: 50, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 50, opacity: 0 }}
-                            className="hidden sm:block fixed bottom-10 right-10 z-[100] p-6 inst-border bg-[#050505] shadow-2xl shadow-[#e2ff3d]/10 w-[280px]"
+                            className="hidden sm:block fixed bottom-10 right-10 z-[100] w-[300px]"
                         >
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between gap-6">
-                                    <div className="space-y-0.5">
-                                        <span className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em]">Contributor_Status</span>
-                                        <h4 className="text-3xl font-black text-white tracking-tighter tabular-nums">#{userRank.rank || '...'}</h4>
-                                    </div>
-                                    <div className="w-12 h-12 bg-[#e2ff3d]/10 border border-[#e2ff3d]/20 flex items-center justify-center">
-                                        <Activity className="w-6 h-6 text-[#e2ff3d]" />
-                                    </div>
-                                </div>
+                            {/* Animated Border Container */}
+                            <div className="relative p-[1px] overflow-hidden">
+                                <div className="absolute -inset-[200%] animate-border-spin bg-neon-conic" />
+                                <div className="relative bg-[#050505] p-6 z-10">
+                                    <div className="space-y-4">
+                                        {/* Header */}
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="space-y-1">
+                                                <span className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em]">Your_Rank</span>
+                                                <h4 className="text-4xl font-black text-white tracking-tighter tabular-nums">#{userRank.rank || '...'}</h4>
+                                            </div>
+                                            <div className="w-14 h-14  flex items-center justify-center">
+                                                <ChartNoAxesColumn className="w-7 h-7 text-[#e2ff3d]" />
+                                            </div>
+                                        </div>
 
-                                <div className="space-y-2 pt-4 border-t border-white/5">
-                                    <div className="flex items-center justify-between text-[10px] font-mono">
-                                        <span className="text-[#e2ff3d] uppercase font-bold tracking-widest">Estimated_$USDZ</span>
-                                        <span className="text-[#e2ff3d] font-black">${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-[10px] font-mono">
-                                        <span className="text-gray-600 uppercase font-bold tracking-widest">Verification_ID</span>
-                                        <span className="text-white/40">{formatAddress(address || '')}</span>
+                                        {/* Badges Row */}
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {userRank.rank === 1 && <span className="text-[8px] bg-[#e2ff3d] text-black px-2 py-1 font-black uppercase">SUPREME</span>}
+                                            {userRank.rank === 2 && <span className="text-[8px] bg-white text-black px-2 py-1 font-black uppercase">MASTER</span>}
+                                            {userRank.rank === 3 && <span className="text-[8px] bg-[#e2ff3d]/10 text-[#e2ff3d] px-2 py-1 font-black uppercase border border-[#e2ff3d]/20">ELITE</span>}
+                                            {userRank.badges?.map((badgeId: string) => {
+                                                const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
+                                                if (!badge) return null;
+                                                return (
+                                                    <span key={badgeId} className={`text-[8px] bg-white/5 ${badge.color} px-2 py-1 font-black uppercase border border-white/10 flex items-center gap-1`}>
+                                                        {badge.icon} {badge.name}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Stats */}
+                                        <div className="space-y-2 pt-4 border-t border-white/5">
+                                            <div className="flex items-center justify-between text-[10px] font-mono">
+                                                <span className="text-[#e2ff3d] uppercase font-bold tracking-widest">$USDZ_Value</span>
+                                                <span className="text-[#e2ff3d] font-black text-sm">${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between text-[10px] font-mono">
+                                                <span className="text-gray-600 uppercase font-bold tracking-widest">Wallet_ID</span>
+                                                <span className="text-white/40">{formatAddress(address || '')}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </motion.div>
 
-                        {/* Mobile: Sticky Bottom Bar */}
+                        {/* Mobile: Professional Floating Rank Card */}
                         <motion.div
-                            initial={{ y: 100 }}
-                            animate={{ y: 0 }}
-                            exit={{ y: 100 }}
-                            className="sm:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#050505] border-t border-[#e2ff3d]/20 p-4 safe-area-pb"
+                            initial={{ y: 50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 50, opacity: 0 }}
+                            className="sm:hidden fixed bottom-1 left-1 right-1 z-[100] p-[1.5px] overflow-hidden rounded-md shadow-[0_10px_40px_rgba(0,0,0,0.8)]"
                         >
-                            <div className="flex items-center justify-between max-w-sm mx-auto">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10  flex items-center justify-center">
-                                        <span className="text-[#e2ff3d] font-black text-lg">#{userRank.rank}</span>
-                                    </div>
+                            {/* Rotating Border Base */}
+                            <div className="absolute -inset-[300%] animate-border-spin bg-neon-conic" />
+
+                            <div className="relative z-10 bg-[#050505] p-4 rounded-[5px]">
+                                <div className="flex items-center justify-between gap-4">
                                     <div className="flex flex-col">
-                                        <span className="text-[9px] text-[#e2ff3d] font-bold uppercase tracking-widest">Global Rank</span>
-                                        <span className="text-[9px] text-gray-500 font-mono tracking-wider">{formatAddress(address || '')}</span>
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-4xl font-black text-[#e2ff3d] tracking-tighter leading-none">#{userRank.rank}</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-widest leading-none mt-1">Your Rank</span>
+                                                <span className="text-[10px] text-gray-600 font-mono leading-none mt-2 opacity-50">{formatMobileAddress(address || '')}</span>
+                                            </div>
+                                        </div>
+                                        {/* User Badges - Icon only on mobile card */}
+                                        <div className="flex flex-wrap gap-1 mt-3">
+                                            {userRank.rank === 1 && <span className="w-5 h-5 bg-[#e2ff3d] rounded-full flex items-center justify-center text-[7px] font-black text-black">S</span>}
+                                            {userRank.rank === 2 && <span className="w-5 h-5 bg-white rounded-full flex items-center justify-center text-[7px] font-black text-black">M</span>}
+                                            {userRank.rank === 3 && <span className="w-5 h-5 bg-[#e2ff3d]/10 border border-[#e2ff3d]/30 rounded-full flex items-center justify-center text-[7px] font-black text-[#e2ff3d]">E</span>}
+                                            {userRank.badges?.map((badgeId: string) => {
+                                                const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
+                                                return badge ? <span key={badgeId} className={`w-5 h-5 bg-white/5 border border-white/10 rounded-full flex items-center justify-center ${badge.color} text-[10px]`}>{badge.icon}</span> : null;
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter leading-none">
-                                        ${(parseInt(userRank.points || 0) * 0.0025).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+                                    <div className="text-right flex flex-col items-end justify-center">
+                                        <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter leading-none">
+                                            ${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </div>
+                                        <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-widest leading-none mt-2">Estimated $USDZ</span>
                                     </div>
-                                    <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-[0.2em] block mt-0.5">$USDZ Amount</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -568,10 +632,17 @@ function MissionControlContent() {
 
                 {/* 2. MISSIONS */}
                 <section>
-                    <div className="flex items-baseline justify-between mb-6 lg:mb-8">
+                    <InstitutionalTasks
+                        userProfile={userProfile}
+                        address={address || ''}
+                        onUpdate={() => fetchData()}
+                    />
+
+                    <div className="flex items-center gap-4 mb-6 lg:mb-8">
                         <h2 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tighter">
-                            Active Assignments
+                            Active <span className="text-[#e2ff3d]">Assignments</span>
                         </h2>
+                        <div className="h-px flex-1 bg-white/10" />
                         <span className="font-mono text-[10px] lg:text-xs text-gray-500">
                             {activeMissions.length} TASKS PENDING
                         </span>
@@ -649,14 +720,12 @@ function MissionControlContent() {
 
                 {/* 3. INVITE MILESTONE REWARDS */}
                 <section className="border-t border-white/5 pt-8 lg:pt-12">
-                    <div className="flex flex-col lg:flex-row items-start lg:items-baseline justify-between mb-6 lg:mb-8 gap-3">
-                        <div>
+                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 lg:mb-8 gap-3">
+                        <div className="flex items-center gap-4 flex-1">
                             <h2 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tighter">
-                                Invite Milestone Rewards
+                                Referral <span className="text-[#e2ff3d]">Rewards</span>
                             </h2>
-                            <p className="text-[10px] font-mono text-zinc-600 mt-1 tracking-wide">
-                                Earn bonus XP for hitting verified invite milestones
-                            </p>
+                            <div className="h-px flex-1 bg-white/10 hidden lg:block" />
                         </div>
                         <div className="flex gap-3">
                             {/* Total Invites */}

@@ -16,11 +16,17 @@ export async function GET(req: NextRequest) {
                 u.points, 
                 u.total_claims, 
                 u.last_active,
+                u.badges,
                 (
                     SELECT COUNT(*) + 1 
                     FROM users 
-                    WHERE points > u.points 
-                    OR (points = u.points AND total_claims > u.total_claims)
+                    WHERE (points * CASE WHEN badges @> '["INSTITUTIONAL_STAKER"]' THEN 0.01 ELSE 0.0025 END) > 
+                          (u.points * CASE WHEN u.badges @> '["INSTITUTIONAL_STAKER"]' THEN 0.01 ELSE 0.0025 END)
+                    OR (
+                        (points * CASE WHEN badges @> '["INSTITUTIONAL_STAKER"]' THEN 0.01 ELSE 0.0025 END) = 
+                        (u.points * CASE WHEN u.badges @> '["INSTITUTIONAL_STAKER"]' THEN 0.01 ELSE 0.0025 END)
+                        AND last_active > u.last_active
+                    )
                 ) as rank 
              FROM users u 
              WHERE LOWER(u.address) = $1`,
