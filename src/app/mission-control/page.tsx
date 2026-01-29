@@ -126,6 +126,15 @@ function MissionControlContent() {
     // User Rank State
     const [userRank, setUserRank] = useState<any>(null);
 
+    // Dynamic Reward Toggle (Loop)
+    const [showPotential, setShowPotential] = useState(true);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setShowPotential(prev => !prev);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, []);
+
     // Handle OAuth Callbacks
     useEffect(() => {
         if (!searchParams) return;
@@ -385,23 +394,63 @@ function MissionControlContent() {
                                             {userRank.rank === 1 && <span className="text-[8px] bg-[#e2ff3d] text-black px-2 py-1 font-black uppercase">SUPREME</span>}
                                             {userRank.rank === 2 && <span className="text-[8px] bg-white text-black px-2 py-1 font-black uppercase">MASTER</span>}
                                             {userRank.rank === 3 && <span className="text-[8px] bg-[#e2ff3d]/10 text-[#e2ff3d] px-2 py-1 font-black uppercase border border-[#e2ff3d]/20">ELITE</span>}
-                                            {userRank.badges?.map((badgeId: string) => {
-                                                const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
-                                                if (!badge) return null;
-                                                return (
-                                                    <span key={badgeId} className={`text-[8px] bg-white/5 ${badge.color} px-2 py-1 font-black uppercase border border-white/10 flex items-center gap-1`}>
-                                                        {badge.icon} {badge.name}
-                                                    </span>
-                                                );
-                                            })}
+                                            {userRank.badges?.length > 0 ? (
+                                                userRank.badges.map((badgeId: string) => {
+                                                    const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
+                                                    if (!badge) return null;
+                                                    return (
+                                                        <span key={badgeId} className={`text-[8px] bg-white/5 ${badge.color} px-2 py-1 font-black uppercase border border-white/10 flex items-center gap-1`}>
+                                                            {badge.icon} {badge.name}
+                                                        </span>
+                                                    );
+                                                })
+                                            ) : (
+                                                <div className="w-full mt-2 p-3  space-y-2 animate-pulse">
+
+                                                    <p className="text-[10px] text-gray-400 font-mono leading-tight">
+                                                        Obtain <span className="text-white font-bold">TITAN</span> badge to unlock <span className="text-[#e2ff3d] font-bold">4X $USDZ</span> reward multiplier.
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Stats */}
-                                        <div className="space-y-2 pt-4 border-t border-white/5">
-                                            <div className="flex items-center justify-between text-[10px] font-mono">
-                                                <span className="text-[#e2ff3d] uppercase font-bold tracking-widest">$USDZ_Value</span>
-                                                <span className="text-[#e2ff3d] font-black text-sm">${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <div className="space-y-4 pt-4 border-t border-white/5">
+                                            <div className="relative h-[44px]">
+                                                <AnimatePresence mode="wait">
+                                                    {!showPotential || userRank.badges?.includes('INSTITUTIONAL_STAKER') ? (
+                                                        <motion.div
+                                                            key="actual"
+                                                            initial={{ opacity: 0, y: 10 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            exit={{ opacity: 0, y: -10 }}
+                                                            className="flex items-center justify-between text-[10px] font-mono h-full"
+                                                        >
+                                                            <span className="text-gray-500 uppercase font-bold tracking-widest leading-none">Actual Reward</span>
+                                                            <span className="text-white font-black whitespace-nowrap text-sm">${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                        </motion.div>
+                                                    ) : (
+                                                        <motion.div
+                                                            key="potential"
+                                                            initial={{ opacity: 0, y: 10 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            exit={{ opacity: 0, y: -10 }}
+                                                            className="flex items-center justify-between text-[10px] font-mono p-2  h-full"
+                                                        >
+                                                            <div className="flex items-center gap-1.5 overflow-hidden">
+                                                                <span className="bg-[#e2ff3d] text-black px-1 text-[8px] rounded-sm font-black animate-pulse">4X</span>
+                                                                <span className="text-white px-1 text-[8px]  font-white"> with</span>
+
+                                                                <span className="text-[#e2ff3d] uppercase font-black tracking-widest flex items-center gap-1 px-1.5 py-0.5 border border-[#e2ff3d]/20 bg-[#e2ff3d]/5">
+                                                                    {INSTITUTIONAL_BADGES.INSTITUTIONAL_STAKER.icon} TITAN
+                                                                </span>
+                                                            </div>
+                                                            <span className="text-[#e2ff3d] font-black text-sm">${(parseInt(userRank.points || 0) * 0.01).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
                                             </div>
+
                                             <div className="flex items-center justify-between text-[10px] font-mono">
                                                 <span className="text-gray-600 uppercase font-bold tracking-widest">Wallet_ID</span>
                                                 <span className="text-white/40">{formatAddress(address || '')}</span>
@@ -437,18 +486,60 @@ function MissionControlContent() {
                                             {userRank.rank === 1 && <span className="w-5 h-5 bg-[#e2ff3d] rounded-full flex items-center justify-center text-[7px] font-black text-black">S</span>}
                                             {userRank.rank === 2 && <span className="w-5 h-5 bg-white rounded-full flex items-center justify-center text-[7px] font-black text-black">M</span>}
                                             {userRank.rank === 3 && <span className="w-5 h-5 bg-[#e2ff3d]/10 border border-[#e2ff3d]/30 rounded-full flex items-center justify-center text-[7px] font-black text-[#e2ff3d]">E</span>}
-                                            {userRank.badges?.map((badgeId: string) => {
-                                                const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
-                                                return badge ? <span key={badgeId} className={`w-5 h-5 bg-white/5 border border-white/10 rounded-full flex items-center justify-center ${badge.color} text-[10px]`}>{badge.icon}</span> : null;
-                                            })}
+                                            {userRank.badges?.length > 0 ? (
+                                                userRank.badges.map((badgeId: string) => {
+                                                    const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
+                                                    return badge ? <span key={badgeId} className={`w-5 h-5 bg-white/5 border border-white/10 rounded-full flex items-center justify-center ${badge.color} text-[10px]`}>{badge.icon}</span> : null;
+                                                })
+                                            ) : (
+                                                <div className="flex items-center gap-2 px-2 py-1 bg-red-500/10 border border-red-500/20 rounded">
+                                                    <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+                                                    <span className="text-[7px] text-red-500 font-black uppercase tracking-widest whitespace-nowrap">Grab your TITAN badge for 4x rewards</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
                                     <div className="text-right flex flex-col items-end justify-center">
-                                        <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter leading-none">
-                                            ${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        <div className="relative h-[48px] flex flex-col items-end justify-center min-w-[100px]">
+                                            <AnimatePresence mode="wait">
+                                                {!showPotential || userRank.badges?.includes('INSTITUTIONAL_STAKER') ? (
+                                                    <motion.div
+                                                        key="actual-mobile"
+                                                        initial={{ opacity: 0, x: 20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        exit={{ opacity: 0, x: -20 }}
+                                                        className="flex flex-col items-end"
+                                                    >
+                                                        <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter">
+                                                            ${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </div>
+                                                        <span className="text-[8px] text-[#e2ff3d]/60 font-bold uppercase tracking-widest mt-1">EST. $USDZ</span>
+                                                    </motion.div>
+                                                ) : (
+                                                    <motion.div
+                                                        key="potential-mobile"
+                                                        initial={{ opacity: 0, x: 20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        exit={{ opacity: 0, x: -20 }}
+                                                        className="flex flex-col items-end gap-1"
+                                                    >
+                                                        <div className="flex items-center gap-1.5 leading-none">
+                                                            <span className="text-2xl font-black text-[#e2ff3d] tracking-tighter">
+                                                                ${(parseInt(userRank.points || 0) * 0.01).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                                            <span className="bg-[#e2ff3d] text-black px-1 text-[8px] rounded-sm font-black animate-pulse">4X</span>
+                                                            <span className="text-[8px]">with</span>
+                                                            <span className="text-[7px] text-[#e2ff3d] font-bold uppercase tracking-widest leading-none flex items-center gap-1 px-1.5 py-0.5 border border-[#e2ff3d]/20 bg-[#e2ff3d]/5">
+                                                                {INSTITUTIONAL_BADGES.INSTITUTIONAL_STAKER.icon} TITAN
+                                                            </span>
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
                                         </div>
-                                        <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-widest leading-none mt-2">Estimated $USDZ</span>
                                     </div>
                                 </div>
                             </div>
