@@ -40,16 +40,14 @@ export function StreakTracker({ faucetStreak, stakeStreak, lastFaucetDate, lastS
             {/* DEBUG OVERLAY */}
 
 
-            <div className="flex flex-col md:flex-row items-baseline justify-between mb-2 lg:mb-4 gap-2">
-                <h2 className="text-3xl lg:text-4xl font-black uppercase text-white tracking-tighter m-0">
-                    Daily Streak
+            <div className="flex items-center gap-4 mb-4 lg:mb-6">
+                <h2 className="text-xl lg:text-4xl font-black uppercase text-white tracking-tighter m-0">
+                    Daily <span className="text-[#e2ff3d]">Streak</span>
                 </h2>
-                <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Status:</span>
-                    <span className="text-lg lg:text-xl font-mono font-bold text-[#e2ff3d]">
-                        {displayStep === 0 ? 'START CYCLE' : `${displayStep} / 7 DAYS`}
-                    </span>
-                </div>
+                <div className="h-px flex-1 bg-white/10" />
+                <span className="text-base lg:text-xl font-mono font-bold text-[#e2ff3d] whitespace-nowrap">
+                    {displayStep === 0 ? 'START CYCLE' : `${displayStep} / 7 DAYS`}
+                </span>
             </div>
 
             {/* Responsive Grid Tracker */}
@@ -99,14 +97,15 @@ export function StreakTracker({ faucetStreak, stakeStreak, lastFaucetDate, lastS
                 </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between mt-4 gap-2">
-                <p className="text-[9px] lg:text-[10px] text-gray-400 font-mono uppercase opacity-60">
-                    Consecutive Activity Required for Bonus
+            <div className="flex items-center justify-between mt-4">
+                <p className="text-[9px] font-mono text-gray-500 uppercase tracking-wider">
+                    BONUS REWARD:
                 </p>
-                <p className="text-[9px] lg:text-[10px] text-[#e2ff3d] font-mono uppercase tracking-widest font-bold">
-                    +1000 BONUS ON DAY 7
-                </p>
-
+                <div className=" px-3 py-1">
+                    <span className="text-[10px] lg:text-xs text-[#e2ff3d] font-black uppercase tracking-widest">
+                        +1000 XP ON DAY 7
+                    </span>
+                </div>
             </div>
         </div>
     );

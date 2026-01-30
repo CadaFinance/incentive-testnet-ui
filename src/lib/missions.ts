@@ -2,7 +2,7 @@ import { db } from '@/lib/db';
 import { getCached, invalidateCache } from '@/lib/redis';
 
 export type TaskType = 'SOCIAL' | 'PARTNER' | 'DAILY';
-export type VerificationType = 'LINK_CLICK' | 'API_VERIFY' | 'MANUAL' | 'TWEET_VERIFY';
+export type VerificationType = 'LINK_CLICK' | 'API_VERIFY' | 'MANUAL' | 'TWEET_VERIFY' | 'X_PROFILE_UPDATE';
 
 export interface Task {
     id: number;
@@ -205,6 +205,22 @@ async function getUserMissionsUncached(address: string): Promise<Task[]> {
         });
     }
 
+    // Dynamic Task 8: Update X Profile (Screenshot Verification Simulation)
+    if (!completedTaskIds.includes(-105)) {
+        dynamicMissions.push({
+            id: -105,
+            type: 'SOCIAL',
+            title: 'Update X Profile',
+            description: 'Add ZugChain branding to your X profile name and bio to show your support.',
+            reward_points: 1500,
+            verification_type: 'X_PROFILE_UPDATE',
+            verification_data: 'X_PROFILE_MODAL',
+            is_completed: false,
+            requires_verification: !twitterProfile?.twitter_id,
+            icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico'
+        });
+    }
+
     const res = await db.query(query, [normalizedAddress]);
 
     return [...dynamicMissions, ...res.rows];
@@ -358,6 +374,14 @@ export async function completeMission(address: string, taskId: number) {
             if (!profile?.twitter_id) return { success: false, message: 'OAuth Required: Link Twitter first.' };
 
             basePoints = 1000;
+            taskType = 'SOCIAL';
+        } else if (taskId === -105) {
+            // Update X Profile: Simulated verification (screenshot uploaded client-side only)
+            // Must have twitter_id linked
+            const profile = await getUserTwitterProfile(normalizedAddress);
+            if (!profile?.twitter_id) return { success: false, message: 'OAuth Required: Link X account first.' };
+
+            basePoints = 1500;
             taskType = 'SOCIAL';
         } else {
             return { success: false, message: 'Virtual task not found' };

@@ -42,12 +42,12 @@ LOG_FILE="/var/log/auto-compound-bot.log"
 # ==============================
 DEPLOYER_PRIVATE_KEY="${DEPLOYER_PRIVATE_KEY:-0x766627b44fc2afc101672a7d34697993bcd91b84c25069d2f48f75b186562da7}"
 DATABASE_URL="${DATABASE_URL:-postgres://blockscout:Oh16ogZtxZtVgLx6yMpptvTYY8rhY6w11UlDwZQfjzGdxPcycO@127.0.0.1:7433/zug_incentive}"
-RPC_URL="${RPC_URL:-https://rpcm.zugchain.org}"
+RPC_URL="${RPC_URL:-https://rpc.zugchain.org}"
 
 # Contract Addresses (can be overridden)
-NATIVE_STAKING="${NATIVE_STAKING:-0x4ed9828ba8487b9160C820C8b72c573E74eBbD0A}"
-TOKEN_STAKING="${TOKEN_STAKING:-0x58D3E94a4D7C0D3F4B0c03861F7E9d81d71EDC0F}"
-VZUG_TOKEN="${VZUG_TOKEN:-0xB5662993e77513393322A1A59651108CD5eFB787}"
+NATIVE_STAKING="${NATIVE_STAKING:-0x50C0B1dFa7B2F60a30016EF73ad68FFCF66A99A9}"
+TOKEN_STAKING="${TOKEN_STAKING:-0xceC2c83d36e285358eA11df34cAe84C125fD581F}"
+VZUG_TOKEN="${VZUG_TOKEN:-0xe6c72abBE82368f6714948D13D2CCdFB40382C12}"
 
 echo ""
 echo -e "${GREEN}╔══════════════════════════════════════════════════════════════╗${NC}"
@@ -92,15 +92,15 @@ const { Pool } = require('pg');
 
 // --- CONFIGURATION FROM ENVIRONMENT ---
 const CONFIG = {
-    RPC_URL: process.env.RPC_URL || "https://rpcm.zugchain.org",
-    NATIVE_STAKING: process.env.NATIVE_STAKING || "0x4ed9828ba8487b9160C820C8b72c573E74eBbD0A",
-    TOKEN_STAKING: process.env.TOKEN_STAKING || "0x58D3E94a4D7C0D3F4B0c03861F7E9d81d71EDC0F",
-    VZUG_TOKEN: process.env.VZUG_TOKEN || "0xB5662993e77513393322A1A59651108CD5eFB787",
+    RPC_URL: process.env.RPC_URL || "https://rpc.zugchain.org",
+    NATIVE_STAKING: process.env.NATIVE_STAKING || "0x50C0B1dFa7B2F60a30016EF73ad68FFCF66A99A9",
+    TOKEN_STAKING: process.env.TOKEN_STAKING || "0xceC2c83d36e285358eA11df34cAe84C125fD581F",
+    VZUG_TOKEN: process.env.VZUG_TOKEN || "0xe6c72abBE82368f6714948D13D2CCdFB40382C12",
     MIN_REWARD_TO_COMPOUND: 0.1,
     PRIVATE_KEY: process.env.DEPLOYER_PRIVATE_KEY || "0x766627b44fc2afc101672a7d34697993bcd91b84c25069d2f48f75b186562da7",
     DB_URL: process.env.DATABASE_URL || 'postgres://blockscout:zugchain_explorer_2024@127.0.0.1:7433/zug_incentive',
-    CONCURRENCY: 50,
-    POLL_INTERVAL: 7200000, // 2 Hours
+    CONCURRENCY: 5,
+    POLL_INTERVAL: 21600000, // 6 Hours
     GAS_BUFFER_RATIO: 2.0,
 };
 
@@ -137,8 +137,8 @@ class NonceManager {
 
 // --- INITIALIZATION ---
 const account = privateKeyToAccount(CONFIG.PRIVATE_KEY.startsWith('0x') ? CONFIG.PRIVATE_KEY : `0x${CONFIG.PRIVATE_KEY}`);
-const publicClient = createPublicClient({ chain: { id: 102219, name: 'ZugChain' }, transport: http(CONFIG.RPC_URL) });
-const walletClient = createWalletClient({ account, chain: { id: 102219, name: 'ZugChain' }, transport: http(CONFIG.RPC_URL) });
+const publicClient = createPublicClient({ chain: { id: 824642, name: 'ZugChain' }, transport: http(CONFIG.RPC_URL) });
+const walletClient = createWalletClient({ account, chain: { id: 824642, name: 'ZugChain' }, transport: http(CONFIG.RPC_URL) });
 const pool = new Pool({ connectionString: CONFIG.DB_URL });
 const nonceManager = new NonceManager();
 

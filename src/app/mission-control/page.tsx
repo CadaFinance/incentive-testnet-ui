@@ -14,7 +14,7 @@ import { TelegramVerifyModal } from '@/components/TelegramVerifyModal';
 import { InviteMilestones } from '@/components/MissionControl/InviteMilestones';
 import { InstitutionalTasks } from '@/components/MissionControl/InstitutionalTasks';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, ChartNoAxesColumn, User } from 'lucide-react';
+import { Activity, ChartNoAxesColumn, User, Origami, Swords, Fingerprint, Crown, Gem, Copy, Zap } from 'lucide-react';
 import { formatAddress } from '@/lib/utils';
 import WalletConnectButton from '@/components/WalletConnectButton';
 import { INSTITUTIONAL_BADGES, getUSDZMultiplier } from '@/lib/badges';
@@ -30,6 +30,17 @@ const formatXP = (num: number): string => {
 
 const formatMobileAddress = (address: string): string => {
     return `${address.slice(0, 4)}...${address.slice(-2)}`;
+};
+
+// Get tier icon component based on tier name
+const getTierIcon = (tier: string, size: number = 14, className: string = '') => {
+    const tierLower = tier?.toLowerCase() || '';
+    if (tierLower.includes('scout')) return <Origami size={size} className={className} />;
+    if (tierLower.includes('vanguard')) return <Swords size={size} className={className} />;
+    if (tierLower.includes('elite')) return <Fingerprint size={size} className={className} />;
+    if (tierLower.includes('legend')) return <Crown size={size} className={className} />;
+    if (tierLower.includes('mythic')) return <Gem size={size} className={className} />;
+    return <Zap size={size} className={className} />;
 };
 
 // Skeleton Component for Instant Perceived Loading
@@ -548,10 +559,82 @@ function MissionControlContent() {
                 )}
             </AnimatePresence>
 
-            <div className="space-y-8 lg:space-y-16">
+            <div className="space-y-4 -mt-8 lg:mt-0re lg:space-y-16">
 
-                {/* Institutional Command Console */}
-                <div className="relative border border-white/5 bg-zinc-950/40 backdrop-blur-xl p-4 lg:p-12 overflow-hidden shadow-2xl">
+                {/* ========== MOBILE LAYOUT ========== */}
+                <div className="lg:hidden space-y-3 -mt-8">
+                    {/* Title */}
+                    <h1 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-4">
+                        MISSION<span className="text-zinc-600">CONTROL.</span>
+                    </h1>
+
+                    {/* Stats Card */}
+                    <div className="bg-zinc-900/60 border border-zinc-700/50 p-4">
+                        {/* Tier Row: Current -> Next */}
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                {getTierIcon(referralInfo?.tier?.current_tier || 'SCOUT', 14, 'text-[#e2ff3d]')}
+                                <span className="text-[11px] font-black text-[#e2ff3d] uppercase">{referralInfo?.tier?.current_tier || 'SCOUT'}</span>
+                                <span className="text-zinc-700 text-xs">—</span>
+                                {getTierIcon(referralInfo?.tier?.next_tier || 'VANGUARD', 12, 'text-zinc-600')}
+                                <span className="text-[11px] font-black text-zinc-600 uppercase">{referralInfo?.tier?.next_tier || 'VANGUARD'}</span>
+                            </div>
+                            <div className="text-xl font-black text-white tabular-nums tracking-tight">
+                                {formatXP(totalPoints || 0)} <span className="text-[10px] text-[#e2ff3d] font-mono">XP</span>
+                            </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="space-y-2">
+                            <div className="h-1 w-full bg-zinc-900 overflow-hidden">
+                                <div
+                                    className="h-full bg-[#e2ff3d]"
+                                    style={{ width: `${referralInfo?.tier?.progress_percent || 0}%` }}
+                                />
+                            </div>
+                            <div className="flex justify-between text-[9px] font-mono text-zinc-500">
+                                <span className="truncate max-w-[60%]">
+                                    {referralInfo?.tier?.next_tier !== 'MAX_LEVEL'
+                                        ? `REQ: ${referralInfo?.tier?.missing_requirements?.replace('More ', '').toUpperCase() || '...'}`
+                                        : 'MAX LEVEL'
+                                    }
+                                </span>
+                                <span className="text-[#e2ff3d]">{Math.floor(referralInfo?.tier?.progress_percent || 0)}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Referral Card */}
+                    <div className="bg-zinc-900/50 border border-zinc-800 p-3">
+                        <div className="flex items-center gap-2">
+                            <div className="flex-1 bg-black/50 border border-zinc-800 px-3 py-2.5">
+                                <span className="font-mono text-[9px] text-zinc-500 truncate block">
+                                    {referralInfo?.code && referralInfo.code !== 'LOADING'
+                                        ? `testnet.zugchain.org/?ref=${referralInfo.code}`
+                                        : 'Loading...'
+                                    }
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    const url = `https://testnet.zugchain.org/?ref=${referralInfo?.code}`;
+                                    navigator.clipboard.writeText(url);
+                                    toast.success('Link copied!');
+                                }}
+                                className="bg-[#e2ff3d] text-black p-2.5 shrink-0"
+                            >
+                                <Copy size={14} />
+                            </button>
+                        </div>
+                        <div className="flex items-center justify-between mt-2 px-1">
+                            <span className="text-[9px] font-mono text-zinc-600">Invites: <span className="text-[#e2ff3d]">{referralInfo?.stats?.total_referrals || 0}</span></span>
+                            <span className="text-[9px] font-mono text-[#e2ff3d]">{referralInfo?.tier?.current_multiplier || '1.0'}x Boost Active</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ========== DESKTOP LAYOUT ========== */}
+                <div className="hidden lg:block relative border border-white/5 bg-zinc-950/40 backdrop-blur-xl p-12 overflow-hidden shadow-2xl">
                     <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
                     <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#e2ff3d]/50" />
@@ -559,11 +642,11 @@ function MissionControlContent() {
                     <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-zinc-800" />
                     <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-zinc-800" />
 
-                    <div className="flex flex-col lg:flex-row justify-between gap-10 lg:gap-12 relative z-10">
+                    <div className="flex flex-row justify-between gap-12 relative z-10">
 
                         {/* Column 01: Protocol Identity */}
-                        <div className="flex-1 space-y-6 lg:space-y-10">
-                            <div className="space-y-4 lg:space-y-6">
+                        <div className="flex-1 space-y-10">
+                            <div className="space-y-6">
                                 <div className="flex items-center gap-4">
                                     <div className={`h-0.5 w-12 ${userProfile?.twitter_id ? 'bg-[#e2ff3d]' : 'bg-red-500/50'}`} />
                                     <span className={`text-[10px] font-mono font-black uppercase tracking-[0.5em] ${userProfile?.twitter_id ? 'text-[#e2ff3d]' : 'text-red-500/50'}`}>
@@ -571,13 +654,13 @@ function MissionControlContent() {
                                     </span>
                                 </div>
 
-                                <h1 className="text-4xl lg:text-8xl font-black text-white uppercase tracking-tighter leading-[0.85]">
+                                <h1 className="text-8xl font-black text-white uppercase tracking-tighter leading-[0.85]">
                                     MISSION<br />
                                     <span className="text-zinc-600 outline-text">CONTROL.</span>
                                 </h1>
                             </div>
 
-                            <div className="hidden lg:flex flex-wrap gap-4 pt-4">
+                            <div className="flex flex-wrap gap-4 pt-4">
                                 <div className="bg-zinc-900/50 border border-white/5 py-3 px-6 text-[#e2ff3d] min-w-[200px]">
                                     <span className="text-[9px] font-mono text-zinc-500 font-bold uppercase tracking-widest block mb-1">Active Invites</span>
                                     <span className="text-xl font-black tabular-nums tracking-tight">{referralInfo?.stats?.total_referrals || 0}</span>
@@ -585,27 +668,27 @@ function MissionControlContent() {
                             </div>
                         </div>
 
-                        {/* Column 02: Performance Stack (Vertical) */}
-                        <div className="w-full lg:w-[420px] space-y-4">
+                        {/* Column 02: Performance Stack */}
+                        <div className="w-[420px] space-y-4">
 
                             {/* XP Yield Module */}
-                            <div className="relative group/card bg-zinc-950 border border-white/10 p-6 lg:p-8 shadow-xl">
+                            <div className="relative group/card bg-zinc-950 border border-white/10 p-8 shadow-xl">
                                 <div className="space-y-6 relative">
-                                    {/* Header: Tier Progression */}
+                                    {/* Header: Tier Progression with Icons */}
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-widest">
                                             <div className="flex items-center gap-2">
+                                                {getTierIcon(referralInfo?.tier?.current_tier || 'SCOUT', 14, 'text-[#e2ff3d]')}
                                                 <span className="text-[#e2ff3d]">{referralInfo?.tier?.current_tier || 'UNRANKED'}</span>
                                                 <div className="h-px w-8 bg-zinc-800" />
+                                                {getTierIcon(referralInfo?.tier?.next_tier || 'VANGUARD', 12, 'text-zinc-600')}
                                                 <span className="text-zinc-600">{referralInfo?.tier?.next_tier || 'MAX'}</span>
                                             </div>
-                                            {/* Multiplier Badge (Moved Here) */}
                                             <div className="px-2 py-0.5 bg-[#e2ff3d]/10 border border-[#e2ff3d]/20 text-[#e2ff3d] text-[9px]">
                                                 {referralInfo?.tier?.current_multiplier || '1.0'}X BOOST
                                             </div>
                                         </div>
 
-                                        {/* Requirements */}
                                         {referralInfo?.tier?.next_tier !== 'MAX_LEVEL' && (
                                             <div className="text-[8px] font-mono text-zinc-500 uppercase tracking-wider pl-1 border-l-2 border-zinc-800">
                                                 REQ: {referralInfo?.tier?.missing_requirements?.replace('More ', '').toUpperCase() || 'SYNCING...'}
@@ -615,7 +698,7 @@ function MissionControlContent() {
 
                                     {/* Main XP Display */}
                                     <div className="flex items-baseline gap-3 py-2">
-                                        <div className={`${(totalPoints || 0) >= 1_000_000 ? 'text-6xl lg:text-7xl' : 'text-7xl lg:text-8xl'} font-black text-white tabular-nums tracking-tighter leading-none transition-all duration-300`}>
+                                        <div className={`${(totalPoints || 0) >= 1_000_000 ? 'text-7xl' : 'text-8xl'} font-black text-white tabular-nums tracking-tighter leading-none transition-all duration-300`}>
                                             {formatXP(totalPoints || 0)}
                                         </div>
                                         <div className="text-lg text-[#e2ff3d] font-black uppercase tracking-widest rotate-[-90deg] origin-bottom-left translate-x-6 -translate-y-2 opacity-50">XP</div>
@@ -627,9 +710,7 @@ function MissionControlContent() {
                                             {referralInfo?.tier?.progress ? (
                                                 <div
                                                     className="h-full bg-[#e2ff3d] shadow-[0_0_10px_rgba(226,255,61,0.5)]"
-                                                    style={{
-                                                        width: `${referralInfo.tier.progress_percent || 0}%`
-                                                    }}
+                                                    style={{ width: `${referralInfo.tier.progress_percent || 0}%` }}
                                                 />
                                             ) : (
                                                 <div className="h-full bg-[#111] w-full" />
@@ -672,14 +753,6 @@ function MissionControlContent() {
                                     </button>
                                 </div>
 
-                                {/* Mobile Stats Column (Only visible on mobile) */}
-                                <div className="flex lg:hidden gap-3 px-1">
-                                    <div className="flex-1 bg-zinc-950/50 border border-white/5 py-3 px-4 text-center">
-                                        <div className="text-[8px] text-zinc-600 font-mono uppercase tracking-widest mb-1">Invites</div>
-                                        <div className="text-xs font-black text-[#e2ff3d] font-mono">{referralInfo?.stats?.total_referrals || 0}</div>
-                                    </div>
-                                </div>
-
                                 <div className="text-[8px] font-mono text-zinc-700 uppercase tracking-widest flex justify-between px-1">
                                     <span>// SECURE_SHARE_AUTH</span>
                                     <span className="text-zinc-600">VALID_NODE</span>
@@ -688,7 +761,8 @@ function MissionControlContent() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6 opacity-30   mt-8">
+                    {/* Network status */}
+                    <div className="flex items-center gap-6 opacity-30 mt-8">
                         <div className="flex items-center gap-2">
                             <div className={`w-1.5 h-1.5 rounded-full ${redisStatus?.connected ? 'bg-[#e2ff3d] animate-pulse' : 'bg-red-500'}`} />
                             <span className="text-[9px] font-mono text-white uppercase tracking-widest">

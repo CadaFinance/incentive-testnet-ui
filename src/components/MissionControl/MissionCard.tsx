@@ -3,6 +3,7 @@ import { useAccount } from 'wagmi';
 import { toast } from 'sonner';
 import { Lock, Zap } from 'lucide-react';
 import { TweetVerifyModal } from './TweetVerifyModal';
+import { XProfileUpdateModal } from './XProfileUpdateModal';
 
 interface MissionCardProps {
     id: number;
@@ -29,6 +30,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
     const [loading, setLoading] = useState(false);
     const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
     const [showTweetVerifyModal, setShowTweetVerifyModal] = useState(false);
+    const [showXProfileModal, setShowXProfileModal] = useState(false);
 
     const isLocked = locked || (requiresVerification && !isUserVerified);
 
@@ -113,8 +115,15 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
 
         // Special handling for dynamic daily tasks (ID < 0)
         // Exclude tweet task state flags (CLICKED/NOT_CLICKED) as they're handled separately below
-        if (id < 0 && verificationLink && !['CLICKED', 'NOT_CLICKED'].includes(verificationLink)) {
+        // Also exclude X_PROFILE_MODAL which is handled by modal
+        if (id < 0 && verificationLink && !['CLICKED', 'NOT_CLICKED', 'X_PROFILE_MODAL'].includes(verificationLink)) {
             window.location.href = verificationLink;
+            return;
+        }
+
+        // Handle X Profile Update Modal
+        if (verificationLink === 'X_PROFILE_MODAL') {
+            setShowXProfileModal(true);
             return;
         }
 
@@ -186,95 +195,98 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
         }
     };
 
+    // Get user-friendly locked reason
+    const getLockedReason = () => {
+        if (lockedMessage?.includes('TELEGRAM')) return 'Complete Telegram verification first';
+        if (lockedMessage?.includes('DISCORD')) return 'Complete Discord verification first';
+        if (lockedMessage?.includes('SERVER')) return 'Join Discord server first';
+        if (lockedMessage?.includes('X') || lockedMessage?.includes('TWITTER')) return 'Connect your X account first';
+        if (requiresVerification && !isUserVerified) return 'Connect your X account first';
+        return 'Complete previous tasks first';
+    };
+
     return (
         <>
             <div
                 onClick={(!isCompleted && !isLocked) || id === -103 ? handleAction : undefined}
                 className={`
-                    group relative border p-4 lg:p-6 transition-all duration-300 overflow-hidden
+                    group relative border transition-all duration-300 overflow-hidden
                     ${isCompleted && id !== -103
-                        ? 'bg-[#060606] border-white/[0.03] opacity-40 cursor-not-allowed'
+                        ? 'bg-[#050505] border-zinc-800/50 opacity-30 cursor-not-allowed grayscale'
                         : isLocked && id !== -103
-                            ? 'bg-[#0a0a0a] border-white/5 cursor-not-allowed filter grayscale opacity-70'
-                            : 'bg-[#080808] border-[#e2ff3d]/30 hover:border-[#e2ff3d]/50 hover:bg-[#e2ff3d]/[0.02] cursor-pointer shadow-[0_0_30px_rgba(226,255,61,0.08)]'
+                            ? 'bg-[#0a0a0a] border-zinc-800/50 cursor-not-allowed'
+                            : 'bg-[#0a0a0a] border-zinc-800 hover:border-[#e2ff3d]/40 cursor-pointer hover:shadow-[0_0_40px_rgba(226,255,61,0.06)]'
                     }
                 `}
             >
-                {/* Locked Watermark */}
-                {isLocked && (
-                    <div className="absolute -right-4 -bottom-4 opacity-[0.03] pointer-events-none rotate-12">
-                        <Lock size={120} strokeWidth={1} />
-                    </div>
-                )}
-
-                {/* Locked Pattern Overlay */}
-                {isLocked && (
-                    <div
-                        className="absolute inset-0 opacity-[0.02] pointer-events-none"
-                        style={{
-                            backgroundImage: `linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 50%, #ffffff 50%, #ffffff 75%, transparent 75%, transparent)`,
-                            backgroundSize: '4px 4px'
-                        }}
-                    />
-                )}
-
-                {/* Horizontal Line Indicator for Premium feel */}
+                {/* Top accent line - only for active cards */}
                 {!isCompleted && !isLocked && (
-                    <>
-                        <div className="absolute inset-0 bg-[#e2ff3d]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#e2ff3d] to-transparent animate-pulse" />
-                    </>
+                    <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#e2ff3d]/50 to-transparent" />
                 )}
 
-                <div className="flex justify-between items-center mb-3 relative z-10">
-                    <span className={`
-                        text-[8px] lg:text-[9px] font-mono uppercase tracking-[0.2em] px-2 py-0.5 border 
-                        ${isLocked
-                            ? 'border-red-500/20 text-red-500/50 bg-red-500/5'
-                            : 'border-[#e2ff3d]/20 text-[#e2ff3d] bg-[#e2ff3d]/10 animate-pulse'
-                        }
-                    `}>
-                        {isLocked ? 'LOCKED' : 'PROTOCOL_REQ'}
-                    </span>
+                {/* Card Content - Compact on mobile */}
+                <div className="p-3 lg:p-5">
+                    {/* Mobile: Inline header | Desktop: Separate row */}
+                    <div className="flex items-center justify-between gap-2 mb-2 lg:mb-3">
+                        <div className="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
+                            {/* Status Badge - Smaller on mobile */}
+                            <span className={`
+                                text-[7px] lg:text-[9px] font-mono uppercase tracking-wider px-1.5 lg:px-2 py-0.5 border shrink-0
+                                ${isLocked
+                                    ? 'border-zinc-700/60 text-zinc-500 bg-zinc-800/40'
+                                    : 'border-[#e2ff3d]/30 text-[#e2ff3d] bg-[#e2ff3d]/[0.08]'
+                                }
+                            `}>
+                                {isLocked ? 'LOCKED' : 'ACTIVE'}
+                            </span>
 
-                    <div className="flex items-center gap-1.5">
-                        <span className={`text-[10px] font-mono ${isLocked ? 'text-zinc-700' : 'text-zinc-600'}`}>REWARD:</span>
-                        <span className={`text-lg lg:text-xl font-black font-mono flex items-center gap-1 ${isLocked ? 'text-zinc-500' : 'text-white'}`}>
-                            <span>+{Math.floor(reward * multiplier)}</span>
-                            {multiplier > 1 && !isLocked && <Zap size={10} className="text-[#e2ff3d] animate-pulse" />}
-                        </span>
+                            {/* Title - Inline on mobile */}
+                            <h3 className={`text-sm lg:text-lg font-bold uppercase tracking-tight truncate ${isLocked ? 'text-zinc-500' : 'text-white'}`}>
+                                {title}
+                            </h3>
+                        </div>
+
+                        {/* Reward - Compact */}
+                        <div className="flex items-center gap-1 shrink-0">
+                            <span className={`text-base lg:text-xl font-black tracking-tight ${isLocked ? 'text-zinc-600' : 'text-[#e2ff3d]'}`}>
+                                +{Math.floor(reward * multiplier)}
+                            </span>
+                            {multiplier > 1 && !isLocked && (
+                                <Zap size={10} className="text-[#e2ff3d]" />
+                            )}
+                        </div>
                     </div>
+
+                    {/* Description - Smaller on mobile */}
+                    <p className={`font-mono text-[10px] lg:text-xs leading-relaxed line-clamp-2 ${isLocked ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                        {description}
+                    </p>
                 </div>
 
-                <h3 className={`text-base lg:text-lg font-bold uppercase tracking-tight mb-1.5 relative z-10 ${isCompleted ? 'text-gray-800' : isLocked ? 'text-zinc-400' : 'text-white'}`}>
-                    {title}
-                </h3>
-
-                <p className={`font-mono text-[10px] lg:text-xs leading-relaxed max-w-[90%] relative z-10 ${isCompleted ? 'text-zinc-900' : isLocked ? 'text-zinc-600' : 'text-zinc-500'}`}>
-                    {description}
-                </p>
-
-                {/* Action Area: Minimalist footer */}
-                <div className="mt-5 pt-4 border-t border-white/[0.03] relative z-10">
+                {/* Footer - Ultra compact on mobile */}
+                <div className={`px-3 lg:px-5 py-2 lg:py-3 border-t ${isLocked ? 'border-zinc-800/50 bg-zinc-900/30' : 'border-zinc-800/50 bg-zinc-900/20'}`}>
                     {isLocked ? (
-                        <div className="flex items-center justify-between bg-red-500/[0.03] px-3 py-2 border border-red-500/10">
-                            <span className="text-red-500/40 text-[9px] font-black uppercase tracking-[0.15em] font-mono">
-                                {lockedMessage}
+                        <div className="flex items-center gap-2">
+                            <Lock size={12} className="text-zinc-600 shrink-0" />
+                            <span className="text-zinc-500 text-[9px] lg:text-[10px] font-mono truncate">
+                                {getLockedReason()}
                             </span>
-                            <Lock size={12} className="text-red-500/40" />
                         </div>
                     ) : loading ? (
-                        <div className="flex items-center gap-2 text-[#e2ff3d] text-[9px] font-mono">
-                            <div className="w-3 h-3 border-t-2 border-[#e2ff3d] border-r-2 border-transparent rounded-full animate-spin" />
-                            <span className="animate-pulse tracking-widest uppercase">Validating...</span>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 border-2 border-[#e2ff3d]/30 border-t-[#e2ff3d] rounded-full animate-spin" />
+                            <span className="text-[#e2ff3d] text-[9px] lg:text-[10px] font-mono uppercase">
+                                Processing...
+                            </span>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-between text-[#e2ff3d]/60 text-[9px] font-bold uppercase tracking-[0.2em] group-hover:text-[#e2ff3d] transition-colors">
-                            <span className="flex items-center gap-2">
-                                <span className="hidden lg:inline">// INIT_PROTOCOL_INTERFACE</span>
-                                <span className="lg:hidden">// START_TASK</span>
+                        <div className="flex items-center justify-between">
+                            <span className="text-zinc-500 text-[9px] lg:text-[10px] font-mono uppercase group-hover:text-[#e2ff3d] transition-colors">
+                                Start Task
                             </span>
-                            <span className="text-lg leading-none transform group-hover:translate-x-1 transition-transform">›</span>
+                            <span className="text-[#e2ff3d]/50 text-sm group-hover:text-[#e2ff3d] group-hover:translate-x-0.5 transition-all">
+                                →
+                            </span>
                         </div>
                     )}
                 </div>
@@ -288,6 +300,17 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
                 referralCode={referralCode}
                 onVerified={() => {
                     setShowTweetVerifyModal(false);
+                    onComplete();
+                }}
+            />
+
+            {/* X Profile Update Modal */}
+            <XProfileUpdateModal
+                open={showXProfileModal}
+                onClose={() => setShowXProfileModal(false)}
+                walletAddress={address || ''}
+                onVerified={() => {
+                    setShowXProfileModal(false);
                     onComplete();
                 }}
             />

@@ -35,99 +35,102 @@ export function InstitutionalTaskCard({ badge, currentAmount, hasBadge, onClaim 
     };
 
     return (
-        <div className={`
-            relative p-6 bg-[#050505] border transition-all duration-300 overflow-hidden group
-            ${isCompleted
-                ? 'border-[#e2ff3d] hover:bg-[#e2ff3d]/[0.02] shadow-[0_0_20px_rgba(226,255,61,0.1)]'
-                : 'border-white/10 hover:border-white/20'
-            }
-        `}>
-            {/* Horizontal Line Indicator */}
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#e2ff3d]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div
+            onClick={handleClaim}
+            className={`
+                group relative border transition-all duration-300 overflow-hidden cursor-pointer
+                ${isCompleted
+                    ? 'bg-[#0a0a0a] border-[#e2ff3d]/50 hover:border-[#e2ff3d] hover:shadow-[0_0_30px_rgba(226,255,61,0.1)]'
+                    : 'bg-[#0a0a0a] border-zinc-800 hover:border-[#e2ff3d]/40 hover:shadow-[0_0_40px_rgba(226,255,61,0.06)]'
+                }
+            `}
+        >
+            {/* Top accent line */}
+            <div className={`absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent ${isCompleted ? 'via-[#e2ff3d]' : 'via-[#e2ff3d]/50'} to-transparent`} />
 
-            {/* Header: Status & Reward */}
-            <div className="flex justify-between items-center mb-4 relative z-10">
-                <span className={`
-                    text-[9px] font-mono uppercase tracking-[0.2em] px-2 py-0.5 border
-                    ${isCompleted
-                        ? 'bg-[#e2ff3d] text-black border-[#e2ff3d] font-black animate-pulse'
-                        : 'bg-white/5 text-gray-400 border-white/10'
-                    }
-                `}>
-                    {isCompleted ? 'CLAIM_READY' : 'IN_PROGRESS'}
-                </span>
+            {/* Card Content */}
+            <div className="p-3 lg:p-5">
+                {/* Row 1: Status Badge + Reward */}
+                <div className="flex items-center justify-between gap-2 mb-3">
+                    {/* Status Badge */}
+                    <span className={`
+                        text-[7px] lg:text-[9px] font-mono uppercase tracking-wider px-1.5 lg:px-2 py-0.5 border shrink-0
+                        ${isCompleted
+                            ? 'border-[#e2ff3d] text-black bg-[#e2ff3d] font-black animate-pulse'
+                            : 'border-[#e2ff3d]/30 text-[#e2ff3d] bg-[#e2ff3d]/[0.08]'
+                        }
+                    `}>
+                        {isCompleted ? 'CLAIM_READY' : 'IN_PROGRESS'}
+                    </span>
 
-                <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-mono text-zinc-600">REWARD:</span>
-                    <span className="text-sm font-black text-white flex items-center gap-1">
+                    {/* Reward Info */}
+                    <div className="flex items-center gap-1.5 text-xs">
+                        <span className="text-zinc-600 font-mono text-[9px]">REWARD:</span>
                         <span className="text-[#e2ff3d]">{badge.icon}</span>
-                        {badge.name}
-                        <span className="text-zinc-600">|</span>
-                        +{badge.rewardPoints}
-                        <Zap size={10} className="text-[#e2ff3d]" />
-                    </span>
-                </div>
-            </div>
-
-            {/* Main Title - Task Action */}
-            <div className="flex items-center gap-3 mb-2 relative z-10">
-                <h3 className="text-lg font-black uppercase text-white tracking-tight">
-                    {badge.taskTitle}
-                </h3>
-                {badge.bonusText && (
-                    <span className="text-[8px] font-black uppercase px-2 py-0.5 bg-[#e2ff3d] text-black border border-[#e2ff3d] tracking-wider animate-pulse shadow-[0_0_12px_rgba(226,255,61,0.4)]">
-                        {badge.bonusText}
-                    </span>
-                )}
-            </div>
-
-            {/* Description */}
-            <p className="font-mono text-[10px] text-zinc-500 mb-6 max-w-[90%] relative z-10">
-                {badge.description}
-            </p>
-
-            {/* Progress Bar Section */}
-            <div className="relative z-10 space-y-2 mb-6">
-                <div className="flex justify-between text-[9px] font-mono uppercase tracking-wider">
-                    <span className="text-zinc-600">Completion Status</span>
-                    <span className={isCompleted ? "text-[#e2ff3d] font-bold" : "text-white"}>
-                        {Math.floor(currentAmount).toLocaleString()} / {badge.targetAmount.toLocaleString()}
-                    </span>
-                </div>
-                <div className="h-1 w-full bg-zinc-900 rounded-none overflow-hidden">
-                    <div
-                        className={`h-full transition-all duration-1000 ${isCompleted ? 'bg-[#e2ff3d] shadow-[0_0_10px_#e2ff3d]' : 'bg-zinc-700'}`}
-                        style={{ width: `${progress}%` }}
-                    />
-                </div>
-            </div>
-
-            {/* Action Button */}
-            <button
-                onClick={handleClaim}
-                disabled={loading}
-                className={`
-                    w-full py-3 relative z-10 text-[10px] font-black uppercase tracking-[0.2em] border transition-all
-                    ${isCompleted
-                        ? 'bg-[#e2ff3d] border-[#e2ff3d] text-black hover:bg-white hover:border-white shadow-[0_0_15px_rgba(226,255,61,0.2)]'
-                        : 'bg-transparent border-white/10 text-zinc-500 hover:text-white hover:border-white/30'
-                    }
-                `}
-            >
-                {loading ? (
-                    <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        <span>PROCESSING...</span>
+                        <span className="font-bold text-white">{badge.name}</span>
+                        <span className="text-zinc-700">|</span>
+                        <span className="font-black text-[#e2ff3d] flex items-center gap-0.5">
+                            +{badge.rewardPoints}
+                            <Zap size={10} />
+                        </span>
                     </div>
-                ) : isCompleted ? (
-                    "CLAIM_REWARD_PACKAGE"
-                ) : (
-                    <div className="flex items-center justify-center gap-2">
-                        <span>{badge.actionText}</span>
-                        <ExternalLink size={10} className="opacity-60" />
+                </div>
+
+                {/* Row 2: Title + Bonus Badge */}
+                <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg lg:text-xl font-black uppercase tracking-tight text-white">
+                        {badge.taskTitle}
+                    </h3>
+                    {badge.bonusText && (
+                        <span className="text-[7px] lg:text-[8px] font-black uppercase px-1.5 py-0.5 bg-[#e2ff3d] text-black tracking-wider animate-pulse shrink-0">
+                            {badge.bonusText}
+                        </span>
+                    )}
+                </div>
+
+                {/* Row 3: Description */}
+                <p className="font-mono text-[10px] lg:text-xs leading-relaxed text-zinc-400">
+                    {badge.description}
+                </p>
+            </div>
+
+            {/* Footer with Progress - Ultra compact on mobile */}
+            <div className="px-3 lg:px-5 py-2 lg:py-3 border-t border-zinc-800/50 bg-zinc-900/20">
+                {/* Progress Info */}
+                <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {/* Progress Bar - Inline */}
+                        <div className="h-1 flex-1 bg-zinc-800 overflow-hidden max-w-[100px] lg:max-w-[150px]">
+                            <div
+                                className={`h-full transition-all duration-500 ${isCompleted ? 'bg-[#e2ff3d] shadow-[0_0_10px_#e2ff3d]' : 'bg-zinc-600'}`}
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+                        <span className={`text-[9px] lg:text-[10px] font-mono ${isCompleted ? 'text-[#e2ff3d]' : 'text-zinc-500'}`}>
+                            {Math.floor(currentAmount).toLocaleString()} / {badge.targetAmount.toLocaleString()}
+                        </span>
                     </div>
-                )}
-            </button>
+
+                    {/* Action Text */}
+                    {loading ? (
+                        <div className="flex items-center gap-2">
+                            <Loader2 className="w-3 h-3 animate-spin text-[#e2ff3d]" />
+                            <span className="text-[#e2ff3d] text-[9px] lg:text-[10px] font-mono uppercase">
+                                Processing...
+                            </span>
+                        </div>
+                    ) : isCompleted ? (
+                        <span className="text-[#e2ff3d] text-[9px] lg:text-[10px] font-mono font-bold uppercase">
+                            CLAIM NOW →
+                        </span>
+                    ) : (
+                        <div className="flex items-center gap-1 text-zinc-500 text-[9px] lg:text-[10px] font-mono uppercase">
+                            <span>{badge.actionText}</span>
+                            <ExternalLink size={10} className="opacity-60" />
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
