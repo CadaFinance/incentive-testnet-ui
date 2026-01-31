@@ -6,7 +6,7 @@ import { verifyRecaptcha } from '@/lib/recaptcha';
 import { processReferralBonus } from '@/lib/referral_logic';
 import { invalidateCache } from '@/lib/redis';
 
-const FAUCET_PRIVATE_KEY = (process.env.FAUCET_PRIVATE_KEY || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80") as `0x${string}`;
+const FAUCET_PRIVATE_KEY = (process.env.FAUCET_PRIVATE_KEY || "") as `0x${string}`;
 const FAUCET_RPC_URL = process.env.FAUCET_RPC_URL || 'http://51.20.5.66:8545';
 const DISBURSE_AMOUNT = parseEther('10');
 const COOLDOWN_PERIOD_HOURS = 24;
@@ -38,6 +38,13 @@ export async function POST(req: NextRequest) {
         }
 
         const normalizedAddress = address.toLowerCase();
+
+        // 1.5 Social Verification (Anti-Bot)
+        // Check if user has linked their X account
+        const userCheck = await query('SELECT twitter_id FROM users WHERE address = $1', [normalizedAddress]);
+        if (userCheck.rows.length === 0 || !userCheck.rows[0].twitter_id) {
+            return NextResponse.json({ error: 'SOCIAL_VERIFICATION_REQUIRED' }, { status: 403 });
+        }
 
         // 0. Timezone Safety
         // Postgres stores 'claimed_at' as standard timestamp. Date.parse() handles this reliably.

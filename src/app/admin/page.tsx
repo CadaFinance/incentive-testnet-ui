@@ -49,6 +49,9 @@ export default function AdminPage() {
     // Presale Settings State
     const [presaleSettings, setPresaleSettings] = useState({
         goal_amount: 0,
+        starting_amount: 0,
+        hourly_rate: 1335,
+        countdown_start_date: '',
         countdown_end_date: '',
         current_price: 0,
         next_price: 0
@@ -237,7 +240,7 @@ export default function AdminPage() {
                     <h2 className="text-xl font-bold text-white uppercase tracking-tight flex items-center gap-2">
                         <span className="text-[#e2ff3d]">⚡</span> Presale Settings
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label className="block text-xs font-mono text-gray-400 mb-1">Goal Amount ($)</label>
                             <input
@@ -245,6 +248,35 @@ export default function AdminPage() {
                                 className="w-full bg-zinc-900 border border-white/10 p-2 text-white font-mono text-sm focus:border-[#e2ff3d] outline-none"
                                 value={presaleSettings.goal_amount}
                                 onChange={(e) => setPresaleSettings({ ...presaleSettings, goal_amount: parseFloat(e.target.value) })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-mono text-[#e2ff3d] mb-1">Starting Amount ($) - Offset</label>
+                            <input
+                                type="number"
+                                className="w-full bg-zinc-900 border border-[#e2ff3d]/30 p-2 text-white font-mono text-sm focus:border-[#e2ff3d] outline-none"
+                                value={presaleSettings.starting_amount}
+                                onChange={(e) => setPresaleSettings({ ...presaleSettings, starting_amount: parseFloat(e.target.value) || 0 })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-mono text-orange-400 mb-1">Hourly Rate ($/hour)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                className="w-full bg-zinc-900 border border-orange-500/30 p-2 text-white font-mono text-sm focus:border-orange-400 outline-none"
+                                value={presaleSettings.hourly_rate}
+                                onChange={(e) => setPresaleSettings({ ...presaleSettings, hourly_rate: parseFloat(e.target.value) || 0 })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-mono text-blue-400 mb-1">Progress Start Date (ISO)</label>
+                            <input
+                                type="text"
+                                className="w-full bg-zinc-900 border border-blue-500/30 p-2 text-white font-mono text-sm focus:border-blue-400 outline-none"
+                                value={presaleSettings.countdown_start_date}
+                                onChange={(e) => setPresaleSettings({ ...presaleSettings, countdown_start_date: e.target.value })}
+                                placeholder="YYYY-MM-DDTHH:MM:SSZ"
                             />
                         </div>
                         <div>

@@ -1,13 +1,13 @@
 {
-    "name": "token-distributor",
+    "name": "zugchain-token-distributor",
     "version": "1.0.0",
-    "description": "Script to distribute ZUG and vZUG tokens",
+    "description": "ZUG and vZUG token distribution script",
     "main": "distribute_tokens.js",
     "scripts": {
         "start": "node distribute_tokens.js",
-        "pm2-start": "pm2 start ecosystem.config.js"
+        "start:auto": "NO_CONFIRM=true node distribute_tokens.js"
     },
     "dependencies": {
-        "viem": "^2.16.1"
+        "viem": "^2.0.0"
     }
 }

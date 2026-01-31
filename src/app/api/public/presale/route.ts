@@ -6,8 +6,11 @@ export async function GET(req: NextRequest) {
         const result = await db.query('SELECT * FROM presale_settings WHERE id = 1');
 
         let data = {
-            goal_amount: 4202850.00,
-            countdown_end_date: '2026-01-05T23:59:59Z',
+            goal_amount: 7000000.00,
+            starting_amount: 5500000.00,
+            hourly_rate: 1335.00,
+            countdown_start_date: '2026-01-25T00:00:00Z',
+            countdown_end_date: '2026-05-01T23:59:59Z',
             current_price: 0.00048,
             next_price: 0.00096
         };

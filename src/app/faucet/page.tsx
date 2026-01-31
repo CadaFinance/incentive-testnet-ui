@@ -129,6 +129,12 @@ function FaucetContent() {
                     toast.error('Access Denied', {
                         description: `Wait ${Math.floor(data.timeLeft / 3600)}h before next claim.`,
                     })
+                } else if (data.error === 'SOCIAL_VERIFICATION_REQUIRED') {
+                    addLog('ERROR: SOCIAL_VERIF_MISSING')
+                    toast.error('Doğrulama Gerekli', {
+                        description: 'Sistemde yaşanan yoğun bot saldırıları nedeniyle, güvenliğiniz için X hesabınızı bağlamanız gerekmektedir.',
+                        duration: 5000,
+                    })
                 } else {
                     addLog(`ERROR: ${data.error}`)
                     toast.error('Protocol Error', { description: data.error })

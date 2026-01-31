@@ -7,7 +7,7 @@ const { defineChain } = require('viem');
 // --- CONFIGURATION ---
 const RPC_URL = "http://127.0.0.1:8545";
 const PRIVATE_KEY = "0x766627b44fc2afc101672a7d34697993bcd91b84c25069d2f48f75b186562da7";
-const VZUG_ADDRESS = "0xe6c72abBE82368f6714948D13D2CCdFB40382C12";
+const VZUG_ADDRESS = "0xc556cA3E46d96AE2474A65b8779a2d6db7b46332";
 
 // Process settings
 const CONCURRENCY_LIMIT = 10; // Moderate concurrency to not overload the chain
@@ -138,12 +138,12 @@ function loadRecipients(filePath) {
                 const amountVal = parseFloat(amountRaw);
 
                 // Validation: Must be > 10 and a valid number
-                if (isValidAddress(address) && !BLACKLIST.has(address) && !isNaN(amountVal) && amountVal > 10) {
+                if (isValidAddress(address) && !BLACKLIST.has(address) && !isNaN(amountVal) && amountVal > 50) {
                     // Convert to fixed string to avoid scientific notation (e.g. 1e+21)
                     // limit to 18 decimals which is standard for EVM
                     const amountStr = amountVal.toLocaleString('fullwide', { useGrouping: false, maximumFractionDigits: 18 });
                     recipients.push({ address, amount: amountStr });
-                } else if (amountVal <= 10) {
+                } else if (amountVal <= 50) {
                     // console.log(`Skipping low balance: ${address} (${amountVal})`); 
                 }
             }
@@ -291,10 +291,10 @@ async function main() {
 
     console.log('Starting...');
 
-    // Process ZUG
-    if (zugRecipients.length > 0) {
-        await processBatch(zugRecipients, 'ZUG');
-    }
+    // Process ZUG - DISABLED (only sending vZUG)
+    // if (zugRecipients.length > 0) {
+    //     await processBatch(zugRecipients, 'ZUG');
+    // }
 
     // Process vZUG
     if (vzugRecipients.length > 0) {
