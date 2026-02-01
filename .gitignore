@@ -35,6 +35,7 @@ yarn-error.log*
 .env
 ubuntu.env
 .env.local
+ubuntuNEW.env
 
 
 # scripts folder (contains sensitive setup scripts)

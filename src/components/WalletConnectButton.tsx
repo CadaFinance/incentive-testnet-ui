@@ -17,20 +17,7 @@ export default function WalletConnectButton({ fullWidth = false }: WalletConnect
     const { address, isConnected, chainId } = useAccount()
     const { disconnect } = useDisconnect()
     const { switchChainAsync } = useSwitchChain()
-    const { data: balance, isError, error, isLoading } = useBalance({ address })
-
-    useEffect(() => {
-        console.log('Wallet Balance Debug:', {
-            address,
-            chainId,
-            contractChainId: CHAIN_ID,
-            balance: balance?.formatted,
-            symbol: balance?.symbol,
-            isError,
-            error,
-            isLoading
-        })
-    }, [address, balance, isError, error, isLoading, chainId])
+    const { data: balance } = useBalance({ address })
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
