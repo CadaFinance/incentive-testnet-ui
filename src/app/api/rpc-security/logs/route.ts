@@ -28,6 +28,8 @@ export async function GET(req: NextRequest) {
             query += ` WHERE status_code IN (403, 429)`;
         } else if (statusFilter === 'error') {
             query += ` WHERE status_code >= 400`;
+        } else if (statusFilter === 'post') {
+            query += ` WHERE method = 'POST'`;
         }
 
         query += ` ORDER BY request_time DESC LIMIT $1`;

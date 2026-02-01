@@ -36,25 +36,28 @@ export async function GET(req: NextRequest) {
       FROM rpc_security.active_bans
     `);
 
-        // Fetch request stats (last 5 minutes)
+        // Fetch request stats (last 5 minutes) - Combined Detailed + Aggregated
         const requestStatsResult = await queryRpcDb<{ count: string | number }>(`
-      SELECT COUNT(*) as count
-      FROM rpc_security.request_log
-      WHERE request_time > NOW() - INTERVAL '5 minutes'
+      SELECT (
+        (SELECT COUNT(*) FROM rpc_security.request_log WHERE request_time > NOW() - INTERVAL '5 minutes') +
+        (SELECT COALESCE(SUM(request_count), 0) FROM rpc_security.aggregated_stats WHERE window_start > NOW() - INTERVAL '5 minutes')
+      ) as count
     `);
 
-        // Calculate current rate (requests per second in last 10 seconds)
+        // Calculate current rate (last 10 seconds)
         const currentRateResult = await queryRpcDb<{ rate: number }>(`
-      SELECT COUNT(*)::numeric / 10 as rate
-      FROM rpc_security.request_log
-      WHERE request_time > NOW() - INTERVAL '10 seconds'
+      SELECT (
+        (SELECT COUNT(*)::numeric FROM rpc_security.request_log WHERE request_time > NOW() - INTERVAL '10 seconds') +
+        (SELECT COALESCE(SUM(request_count), 0)::numeric FROM rpc_security.aggregated_stats WHERE window_start > NOW() - INTERVAL '10 seconds')
+      ) / 10 as rate
     `);
 
-        // Get previous rate for trend
+        // Get previous rate (10-20 seconds ago)
         const previousRateResult = await queryRpcDb<{ rate: number }>(`
-      SELECT COUNT(*)::numeric / 10 as rate
-      FROM rpc_security.request_log
-      WHERE request_time BETWEEN NOW() - INTERVAL '20 seconds' AND NOW() - INTERVAL '10 seconds'
+      SELECT (
+        (SELECT COUNT(*)::numeric FROM rpc_security.request_log WHERE request_time BETWEEN NOW() - INTERVAL '20 seconds' AND NOW() - INTERVAL '10 seconds') +
+        (SELECT COALESCE(SUM(request_count), 0)::numeric FROM rpc_security.aggregated_stats WHERE window_start BETWEEN NOW() - INTERVAL '20 seconds' AND NOW() - INTERVAL '10 seconds')
+      ) / 10 as rate
     `);
 
         const currentRate = parseFloat(String(currentRateResult[0]?.rate || '0'));

@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/MissionControl/DashboardLayout';
 import { RequestLog, BanEntry } from '@/lib/rpc-db';
 import { formatDistanceToNow } from 'date-fns';
+import { RpcDebugTracker } from '@/components/RpcDebugTracker';
 
 const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS?.toLowerCase();
 
@@ -24,12 +25,13 @@ export default function RPCSecurityDashboard() {
     const [logs, setLogs] = useState<RequestLog[]>([]);
     const [bans, setBans] = useState<BanEntry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'overview' | 'logs' | 'bans' | 'analysis'>('overview');
-    const [logFilter, setLogFilter] = useState<'all' | 'blocked' | 'error'>('all');
+    const [activeTab, setActiveTab] = useState<'overview' | 'logs' | 'bans' | 'analysis' | 'permanent'>('overview');
+    const [logFilter, setLogFilter] = useState<'all' | 'blocked' | 'post'>('all');
 
     // Analysis State
     const [topAbusers, setTopAbusers] = useState<any[]>([]);
     const [ipCountries, setIpCountries] = useState<Record<string, string>>({});
+    const [permBans, setPermBans] = useState<BanEntry[]>([]);
 
     // Manual Ban State
     const [manualBanTarget, setManualBanTarget] = useState('');
@@ -54,6 +56,12 @@ export default function RPCSecurityDashboard() {
             // Fetch Bans
             const bansRes = await fetch('/api/rpc-security/bans', { headers });
             if (bansRes.ok) setBans(await bansRes.json());
+
+            // Fetch Permanent Bans
+            if (activeTab === 'permanent') {
+                const permRes = await fetch('/api/rpc-security/permanent-bans', { headers });
+                if (permRes.ok) setPermBans(await permRes.json());
+            }
 
             // Fetch Analysis (Top Abusers)
             if (activeTab === 'analysis') {
@@ -156,6 +164,7 @@ export default function RPCSecurityDashboard() {
                             { id: 'analysis', label: 'Analysis' },
                             { id: 'logs', label: 'Logs' },
                             { id: 'bans', label: 'Bans' },
+                            { id: 'permanent', label: 'Permanent' },
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -304,7 +313,7 @@ export default function RPCSecurityDashboard() {
                             {[
                                 { id: 'all', label: 'All' },
                                 { id: 'blocked', label: 'Blocked' },
-                                { id: 'error', label: 'Errors' },
+                                { id: 'post', label: 'Post Reqs' },
                             ].map((filter) => (
                                 <button
                                     key={filter.id}
@@ -337,7 +346,7 @@ export default function RPCSecurityDashboard() {
                                             <td className="p-3 text-zinc-500 whitespace-nowrap">
                                                 {new Date(log.request_time).toLocaleTimeString()}
                                             </td>
-                                            <td className="p-3 text-white">
+                                            <td className={`p-3 font-medium ${log.method === 'POST' ? 'text-green-500' : 'text-white'}`}>
                                                 {log.method}
                                             </td>
                                             <td className="p-3">
@@ -421,7 +430,58 @@ export default function RPCSecurityDashboard() {
                         )}
                     </div>
                 )}
+
+                {/* PERMANENT BANS TAB */}
+                {activeTab === 'permanent' && (
+                    <div className="border border-red-500/20 rounded-lg overflow-hidden bg-black animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="p-4 border-b border-red-500/20 flex justify-between items-center bg-red-500/5">
+                            <h3 className="text-red-400 text-sm font-medium flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                PREMANENTLY BANNED
+                            </h3>
+                            <div className="text-xs text-red-500/50">Recidivist Attackers</div>
+                        </div>
+                        {permBans.length === 0 ? (
+                            <div className="p-12 text-center text-zinc-600 text-sm">No permanent bans recorded</div>
+                        ) : (
+                            <table className="w-full text-left text-xs">
+                                <thead className="bg-zinc-900/50 text-zinc-500">
+                                    <tr>
+                                        <th className="p-4 font-medium">Type</th>
+                                        <th className="p-4 font-medium">Target</th>
+                                        <th className="p-4 font-medium">Reason</th>
+                                        <th className="p-4 font-medium">Banned</th>
+                                        <th className="p-4 font-medium text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-zinc-900 font-mono">
+                                    {permBans.map((ban, i) => (
+                                        <tr key={i} className="hover:bg-red-500/5 transition-colors">
+                                            <td className="p-4 text-zinc-400 uppercase">
+                                                {ban.ban_type}
+                                            </td>
+                                            <td className="p-4 text-white font-medium">{ban.target}</td>
+                                            <td className="p-4 text-zinc-500">{ban.reason}</td>
+                                            <td className="p-4 text-zinc-500">
+                                                {formatDistanceToNow(new Date(ban.banned_at), { addSuffix: true })}
+                                            </td>
+                                            <td className="p-4 text-right">
+                                                <button
+                                                    onClick={() => handleAction('unban', ban.ban_type, ban.target)}
+                                                    className="text-red-500 hover:text-red-400 underline transition-colors"
+                                                >
+                                                    Unban (Emergency)
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                )}
             </div>
+            <RpcDebugTracker />
         </DashboardLayout>
     );
 }
@@ -450,3 +510,4 @@ function MinimalBadge({ code }: { code: number }) {
     }
     return <span className="text-zinc-500">{code}</span>;
 }
+

@@ -13,11 +13,27 @@ export const zugChain = {
   nativeCurrency: { name: 'Zug', symbol: 'ZUG', decimals: 18 },
   rpcUrls: {
     default: { http: [RPC_URL] },
+    public: { http: [RPC_URL] },
   },
   blockExplorers: {
     default: { name: 'ZugExplorer', url: EXPLORER_URL },
   },
 } as const
+
+// Safe interceptor for the UI tracker
+if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  window.fetch = function (...args) {
+    const url = args[0] instanceof Request ? args[0].url : String(args[0]);
+    if (url.includes('rpc.zugchain.org')) {
+      window.dispatchEvent(new CustomEvent('rpc-request', {
+        detail: { url, timestamp: Date.now() }
+      }));
+    }
+    // Use apply to ensure 'fetch' is called with the correct 'window' context
+    return originalFetch.apply(window, args);
+  };
+}
 
 export const config = createConfig({
   chains: [zugChain],

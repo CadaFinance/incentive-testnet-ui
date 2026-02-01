@@ -1,6 +1,6 @@
 {
   "vZUG": {
-    "address": "0xdb0840fb08FC71B59fB4c767495BC1C0bE621808",
+    "address": "0x440d985a4a6379ab43178Fd2670455A106272928",
     "abi": [
       {
         "inputs": [
@@ -288,7 +288,7 @@
     ]
   },
   "native_v4": {
-    "address": "0x3B996c1F73187D90648F85226d1BAaa7D5b5dC1A",
+    "address": "0x637C390f08531EE0Cf52Fc7405469939339499D5",
     "abi": [
       {
         "inputs": [
@@ -1212,7 +1212,7 @@
     ]
   },
   "token_v4": {
-    "address": "0x77ebD389a74F96951BCa385DCaeFCB4aad01D57d",
+    "address": "0xaf99F4defA9604ad544F77546647067E8AaBCB16",
     "abi": [
       {
         "inputs": [

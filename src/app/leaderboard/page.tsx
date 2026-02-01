@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Trophy, User, Activity, Gift, Radio, ChartNoAxesColumn, Zap } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import { formatAddress } from '@/lib/utils'
+import { RpcDebugTracker } from '@/components/RpcDebugTracker'
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -332,6 +333,7 @@ export default function LeaderboardPage() {
                     </motion.div>
                 </div>
             </motion.div>
+            <RpcDebugTracker />
         </div>
     )
 }

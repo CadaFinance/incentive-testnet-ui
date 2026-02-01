@@ -10,6 +10,7 @@ import { useAccount, useBalance } from 'wagmi'
 import { toast } from 'sonner'
 import ReCAPTCHA from 'react-google-recaptcha'
 import WalletModal from '@/components/WalletModal'
+import { RpcDebugTracker } from '@/components/RpcDebugTracker'
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -352,6 +353,7 @@ function FaucetContent() {
                 open={isWalletModalOpen}
                 onClose={() => setIsWalletModalOpen(false)}
             />
+            <RpcDebugTracker />
         </div>
     )
 }

@@ -205,7 +205,7 @@ export default function AdminPage() {
     };
 
 
-    if (!address || address.toLowerCase() !== ADMIN_ADDRESS) {
+    if (!address || address?.toLowerCase() !== ADMIN_ADDRESS) {
         return (
             <DashboardLayout>
                 <div className="h-[60vh] flex flex-col items-center justify-center bg-[#0b0b0b] border border-red-500/20 text-center p-8">
