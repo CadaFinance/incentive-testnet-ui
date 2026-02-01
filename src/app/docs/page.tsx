@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RpcDebugTracker } from "@/components/RpcDebugTracker";
 // No Lucide icons allowed per institutional guidelines
 // No Lucide icons allowed per institutional guidelines
 import Link from "next/link";
@@ -894,7 +893,6 @@ export default function DocsPage() {
                     </AnimatePresence>
                 </div>
             </main>
-            <RpcDebugTracker />
         </div>
     );
 }
