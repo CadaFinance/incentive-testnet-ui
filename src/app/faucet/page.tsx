@@ -132,8 +132,8 @@ function FaucetContent() {
                     })
                 } else if (data.error === 'SOCIAL_VERIFICATION_REQUIRED') {
                     addLog('ERROR: SOCIAL_VERIF_MISSING')
-                    toast.error('Doğrulama Gerekli', {
-                        description: 'Sistemde yaşanan yoğun bot saldırıları nedeniyle, güvenliğiniz için X hesabınızı bağlamanız gerekmektedir.',
+                    toast.error('X Social Verification Required', {
+                        description: 'X Social verification required to claim.',
                         duration: 5000,
                     })
                 } else {
