@@ -24,7 +24,6 @@ import {
 import { StakingHistory } from '@/components/StakingHistory';
 import { formatZug } from "@/lib/utils";
 import WalletModal from "@/components/WalletModal";
-import { RpcDebugTracker } from "@/components/RpcDebugTracker";
 import { STAKING_CONTRACT_NATIVE } from "@/contracts";
 import { CHAIN_ID, zugChain } from "../config";
 
@@ -550,7 +549,6 @@ export default function NativeStakingPage() {
 
                 </motion.div>
                 <WalletModal open={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} />
-                <RpcDebugTracker />
             </main>
         </div>
     );

@@ -18,7 +18,6 @@ import { Activity, ChartNoAxesColumn, User, Origami, Swords, Fingerprint, Crown,
 import { formatAddress } from '@/lib/utils';
 import WalletConnectButton from '@/components/WalletConnectButton';
 import { INSTITUTIONAL_BADGES, getUSDZMultiplier } from '@/lib/badges';
-import { RpcDebugTracker } from '@/components/RpcDebugTracker';
 
 
 // Format large XP numbers: 22,005,639 -> "22.0M"
@@ -954,7 +953,6 @@ function MissionControlContent() {
 
 
             </div>
-            <RpcDebugTracker />
         </DashboardLayout>
     );
 }

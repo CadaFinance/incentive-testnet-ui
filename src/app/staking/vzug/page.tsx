@@ -27,7 +27,6 @@ import {
 import { StakingHistory } from '@/components/StakingHistory';
 import { formatZug } from "@/lib/utils";
 import WalletModal from "@/components/WalletModal";
-import { RpcDebugTracker } from "@/components/RpcDebugTracker";
 import { STAKING_CONTRACT_VZUG, VZUG_TOKEN } from "@/contracts";
 import { CHAIN_ID, zugChain } from "../../../config";
 
@@ -598,7 +597,6 @@ export default function TokenStakingPage() {
                 </motion.div>
                 <WalletModal open={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} />
             </main>
-            <RpcDebugTracker />
         </div>
     );
 }
