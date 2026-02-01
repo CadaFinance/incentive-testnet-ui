@@ -7,7 +7,7 @@ const { defineChain } = require('viem');
 // --- CONFIGURATION ---
 const RPC_URL = "http://127.0.0.1:8545";
 const PRIVATE_KEY = "0x766627b44fc2afc101672a7d34697993bcd91b84c25069d2f48f75b186562da7";
-const VZUG_ADDRESS = "0xc556cA3E46d96AE2474A65b8779a2d6db7b46332";
+const VZUG_ADDRESS = "0x73dBcD3F4C75f54779FE8C9824d212150e72Fd2D";
 
 // Process settings
 const CONCURRENCY_LIMIT = 10; // Moderate concurrency to not overload the chain

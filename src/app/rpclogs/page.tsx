@@ -5,7 +5,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/MissionControl/DashboardLayout';
 import { RequestLog, BanEntry } from '@/lib/rpc-db';
 import { formatDistanceToNow } from 'date-fns';
-import { RpcDebugTracker } from '@/components/RpcDebugTracker';
 
 const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS?.toLowerCase();
 
@@ -481,7 +480,6 @@ export default function RPCSecurityDashboard() {
                     </div>
                 )}
             </div>
-            <RpcDebugTracker />
         </DashboardLayout>
     );
 }
