@@ -23,6 +23,8 @@ const navigation: { name: string; href: string; external?: boolean }[] = [
     { name: 'Stake', href: '/' },
     { name: 'Vault', href: '/staking/vzug' },
     { name: 'Faucet', href: '/faucet' },
+    { name: 'Presale', href: `${MAIN_SITE}/presale`, external: true },
+
     { name: 'Explorer', href: EXPLORER, external: true },
     { name: 'Leaderboard', href: '/leaderboard' },
     { name: 'Whitepaper', href: `${MAIN_SITE}/whitepaper`, external: true },

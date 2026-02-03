@@ -78,7 +78,7 @@ function FaucetContent() {
         if (!targetAddress || !recaptchaToken) return
 
         setStatus('requesting')
-        setTerminalLogs(['INITIALIZING_HANDSHAKE...'])
+        setTerminalLogs(['Initializing Handshake...'])
 
         try {
             const res = await fetch('/api/faucet', {
@@ -94,23 +94,23 @@ function FaucetContent() {
             const data = await res.json()
 
             if (res.ok) {
-                addLog('VERIFYING_RECAPTCHA...')
-                addLog('DISBURSING_10_ZUG...')
+                addLog('Verifying Recaptcha...')
+                addLog('Disbursing 10 ZUG...')
                 setTxHash(data.hash)
                 setStatus('success')
-                addLog('TRANSACTION_CONFIRMED')
+                addLog('Transaction Confirmed')
 
                 const pts = data.pointsEarned || 25;
                 const multiplier = data.multiplierApplied || 1.0;
                 const isBoosted = multiplier > 1.0;
 
                 if (data.referralBonus) {
-                    addLog('REFERRAL_WELCOME_BONUS: +50')
+                    addLog('Referral Welcome Bonus: +50')
                     toast.success('Welcome Bonus Awarded!', {
                         description: `10 ZUG + ${pts} Points sent (Includes Welcome Bonus).`
                     })
                 } else {
-                    addLog(`INCENTIVE_POINTS: +${pts} ${isBoosted ? `(${multiplier}x BOOST)` : ''}`)
+                    addLog(`Incentive Points: +${pts} ${isBoosted ? `(${multiplier}x Boost)` : ''}`)
                     toast.success('Disbursement Successful', {
                         description: `10 ZUG and ${pts} Incentive Points awarded.${isBoosted ? ' (Boost Active)' : ''}`,
                     })
@@ -125,24 +125,24 @@ function FaucetContent() {
             } else {
                 if (data.error === 'COOLDOWN_ACTIVE') {
                     setCooldownTime(data.timeLeft)
-                    addLog('ERROR: COOLDOWN_ACTIVE')
+                    addLog('Error: Cooldown Active')
                     toast.error('Access Denied', {
                         description: `Wait ${Math.floor(data.timeLeft / 3600)}h before next claim.`,
                     })
                 } else if (data.error === 'SOCIAL_VERIFICATION_REQUIRED') {
-                    addLog('ERROR: SOCIAL_VERIF_MISSING')
+                    addLog('Error: Verification Missing')
                     toast.error('X Social Verification Required', {
                         description: 'X Social verification required to claim.',
                         duration: 5000,
                     })
                 } else {
-                    addLog(`ERROR: ${data.error}`)
+                    addLog(`Error: ${data.error}`)
                     toast.error('Protocol Error', { description: data.error })
                 }
                 setStatus('error')
             }
         } catch (err) {
-            addLog('ERROR: CONNECTION_FAILED')
+            addLog('Error: Connection Failed')
             setStatus('error')
             toast.error('Connection Failed', { description: 'Check network status.' })
         }
@@ -165,20 +165,14 @@ function FaucetContent() {
                 {/* 1. Header - Synced with Staking V3 */}
                 <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end justify-between items-start gap-4 pb-4 border-b border-white/[0.05]">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 opacity-40">
-                            <span className="w-4 h-[1px] bg-white" />
-                            <span className="text-mono text-[8px] font-bold tracking-widest uppercase italic font-mono">Disbursement protocol</span>
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase leading-none mb-4">
-                            ZUG_FAUCET<span className="text-[#e2ff3d]">.</span>
+                        <h1 className="text-3xl font-bold text-white tracking-tight">
+                            ZUG Faucet <span className="text-[#e2ff3d]">V4</span>
                         </h1>
-                        <p className="text-white/40 text-[11px] font-medium tracking-tight uppercase max-w-lg leading-relaxed">
+                        <p className="text-white/50 text-xs font-medium max-w-lg leading-relaxed">
                             Institutional portal for network asset distribution. Features reCAPTCHA node verification for sybil protection.
                         </p>
                     </div>
                 </motion.div>
-
-
 
                 {/* 2. Symmetrical Action Grid */}
                 <div className="grid lg:grid-cols-12 gap-8 mt-12">
@@ -188,23 +182,23 @@ function FaucetContent() {
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[#e2ff3d]/5 blur-3xl rounded-full -mr-16 -mt-16" />
 
                             <div className="space-y-3 relative">
-                                <label className="text-white/40 text-[7px] font-mono font-bold tracking-[0.2em] uppercase flex items-center gap-2">
+                                <label className="text-white/50 text-[10px] font-bold tracking-wide flex items-center gap-2">
                                     <Wallet className="w-3 h-3" />
-                                    RECIPIENT_ADDRESS
+                                    Recipient Address
                                 </label>
                                 <input
                                     type="text"
                                     value={targetAddress}
                                     onChange={(e) => setTargetAddress(e.target.value)}
                                     placeholder="0x..."
-                                    className="w-full bg-white/[0.03] border border-white/10 py-4 px-5 text-xs font-mono text-white placeholder:text-white/5 focus:ring-1 focus:ring-[#e2ff3d]/20 focus:border-[#e2ff3d]/40 outline-none transition-all uppercase rounded-xl"
+                                    className="w-full bg-white/[0.02] border border-white/10 py-4 px-5 text-xs font-mono text-white placeholder:text-white/5 focus:ring-1 focus:ring-[#e2ff3d]/20 focus:border-[#e2ff3d]/40 outline-none transition-all rounded-xl"
                                 />
                             </div>
 
                             <div className="space-y-6 relative">
                                 {/* reCAPTCHA Section - Optimized for mobile */}
                                 {isConnected && targetAddress && (
-                                    <div className="flex justify-center py-4 bg-white/[0.01] border border-white/5 overflow-hidden">
+                                    <div className="flex justify-center py-4 bg-white/[0.01] border border-white/5 overflow-hidden rounded-xl">
                                         <div className="scale-[0.85] sm:scale-100 origin-center transition-transform">
                                             <ReCAPTCHA
                                                 sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
@@ -218,33 +212,32 @@ function FaucetContent() {
                                 {!isConnected ? (
                                     <button
                                         onClick={() => setIsWalletModalOpen(true)}
-                                        className="w-full bg-[#e2ff3d] hover:bg-white text-black py-4 sm:py-5 font-black text-[11px] sm:text-[12px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-4 group shadow-[0_0_20px_rgba(226,255,61,0.05)] rounded-2xl"
+                                        className="w-full bg-[#e2ff3d] hover:bg-[#d4f030] text-black text-sm py-4 font-bold transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[#e2ff3d]/10 rounded-xl"
                                     >
-                                        CONNECT_WALLET
-                                        <Wallet className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+                                        Connect Wallet
                                     </button>
                                 ) : (
                                     <button
                                         onClick={handleClaim}
                                         disabled={status === 'requesting' || !targetAddress || !recaptchaToken}
-                                        className="w-full bg-[#e2ff3d] hover:bg-white text-black py-4 sm:py-5 font-black text-[11px] sm:text-[12px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-4 disabled:opacity-30 group shadow-[0_0_20px_rgba(226,255,61,0.05)] rounded-2xl"
+                                        className="w-full bg-[#e2ff3d] hover:bg-[#d4f030] text-black text-sm py-4 font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group shadow-lg shadow-[#e2ff3d]/10 rounded-xl"
                                     >
                                         {status === 'requesting' ? (
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <>
-                                                {recaptchaToken ? 'AUTHORIZE_CLAIM' : 'SOLVE_CAPTCHA'}
+                                                {recaptchaToken ? 'Authorize Claim' : 'Complete Captcha'}
                                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                             </>
                                         )}
                                     </button>
                                 )}
 
-                                <div className="bg-[#030303]/90 backdrop-blur-xl border border-white/10 p-6 font-mono rounded-2xl shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)]">
+                                <div className="bg-[#0f111a] backdrop-blur-xl border border-white/10 p-6 font-mono rounded-2xl shadow-inner">
                                     <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
                                         <div className="flex items-center gap-2">
                                             <Terminal className="w-3 h-3 text-[#e2ff3d]" />
-                                            <span className="text-[9px] text-white/40 font-bold tracking-[0.2em] uppercase">System_Logs</span>
+                                            <span className="text-[10px] text-white/50 font-bold tracking-wide">System Logs</span>
                                         </div>
                                         <div className="flex gap-1.5 opacity-40">
                                             <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
@@ -254,10 +247,10 @@ function FaucetContent() {
                                     </div>
                                     <div className="space-y-1.5 min-h-[100px] text-[10px]">
                                         {terminalLogs.length === 0 && (
-                                            <span className="text-white/20 uppercase tracking-widest animate-pulse">System Idle... Awaiting Command</span>
+                                            <span className="text-white/20 tracking-wide animate-pulse">System Idle... Awaiting Command</span>
                                         )}
                                         {terminalLogs.map((log, i) => (
-                                            <div key={i} className={`font-medium tracking-tight ${log.startsWith('> ERROR') ? 'text-red-400' : 'text-[#e2ff3d]'}`}>
+                                            <div key={i} className={`font-medium tracking-tight ${log.startsWith('> Error') ? 'text-red-400' : 'text-[#e2ff3d]'}`}>
                                                 {log}
                                             </div>
                                         ))}
@@ -271,25 +264,25 @@ function FaucetContent() {
                     <div className="lg:col-span-5 space-y-6">
                         <motion.div variants={itemVariants} className="p-8 bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-[32px] space-y-6 relative group hover:border-[#e2ff3d]/10 transition-colors shadow-2xl">
                             <div className="flex items-center justify-between border-b border-white/[0.05] pb-4">
-                                <h3 className="text-[9px] font-black tracking-[0.2em] uppercase text-white flex items-center gap-2">
+                                <h3 className="text-xs font-bold text-white flex items-center gap-2 tracking-wide">
                                     <Trophy className="w-4 h-4 text-[#e2ff3d]" />
-                                    INCENTIVE_REPORT
+                                    Incentive Report
                                 </h3>
-                                <div className="px-2 py-0.5 border border-[#e2ff3d]/20 bg-[#e2ff3d]/5 text-[#e2ff3d] text-[7px] font-bold uppercase tracking-tighter italic">
-                                    verified
+                                <div className="px-2 py-0.5 border border-[#e2ff3d]/20 bg-[#e2ff3d]/5 text-[#e2ff3d] text-[9px] font-bold uppercase tracking-wider italic rounded">
+                                    Verified
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-0">
-                                    <span className="text-[7px] font-mono text-white/40 font-bold uppercase tracking-widest">Global_Points</span>
-                                    <p className="text-4xl font-black text-white tracking-tighter tabular-nums leading-none">
+                                <div className="space-y-1">
+                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Global Points</span>
+                                    <p className="text-3xl font-bold text-white tracking-tight tabular-nums leading-none">
                                         {userProfile ? userProfile.points : '--'}
                                     </p>
                                 </div>
-                                <div className="space-y-0 border-l border-white/10 pl-6">
-                                    <span className="text-[7px] font-mono text-white/40 font-bold uppercase tracking-widest">Multiplier</span>
-                                    <p className="text-2xl font-black text-[#e2ff3d]/80 tracking-tighter leading-none pt-1">
+                                <div className="space-y-1 border-l border-white/10 pl-6">
+                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Multiplier</span>
+                                    <p className="text-2xl font-bold text-[#e2ff3d]/80 tracking-tight leading-none pt-1">
                                         1.2x<span className="text-[10px] opacity-40 ml-1">STABLE</span>
                                     </p>
                                 </div>
@@ -297,19 +290,19 @@ function FaucetContent() {
 
                             <div className="space-y-4 pt-6 border-t border-white/5">
                                 <div className="flex justify-between items-center px-1">
-                                    <span className="text-white/30 font-mono uppercase text-[7px] font-bold tracking-widest">Claimed_Sessions</span>
-                                    <span className="font-mono text-[10px] text-white font-bold">{userProfile ? userProfile.total_claims : '0'} UNIT</span>
+                                    <span className="text-white/40 text-[10px] font-bold tracking-wide">Claimed Sessions</span>
+                                    <span className="font-mono text-xs text-white font-bold">{userProfile ? userProfile.total_claims : '0'}</span>
                                 </div>
                                 <div className="flex justify-between items-center px-1">
-                                    <span className="text-white/30 font-mono uppercase text-[7px] font-bold tracking-widest">Protocol_Identity</span>
-                                    <span className="font-mono text-[9px] text-[#e2ff3d]/60 font-bold uppercase">VAL_CONTRACTOR_L1</span>
+                                    <span className="text-white/40 text-[10px] font-bold tracking-wide">Protocol Identity</span>
+                                    <span className="font-mono text-[10px] text-[#e2ff3d]/60 font-bold uppercase">VAL_CONTRACTOR_L1</span>
                                 </div>
                             </div>
 
                             <div className="p-4 bg-[#e2ff3d]/5 border border-[#e2ff3d]/10 flex gap-3 rounded-xl">
                                 <Activity className="w-3 h-3 text-[#e2ff3d] shrink-0 mt-0.5" />
-                                <p className="text-[9px] text-white/50 font-mono leading-relaxed uppercase opacity-80">
-                                    Global points are indexed via DB. Cumulative metrics refresh on every successful disbursement.
+                                <p className="text-[10px] text-white/50 leading-relaxed">
+                                    Global points are indexed via database. Cumulative metrics refresh on every successful disbursement.
                                 </p>
                             </div>
                         </motion.div>
@@ -317,11 +310,11 @@ function FaucetContent() {
                         <motion.div variants={itemVariants} className="p-5 border border-white/5 flex items-center justify-between opacity-50 rounded-2xl">
                             <div className="flex items-center gap-3">
                                 <ShieldCheck className="w-3 h-3 text-green-500" />
-                                <span className="text-[8px] font-mono text-white/40 font-bold uppercase tracking-widest italic">SYBIL_PROT_ACTIVE</span>
+                                <span className="text-[10px] font-bold text-white/40 tracking-wide uppercase">Sybil Protection Active</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-[8px] text-white/60 font-bold uppercase tabular-nums tracking-tighter px-2 py-0.5 border border-white/5 bg-white/[0.02] rounded">
-                                    MAX_LIMIT: 10 ZUG / 24H
+                                <span className="text-[9px] text-white/60 font-bold uppercase tabular-nums tracking-wide px-2 py-0.5 border border-white/5 bg-white/[0.02] rounded">
+                                    Max: 10 ZUG / 24H
                                 </span>
                             </div>
                         </motion.div>
@@ -335,14 +328,14 @@ function FaucetContent() {
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-12 right-12 p-8 bg-red-500/10 border border-red-500/20 backdrop-blur-xl flex items-center gap-6 z-50 shadow-2xl"
+                        className="fixed bottom-12 right-12 p-8 bg-red-500/10 border border-red-500/20 backdrop-blur-xl flex items-center gap-6 z-50 shadow-2xl rounded-2xl"
                     >
-                        <div className="w-12 h-12 bg-red-500/20 flex items-center justify-center">
+                        <div className="w-12 h-12 bg-red-500/20 flex items-center justify-center rounded-xl">
                             <Clock className="w-6 h-6 text-red-500" />
                         </div>
                         <div className="space-y-1">
-                            <h4 className="text-white text-[10px] font-bold uppercase tracking-[0.2em]">Cooldown_Synchronized</h4>
-                            <p className="text-red-500/80 text-[11px] font-mono uppercase font-black">{formatTime(cooldownTime)}</p>
+                            <h4 className="text-white text-xs font-bold uppercase tracking-wide">Cooldown Active</h4>
+                            <p className="text-red-500/80 text-xs font-mono font-bold">{formatTime(cooldownTime)}</p>
                         </div>
                     </motion.div>
                 )}

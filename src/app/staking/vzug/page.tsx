@@ -91,7 +91,7 @@ export default function TokenStakingPage() {
     const { switchChainAsync } = useSwitchChain();
     const [stakeAmount, setStakeAmount] = useState("");
     const [selectedTier, setSelectedTier] = useState(0);
-    const [autoCompoundPref, setAutoCompoundPref] = useState(true);
+    const [autoCompoundPref, setAutoCompoundPref] = useState(false);
     const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
     // TRIGGER: Add state
     const [historyTrigger, setHistoryTrigger] = useState(0);
@@ -279,12 +279,12 @@ export default function TokenStakingPage() {
             <div className="p-8 bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-[32px] relative group hover:border-[#e2ff3d]/20 transition-all">
                 <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-sm">
+                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
                             <Box className="w-4 h-4 text-[#e2ff3d]" />
                         </div>
                         <div>
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-white">#POS_{deposit.originalIndex + 1}</h4>
-                            <span className={`text-[9px] font-mono uppercase ${tier.id === 2 ? 'text-cyan-400' : tier.id === 1 ? 'text-yellow-400' : 'text-gray-500'}`}>
+                            <span className={`text-[9px] font-mono uppercase ${tier.id === 2 ? 'text-cyan-400' : tier.id === 1 ? 'text-yellow-400' : 'text-white/40'}`}>
                                 {tier.name}
                             </span>
                         </div>
@@ -294,7 +294,7 @@ export default function TokenStakingPage() {
                             <Clock size={10} /> Unbonding
                         </div>
                     ) : isLocked ? (
-                        <div className="px-2 py-1 bg-white/5 border border-white/10 text-gray-500 text-[8px] font-bold uppercase tracking-widest flex items-center gap-1">
+                        <div className="px-2 py-1 bg-white/5 border border-white/10 text-white/40 text-[8px] font-bold uppercase tracking-widest flex items-center gap-1 rounded-lg">
                             <LockIcon size={10} /> Locked
                         </div>
                     ) : (
@@ -308,7 +308,7 @@ export default function TokenStakingPage() {
                     {/* Main Stats Block */}
                     <div className="grid grid-cols-2 gap-4 border-b border-white/5 pb-4">
                         <div className="space-y-1">
-                            <span className="text-[8px] text-gray-600 uppercase font-black">Bonded</span>
+                            <span className="text-[8px] text-white/40 uppercase font-black">Bonded</span>
                             <div className="text-sm font-bold text-white">{formatZug(Number(formatEther(deposit.amount)))}</div>
                         </div>
                         <div className="space-y-1 text-right">
@@ -324,7 +324,7 @@ export default function TokenStakingPage() {
                             <span className="text-white font-mono">{Number(formatEther(deposit.totalClaimed)).toFixed(2)}</span>
                         </div>
                         <div className="space-y-1 p-3 bg-white/[0.02] rounded-xl border border-white/5">
-                            <span className="text-white/40 uppercase block font-bold">Yielded</span>
+                            <span className="text-white/40 uppercase block font-bold">Compounded</span>
                             <span className="text-white font-mono">{Number(formatEther(deposit.totalCompounded)).toFixed(2)}</span>
                         </div>
                     </div>
@@ -338,9 +338,9 @@ export default function TokenStakingPage() {
                             <button
                                 onClick={() => handleWithdraw(Number(originalId))}
                                 disabled={isPending || Date.now() / 1000 < Number(deposit.unbondingEnd)}
-                                className="w-full py-3 bg-blue-500/10 hover:bg-green-500 hover:text-black border border-blue-500/20 text-blue-400 text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                                className="w-full py-3 bg-blue-500/10 hover:bg-green-500 hover:text-black border border-blue-500/20 text-blue-400 text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-50 rounded-xl"
                             >
-                                {Date.now() / 1000 < Number(deposit.unbondingEnd) ? "UNBONDING_ACTIVE" : "FINALIZE_EXIT"}
+                                {Date.now() / 1000 < Number(deposit.unbondingEnd) ? "COOLDOWN_ACTIVE" : "FINALIZE_EXIT"}
                             </button>
                         </div>
                     ) : (
@@ -350,7 +350,7 @@ export default function TokenStakingPage() {
                                 <button
                                     onClick={() => handleCompound(Number(originalId))}
                                     disabled={isPending}
-                                    className="w-full py-3 bg-[#e2ff3d]/10 border border-[#e2ff3d]/20 hover:bg-[#e2ff3d] hover:text-black text-[9px] font-black uppercase tracking-[0.2em] text-[#e2ff3d] transition-all"
+                                    className="w-full py-3 bg-[#e2ff3d]/10 border border-[#e2ff3d]/20 hover:bg-[#e2ff3d] hover:text-black text-[9px] font-black uppercase tracking-[0.2em] text-[#e2ff3d] transition-all rounded-xl"
                                 >
                                     MANUAL_COMPOUND
                                 </button>
@@ -360,14 +360,14 @@ export default function TokenStakingPage() {
                                 <button
                                     onClick={() => handleClaim(Number(originalId))}
                                     disabled={isPending}
-                                    className="py-3 bg-white/5 border border-white/10 hover:bg-white hover:text-black text-[9px] font-black uppercase tracking-[0.2em] text-white transition-all disabled:opacity-30"
+                                    className="py-3 bg-white/5 border border-white/10 hover:bg-white hover:text-black text-[9px] font-black uppercase tracking-[0.2em] text-white transition-all disabled:opacity-30 rounded-xl"
                                 >
                                     CLAIM
                                 </button>
                                 <button
                                     onClick={() => handleUnstake(Number(originalId))}
                                     disabled={isPending || isLocked || isHeldUnder7Days}
-                                    className={`py-3 border text-[9px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-30 ${isLocked || isHeldUnder7Days ? 'bg-transparent border-white/5 text-gray-700 cursor-not-allowed' : 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white'}`}
+                                    className={`py-3 border text-[9px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-30 rounded-xl ${isLocked || isHeldUnder7Days ? 'bg-transparent border-white/5 text-white/20 cursor-not-allowed' : 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white'}`}
                                 >
                                     {isHeldUnder7Days && !isLocked ? `LOCKED_${remainingDays}D` : "EXIT"}
                                 </button>
@@ -388,42 +388,39 @@ export default function TokenStakingPage() {
                     {/* 1. Header & Global Stats */}
                     <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end justify-between items-start gap-4 pb-4 border-b border-white/[0.05]">
                         <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 opacity-40">
-                                <span className="w-4 h-[1px] bg-white" />
-                                <span className="text-mono text-[8px] font-bold tracking-widest uppercase italic font-mono">Vault protocol</span>
-                            </div>
-                            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase leading-none mb-4">
-                                vZUG_VAULT<span className="text-[#e2ff3d]">V4.</span>
+                            <h1 className="text-3xl font-bold text-white tracking-tight">
+                                vZUG Vault <span className="text-[#e2ff3d]">V4</span>
                             </h1>
-                            <p className="text-white/40 text-[11px] font-medium tracking-tight uppercase max-w-lg leading-relaxed">
+                            <p className="text-white/50 text-xs font-medium max-w-lg leading-relaxed">
                                 Liquid staking derivative vault. Optimized for high-fidelity yield capture and network liquidity.
                             </p>
                         </div>
 
 
-                        <div className="flex flex-wrap items-center gap-6 pt-4 sm:pt-0">
-                            <div className="space-y-0">
-                                <span className="text-[7px] font-mono text-gray-600 font-bold uppercase tracking-widest block mb-1">Active_Weight</span>
-                                <div className="text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
-                                    {formatZug(activeStaked)}<span className="text-[9px] text-gray-600 ml-1">VZUG</span>
+                        <div className="flex flex-wrap items-center gap-8 pt-4 sm:pt-0">
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Active Weight</span>
+                                <div className="text-xl font-bold text-white tracking-tight tabular-nums font-mono">
+                                    {formatZug(activeStaked)}<span className="text-[10px] text-white/20 ml-1">VZUG</span>
                                 </div>
                             </div>
-                            <div className="space-y-0 border-l border-white/5 pl-6">
-                                <span className="text-[7px] font-mono text-blue-500/60 font-bold uppercase tracking-widest block mb-1 italic">Unbonding_Signal</span>
-                                <div className="text-3xl font-black text-blue-400 tracking-tighter tabular-nums leading-none">
-                                    {formatZug(unbondingStaked)}<span className="text-[9px] text-blue-500/40 ml-1">VZUG</span>
+                            <div className="space-y-1 border-l border-white/10 pl-6">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Unbonding</span>
+                                <div className="text-xl font-bold text-white/80 tracking-tight tabular-nums font-mono">
+                                    {formatZug(unbondingStaked)}<span className="text-[10px] text-white/20 ml-1">VZUG</span>
                                 </div>
                             </div>
-                            <div className="space-y-0 border-l border-white/5 pl-6">
-                                <span className="text-[7px] font-mono text-gray-600 font-bold uppercase tracking-widest block mb-1">Total_Yield</span>
-                                <div className="text-3xl font-black text-[#e2ff3d] tracking-tighter tabular-nums leading-none">
+                            <div className="space-y-1 border-l border-white/10 pl-6">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Total Yield</span>
+                                <div className="text-xl font-bold text-white tracking-tight tabular-nums font-mono flex items-center gap-2">
                                     +{formatEther(typeof totalPending === 'bigint' ? totalPending : 0n).substring(0, 8)}
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#e2ff3d]" />
                                 </div>
                             </div>
                             {/* NEW: PROTOCOL TVL */}
-                            <div className="space-y-1 border-l border-white/10 pl-8">
-                                <span className="text-[9px] font-bold text-[#e2ff3d]/60 uppercase tracking-widest block mb-1">Protocol_TVL</span>
-                                <div className="text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
+                            <div className="space-y-1 border-l border-white/10 pl-6 hidden sm:block">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">TVL</span>
+                                <div className="text-xl font-bold text-white tracking-tight tabular-nums font-mono">
                                     {tvlData ? formatZug(Number(formatEther(tvlData.value))) : "Loading..."}
                                 </div>
                             </div>
@@ -436,10 +433,13 @@ export default function TokenStakingPage() {
                         <div className="lg:col-span-4 space-y-6">
                             <div className="bg-white/[0.02] backdrop-blur-xl border border-white/10 p-8 rounded-[32px] sticky top-24 shadow-2xl">
                                 <div className="flex items-center justify-between mb-8">
-                                    <h3 className="text-[10px] font-black tracking-[0.3em] uppercase text-white flex items-center gap-2">
-                                        <Database className="w-3 h-3 text-[#e2ff3d]" /> STAKE_MODULE
+                                    <h3 className="text-xs font-bold tracking-wide text-white flex items-center gap-2">
+                                        <Database className="w-3 h-3 text-[#e2ff3d]" /> Stake vZUG
                                     </h3>
-                                    <Zap className="w-3 h-3 text-[#e2ff3d] animate-pulse" />
+                                    <div className="flex items-center gap-1.5 px-2 py-1 bg-[#e2ff3d]/10 rounded-full">
+                                        <div className="w-1.5 h-1.5 bg-[#e2ff3d] rounded-full animate-pulse" />
+                                        <span className="text-[10px] font-bold text-[#e2ff3d]">Live</span>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-6">
@@ -449,14 +449,14 @@ export default function TokenStakingPage() {
                                             <button
                                                 key={tier.id}
                                                 onClick={() => setSelectedTier(tier.id)}
-                                                className={`flex justify-between items-center p-4 border rounded-xl transition-all ${selectedTier === tier.id
-                                                    ? "bg-[#e2ff3d]/10 border-[#e2ff3d]/50"
-                                                    : "bg-white/[0.02] border-white/5 hover:bg-white/5"
-                                                    }`}
+                                                className={`flex justify-between items-center p-4 border transition-all ${selectedTier === tier.id
+                                                    ? "bg-[#e2ff3d]/5 border-[#e2ff3d]/50"
+                                                    : "bg-white/[0.01] border-white/5 hover:bg-white/5"
+                                                    } rounded-2xl`}
                                             >
                                                 <div className="text-left font-mono">
-                                                    <div className={`text-[10px] font-black uppercase tracking-wider ${selectedTier === tier.id ? 'text-[#e2ff3d]' : 'text-gray-500'}`}>{tier.name}</div>
-                                                    <div className="text-[8px] text-gray-700 mt-1">{tier.duration} LOCK</div>
+                                                    <div className={`text-[10px] font-black uppercase tracking-wider ${selectedTier === tier.id ? 'text-[#e2ff3d]' : 'text-white/40'}`}>{tier.name}</div>
+                                                    <div className="text-[8px] text-white/20 mt-1 uppercase">{tier.duration} LOCK</div>
                                                 </div>
                                                 <div className="text-right font-mono">
                                                     <div className="text-[14px] font-black tracking-tighter text-white">{getAPY(tier.id)}</div>
@@ -467,30 +467,29 @@ export default function TokenStakingPage() {
                                     </div>
 
                                     {/* Auto-Compound Selector */}
-                                    <div className="p-4 bg-white/[0.02] border border-white/5 flex items-center justify-between">
+                                    <div className="p-4 bg-white/[0.02] border border-white/5 flex items-center justify-between rounded-2xl">
                                         <div className="flex items-center gap-3">
-                                            <Settings2 className="w-4 h-4 text-gray-600" />
+                                            <Settings2 className="w-4 h-4 text-white/30" />
                                             <div>
-                                                <div className="text-[10px] font-black text-white uppercase tracking-widest">Auto_Compound</div>
-                                                <div className="text-[8px] text-gray-600 font-mono mt-0.5">Automated Re-staking</div>
+                                                <div className="text-xs font-bold text-white tracking-wide">Auto Compound</div>
+                                                <div className="text-[10px] text-white/40 mt-0.5">Automated Re-staking</div>
                                             </div>
                                         </div>
                                         <button
                                             onClick={() => setAutoCompoundPref(!autoCompoundPref)}
-                                            className={`px-3 py-1 border text-[9px] font-black tracking-widest transition-all rounded-lg ${autoCompoundPref ? 'bg-[#e2ff3d] border-[#e2ff3d] text-black' : 'bg-transparent border-white/10 text-white hover:border-white/30'}`}
+                                            className={`px-3 py-1.5 border text-[10px] font-bold tracking-wide transition-all rounded-lg ${autoCompoundPref ? 'bg-[#e2ff3d] border-[#e2ff3d] text-black' : 'bg-transparent border-white/10 text-white hover:border-white/30'}`}
                                         >
-                                            {autoCompoundPref ? 'ON' : 'OFF'}
+                                            {autoCompoundPref ? 'Active' : 'Off'}
                                         </button>
                                     </div>
 
                                     {/* Amount Input */}
                                     <div className="space-y-3 relative">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-gray-600 text-[7px] font-mono font-bold tracking-widest uppercase flex items-center gap-2">
-                                                <Database className="w-3 h-3" />
-                                                DEPOSIT_AMOUNT
+                                            <label className="text-white/50 text-[10px] font-bold tracking-wide flex items-center gap-2">
+                                                vZUG Amount
                                             </label>
-                                            <span className="text-white/40 text-[7px] font-mono font-bold uppercase tracking-tight">
+                                            <span className="text-white/50 text-[7px] font-mono font-bold uppercase tracking-tight">
                                                 BAL: {formatEther(vzugBalance || 0n).substring(0, 10)}
                                             </span>
                                         </div>
@@ -500,7 +499,7 @@ export default function TokenStakingPage() {
                                                 value={stakeAmount}
                                                 onChange={(e) => setStakeAmount(e.target.value)}
                                                 placeholder="0.00"
-                                                className="w-full bg-white/[0.03] border border-white/10 py-4 px-5 text-xs font-mono text-white placeholder:text-white/5 focus:ring-1 focus:ring-[#e2ff3d]/20 focus:border-[#e2ff3d]/40 outline-none transition-all rounded-xl"
+                                                className="w-full bg-white/[0.02] border border-white/10 py-4 px-5 text-xs font-mono text-white placeholder:text-white/5 focus:ring-1 focus:ring-[#e2ff3d]/20 focus:border-[#e2ff3d]/40 outline-none transition-all rounded-2xl"
                                             />
                                             <button
                                                 onClick={() => setStakeAmount(vzugBalance ? formatEther(vzugBalance) : "0")}
@@ -515,31 +514,31 @@ export default function TokenStakingPage() {
                                     {!isConnected ? (
                                         <button
                                             onClick={() => setIsWalletModalOpen(true)}
-                                            className="w-full py-5 bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all hover:bg-[#e2ff3d] rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                                            className="w-full py-4 bg-white text-black font-bold text-sm transition-all hover:bg-white/90 rounded-xl"
                                         >
-                                            CONNECT_WALLET
+                                            Connect Wallet
                                         </button>
                                     ) : chainId !== CHAIN_ID ? (
                                         <button
                                             onClick={handleSwitchNetwork}
-                                            className="w-full py-5 bg-red-500/10 border border-red-500/50 hover:bg-red-500/20 text-red-500 font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-4 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 font-bold text-sm transition-all flex items-center justify-center gap-2 rounded-xl"
                                         >
-                                            <AlertTriangle className="w-5 h-5" />
-                                            SWITCH_NETWORK
+                                            <AlertTriangle className="w-4 h-4" />
+                                            Switch Network
                                         </button>
                                     ) : hasInsufficientBalance ? (
-                                        <div className="space-y-2">
+                                        <div className="space-y-3">
                                             <button
                                                 onClick={() => window.open('https://www.zugchain.org/presale', '_blank')}
-                                                className="w-full py-5 bg-[#e2ff3d] hover:bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2"
+                                                className="w-full py-4 bg-[#e2ff3d] hover:bg-[#d4f030] text-black font-bold text-sm transition-all flex items-center justify-center gap-2 rounded-xl"
                                             >
-                                                <ArrowUpRight className="w-5 h-5" />
-                                                CLAIM VZUG
+                                                <ArrowUpRight className="w-4 h-4" />
+                                                Claim vZUG
                                             </button>
-                                            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-red-500/10 border border-red-500/20 text-red-400">
-                                                <AlertTriangle className="w-4 h-4" />
-                                                <span className="text-[9px] font-mono uppercase tracking-wide">
-                                                    Insufficient vZUG balance. You need {(amt - vBalance).toFixed(2)} more vZUG.
+                                            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-red-500/5 border border-red-500/10 text-red-400 rounded-lg">
+                                                <AlertTriangle className="w-3 h-3" />
+                                                <span className="text-xs font-medium">
+                                                    Insufficient balance (+{(amt - vBalance).toFixed(2)} needed)
                                                 </span>
                                             </div>
                                         </div>
@@ -547,17 +546,17 @@ export default function TokenStakingPage() {
                                         <button
                                             onClick={handleApprove}
                                             disabled={isPending}
-                                            className="w-full py-5 bg-yellow-500 hover:bg-yellow-400 text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2 rounded-2xl"
+                                            className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-sm transition-all flex items-center justify-center gap-2 rounded-xl"
                                         >
-                                            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "GRANT_APPROVAL"}
+                                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Grant Approval"}
                                         </button>
                                     ) : (
                                         <button
                                             onClick={handleStake}
                                             disabled={isPending}
-                                            className="w-full py-5 bg-[#e2ff3d] hover:bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2 rounded-2xl shadow-[0_0_30px_rgba(226,255,61,0.1)]"
+                                            className="w-full py-4 bg-[#e2ff3d] hover:bg-[#d4f030] text-black font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#e2ff3d]/10 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "EXECUTE_STAKE"}
+                                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Stake vZUG"}
                                         </button>
                                     )}
 
@@ -569,15 +568,15 @@ export default function TokenStakingPage() {
                         {/* 3. POSITIONS GRID */}
                         <div className="lg:col-span-8 space-y-8">
                             <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                                <h3 className="text-[10px] font-black tracking-[0.4em] uppercase text-gray-500">LIVE_PROTOCOL_CHANNELS</h3>
-                                <History size={16} className="text-gray-800" />
+                                <h3 className="text-xs font-bold text-white/50 tracking-wide">vZUG Positions</h3>
+                                <History size={16} className="text-white/40" />
                             </div>
 
                             {deposits.length === 0 ? (
-                                <div className="h-[400px] flex flex-col items-center justify-center border border-dashed border-white/10 bg-white/[0.01]">
-                                    <div className="p-6 bg-white/5 rounded-full mb-6 opacity-20"><Box size={32} className="text-gray-400" /></div>
-                                    <p className="text-[11px] font-black uppercase text-gray-600 tracking-[0.3em]">No active channels found</p>
-                                    <p className="text-[9px] text-gray-800 font-mono mt-3 uppercase">Initialization required via terminal</p>
+                                <div className="h-[400px] flex flex-col items-center justify-center border border-dashed border-white/10 bg-white/[0.01] rounded-2xl">
+                                    <div className="p-4 bg-white/5 rounded-full mb-4 opacity-50"><Box size={24} className="text-white/40" /></div>
+                                    <p className="text-sm font-medium text-white/60">No active positions</p>
+                                    <p className="text-xs text-white/30 mt-2">Your staked vZUG will appear here</p>
                                 </div>
                             ) : (
                                 <div className="grid md:grid-cols-2 gap-6">

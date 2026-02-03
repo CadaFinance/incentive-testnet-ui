@@ -244,7 +244,7 @@ export default function LeaderboardPage() {
 
                 {/* Table Area - Fixed Mobile Layout */}
                 <div className="w-full">
-                    <motion.div variants={itemVariants} className="bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-[32px] overflow-hidden p-2">
+                    <motion.div variants={itemVariants} className="bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-[32px] overflow-hidden">
                         <div className="overflow-x-auto custom-scrollbar pb-2">
                             <table className="w-full text-left border-collapse min-w-[340px] sm:min-w-[500px]">
                                 <thead>

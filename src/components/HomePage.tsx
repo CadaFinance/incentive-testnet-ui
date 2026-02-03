@@ -87,7 +87,7 @@ export default function NativeStakingPage() {
     const { switchChainAsync } = useSwitchChain();
     const [stakeAmount, setStakeAmount] = useState("");
     const [selectedTier, setSelectedTier] = useState(0);
-    const [autoCompoundPref, setAutoCompoundPref] = useState(true);
+    const [autoCompoundPref, setAutoCompoundPref] = useState(false);
     const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
     // TRIGGER: Add state to force history refresh
     const [historyTrigger, setHistoryTrigger] = useState(0);
@@ -348,41 +348,40 @@ export default function NativeStakingPage() {
                     {/* 1. Header & Global Stats */}
                     <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end justify-between items-start gap-4 pb-4 border-b border-white/[0.05]">
                         <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 opacity-40">
-                                <span className="w-4 h-[1px] bg-white" />
-                                <span className="text-mono text-[8px] font-bold tracking-widest uppercase italic font-mono">Staking protocol</span>
-                            </div>
-                            <h1 className="text-2xl font-black text-white tracking-tighter uppercase leading-none">
-                                ZUG_STAKING<span className="text-[#e2ff3d]">V4.</span>
+                            <h1 className="text-3xl font-bold text-white tracking-tight">
+                                ZUG Staking <span className="text-[#e2ff3d]">V4</span>
                             </h1>
-                            <p className="text-white/40 text-[9px] font-mono tracking-tight uppercase max-w-lg">
+                            <p className="text-white/50 text-xs font-medium max-w-lg leading-relaxed">
                                 Institutional yield optimization layer. Engineered for high-fidelity decentralized capital execution.
                             </p>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-6 pt-4 sm:pt-0">
-                            <div className="space-y-0">
-                                <span className="text-[7px] font-mono text-white/30 font-bold uppercase tracking-widest block mb-1">Active_Weight</span>
-                                <div className="text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
-                                    {formatZug(activeStaked)}<span className="text-[9px] text-white/30 ml-1">ZUG</span>
+                        <div className="flex flex-wrap items-center gap-8 pt-4 sm:pt-0">
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Active Weight</span>
+                                <div className="text-xl font-bold text-white tracking-tight tabular-nums font-mono">
+                                    {formatZug(activeStaked)}<span className="text-[10px] text-white/20 ml-1">ZUG</span>
                                 </div>
                             </div>
-                            <div className="space-y-0 border-l border-white/5 pl-6">
-                                <span className="text-[7px] font-mono text-blue-500/60 font-bold uppercase tracking-widest block mb-1 italic">Unbonding_Signal</span>
-                                <div className="text-3xl font-black text-blue-400 tracking-tighter tabular-nums leading-none">
-                                    {formatZug(unbondingStaked)}<span className="text-[9px] text-blue-500/40 ml-1">ZUG</span>
+
+                            <div className="space-y-1 border-l border-white/10 pl-6">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Unbonding</span>
+                                <div className="text-xl font-bold text-white/80 tracking-tight tabular-nums font-mono">
+                                    {formatZug(unbondingStaked)}<span className="text-[10px] text-white/20 ml-1">ZUG</span>
                                 </div>
                             </div>
-                            <div className="space-y-0 border-l border-white/5 pl-6">
-                                <span className="text-[7px] font-mono text-white/30 font-bold uppercase tracking-widest block mb-1">Total_Yield</span>
-                                <div className="text-3xl font-black text-[#e2ff3d] tracking-tighter tabular-nums leading-none">
+
+                            <div className="space-y-1 border-l border-white/10 pl-6">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Total Yield</span>
+                                <div className="text-xl font-bold text-white tracking-tight tabular-nums font-mono flex items-center gap-2">
                                     +{formatEther(typeof totalPending === 'bigint' ? totalPending : 0n).substring(0, 8)}
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#e2ff3d]" />
                                 </div>
                             </div>
-                            {/* NEW: PROTOCOL TVL */}
-                            <div className="space-y-0 border-l border-white/5 pl-6">
-                                <span className="text-[7px] font-mono text-[#e2ff3d]/60 font-bold uppercase tracking-widest block mb-1">Protocol_TVL</span>
-                                <div className="text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
+
+                            <div className="space-y-1 border-l border-white/10 pl-6 hidden sm:block">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">TVL</span>
+                                <div className="text-xl font-bold text-white tracking-tight tabular-nums font-mono">
                                     {tvlData ? formatZug(Number(formatEther(tvlData.value))) : "Loading..."}
                                 </div>
                             </div>
@@ -395,12 +394,12 @@ export default function NativeStakingPage() {
                         <div className="lg:col-span-4 space-y-6">
                             <div className="bg-white/[0.02] backdrop-blur-xl border border-white/10 p-8 sticky top-24 shadow-2xl rounded-[32px]">
                                 <div className="flex items-center justify-between mb-8">
-                                    <h3 className="text-[10px] font-black tracking-[0.3em] uppercase text-white flex items-center gap-2">
-                                        <Database className="w-3 h-3 text-[#e2ff3d]" /> STAKE_MODULE
+                                    <h3 className="text-xs font-bold tracking-wide text-white flex items-center gap-2">
+                                        <Database className="w-3 h-3 text-[#e2ff3d]" /> Stake ZUG
                                     </h3>
-                                    <div className="flex items-center gap-1">
-                                        <div className="w-1 h-1 bg-[#e2ff3d] rounded-full animate-ping" />
-                                        <span className="text-[8px] font-mono text-[#e2ff3d]">LIVE_FED</span>
+                                    <div className="flex items-center gap-1.5 px-2 py-1 bg-[#e2ff3d]/10 rounded-full">
+                                        <div className="w-1.5 h-1.5 bg-[#e2ff3d] rounded-full animate-pulse" />
+                                        <span className="text-[10px] font-bold text-[#e2ff3d]">Live</span>
                                     </div>
                                 </div>
 
@@ -433,24 +432,23 @@ export default function NativeStakingPage() {
                                         <div className="flex items-center gap-3">
                                             <Settings2 className="w-4 h-4 text-white/30" />
                                             <div>
-                                                <div className="text-[10px] font-black text-white uppercase tracking-widest">Auto_Compound</div>
-                                                <div className="text-[8px] text-white/30 font-mono mt-0.5">Auto-reinvest yield</div>
+                                                <div className="text-xs font-bold text-white tracking-wide">Auto Compound</div>
+                                                <div className="text-[10px] text-white/40 mt-0.5">Automatically reinvest rewards</div>
                                             </div>
                                         </div>
                                         <button
                                             onClick={() => setAutoCompoundPref(!autoCompoundPref)}
-                                            className={`px-3 py-1 border text-[9px] font-black tracking-widest transition-all rounded-lg ${autoCompoundPref ? 'bg-[#e2ff3d] border-[#e2ff3d] text-black' : 'bg-transparent border-white/10 text-white hover:border-white/30'}`}
+                                            className={`px-3 py-1.5 border text-[10px] font-bold tracking-wide transition-all rounded-lg ${autoCompoundPref ? 'bg-[#e2ff3d] border-[#e2ff3d] text-black' : 'bg-transparent border-white/10 text-white hover:border-white/30'}`}
                                         >
-                                            {autoCompoundPref ? 'ACTIVE' : 'OFF'}
+                                            {autoCompoundPref ? 'Active' : 'Off'}
                                         </button>
                                     </div>
 
                                     {/* Amount Input */}
                                     <div className="space-y-3 relative">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-white/40 text-[7px] font-mono font-bold tracking-widest uppercase flex items-center gap-2">
-                                                <Database className="w-3 h-3" />
-                                                STAKE_VALUE
+                                            <label className="text-white/50 text-[10px] font-bold tracking-wide flex items-center gap-2">
+                                                ZUG Amount
                                             </label>
                                             <span className="text-white/50 text-[7px] font-mono font-bold uppercase tracking-tight">
                                                 BAL: {formatEther(balanceData?.value || 0n).substring(0, 10)}
@@ -477,31 +475,31 @@ export default function NativeStakingPage() {
                                     {!isConnected ? (
                                         <button
                                             onClick={() => setIsWalletModalOpen(true)}
-                                            className="w-full py-5 bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all hover:bg-[#e2ff3d] rounded-2xl"
+                                            className="w-full py-4 bg-white text-black font-bold text-sm transition-all hover:bg-white/90 rounded-xl"
                                         >
-                                            CONNECT_WALLET
+                                            Connect Wallet
                                         </button>
                                     ) : chainId !== CHAIN_ID ? (
                                         <button
                                             onClick={handleSwitchNetwork}
-                                            className="w-full py-5 bg-red-500/10 border border-red-500/50 hover:bg-red-500/20 text-red-500 font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2 rounded-2xl"
+                                            className="w-full py-4 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 font-bold text-sm transition-all flex items-center justify-center gap-2 rounded-xl"
                                         >
-                                            <AlertTriangle className="w-5 h-5" />
-                                            SWITCH_NETWORK
+                                            <AlertTriangle className="w-4 h-4" />
+                                            Switch Network
                                         </button>
                                     ) : hasInsufficientBalance ? (
-                                        <div className="space-y-2">
+                                        <div className="space-y-3">
                                             <button
                                                 onClick={() => window.open('https://zugchain.org', '_blank')}
-                                                className="w-full py-5 bg-[#e2ff3d] hover:bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2 rounded-2xl"
+                                                className="w-full py-4 bg-[#e2ff3d] hover:bg-[#d4f030] text-black font-bold text-sm transition-all flex items-center justify-center gap-2 rounded-xl"
                                             >
-                                                <ArrowUpRight className="w-5 h-5" />
-                                                GET_ZUG
+                                                <ArrowUpRight className="w-4 h-4" />
+                                                Get ZUG
                                             </button>
-                                            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl">
-                                                <AlertTriangle className="w-4 h-4" />
-                                                <span className="text-[9px] font-mono uppercase tracking-wide">
-                                                    Insufficient ZUG balance. You need {(amt - zugBalance).toFixed(2)} more ZUG.
+                                            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-red-500/5 border border-red-500/10 text-red-400 rounded-lg">
+                                                <AlertTriangle className="w-3 h-3" />
+                                                <span className="text-xs font-medium">
+                                                    Insufficient balance (+{(amt - zugBalance).toFixed(2)} needed)
                                                 </span>
                                             </div>
                                         </div>
@@ -509,12 +507,11 @@ export default function NativeStakingPage() {
                                         <button
                                             onClick={handleStake}
                                             disabled={isPending}
-                                            className="w-full py-5 bg-[#e2ff3d] hover:bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2 shadow-[0_0_50px_rgba(226,255,61,0.05)] rounded-2xl"
+                                            className="w-full py-4 bg-[#e2ff3d] hover:bg-[#d4f030] text-black font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#e2ff3d]/10 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "INITIATE_STAKE"}
+                                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Stake"}
                                         </button>
                                     )}
-
 
                                 </div>
                             </div>
@@ -523,15 +520,15 @@ export default function NativeStakingPage() {
                         {/* 3. POSITIONS GRID */}
                         <div className="lg:col-span-8 space-y-8">
                             <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                                <h3 className="text-[10px] font-black tracking-[0.4em] uppercase text-white/30">USER_DEPOSIT_INDEX</h3>
+                                <h3 className="text-xs font-bold text-white/50 tracking-wide">ZUG Positions</h3>
                                 <History size={16} className="text-white/40" />
                             </div>
 
                             {deposits.length === 0 ? (
-                                <div className="h-[400px] flex flex-col items-center justify-center border border-dashed border-white/10 bg-white/[0.01]">
-                                    <div className="p-6 bg-white/5 rounded-full mb-6 opacity-20"><Box size={32} className="text-white/30" /></div>
-                                    <p className="text-[11px] font-black uppercase text-white/40 tracking-[0.3em]">No deposit records found</p>
-                                    <p className="text-[9px] text-white/20 font-mono mt-3 uppercase tracking-tighter">System ready for new inputs</p>
+                                <div className="h-[400px] flex flex-col items-center justify-center border border-dashed border-white/10 bg-white/[0.01] rounded-2xl">
+                                    <div className="p-4 bg-white/5 rounded-full mb-4 opacity-50"><Box size={24} className="text-white/40" /></div>
+                                    <p className="text-sm font-medium text-white/60">No active deposits</p>
+                                    <p className="text-xs text-white/30 mt-2">Your staked positions will appear here</p>
                                 </div>
                             ) : (
                                 <div className="grid md:grid-cols-2 gap-6">
