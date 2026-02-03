@@ -94,7 +94,7 @@ export default function Header() {
                                         fill
                                         className="object-contain brightness-150"
                                     />
-                                    <div className="absolute inset-0 bg-white/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <div className="absolute inset-0  blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 </div>
                                 {/* Desktop: Show SVG logo */}
                                 <div className="relative w-28 h-28 hidden lg:flex items-center justify-center">
@@ -104,7 +104,7 @@ export default function Header() {
                                         fill
                                         className="object-contain"
                                     />
-                                    <div className="absolute inset-0 bg-[#e2ff3d]/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <div className="absolute inset-0  blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 </div>
                             </Link>
 
