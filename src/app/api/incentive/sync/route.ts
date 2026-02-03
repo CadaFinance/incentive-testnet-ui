@@ -4,9 +4,13 @@ import { db } from '@/lib/db';
 import { invalidateCache } from '@/lib/redis';
 import { addJob } from '@/lib/queue';
 
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "https://rpc.zugchain.org";
-const STAKING_CONTRACT_NATIVE = process.env.NEXT_PUBLIC_STAKING_CONTRACT_NATIVE || "0x277DFA5c0C7037007716C4C417A1b08fC9B78f2c";
-const STAKING_CONTRACT_TOKEN = process.env.NEXT_PUBLIC_STAKING_CONTRACT_VZUG || "0x532EBcF976148D2531B7d75357694D2eEcA11a76";
+const RPC_URL = process.env.SERVER_RPC_URL || process.env.NEXT_PUBLIC_RPC_URL!;
+const STAKING_CONTRACT_NATIVE = process.env.NEXT_PUBLIC_STAKING_CONTRACT_NATIVE!;
+const STAKING_CONTRACT_TOKEN = process.env.NEXT_PUBLIC_STAKING_CONTRACT_VZUG!;
+
+if (!RPC_URL || !STAKING_CONTRACT_NATIVE || !STAKING_CONTRACT_TOKEN) {
+    throw new Error("Missing required environment variables in api/incentive/sync");
+}
 
 const client = createPublicClient({
     transport: http(RPC_URL)

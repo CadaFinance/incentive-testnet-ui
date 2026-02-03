@@ -70,7 +70,7 @@ export default function WalletModal({ open, onClose }: WalletModalProps) {
                         initial={{ scale: 0.98, opacity: 0, y: 10 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.98, opacity: 0, y: 10 }}
-                        className="relative z-10 w-full max-w-sm overflow-hidden bg-[#020202] inst-border rounded-sm shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+                        className="relative z-10 w-full max-w-sm overflow-hidden bg-[#12141f] inst-border rounded-sm shadow-[0_0_50px_rgba(0,0,0,0.5)]"
                     >
                         {/* Background Atmosphere */}
                         <div className="absolute inset-0 blueprint-grid-fine opacity-20 pointer-events-none" />

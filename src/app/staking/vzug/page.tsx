@@ -276,7 +276,7 @@ export default function TokenStakingPage() {
         const remainingDays = Math.ceil(remainingSeconds / (24 * 60 * 60));
 
         return (
-            <div className="p-6 bg-[#050505]/40 inst-border relative group hover:border-[#e2ff3d]/20 transition-all">
+            <div className="p-8 bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-[32px] relative group hover:border-[#e2ff3d]/20 transition-all">
                 <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-white/5 border border-white/10 rounded-sm">
@@ -319,12 +319,12 @@ export default function TokenStakingPage() {
 
                     {/* Breakdown Stats */}
                     <div className="grid grid-cols-2 gap-2 py-2 text-[9px]">
-                        <div className="space-y-1 p-2 bg-white/[0.02] border border-white/5">
-                            <span className="text-gray-600 uppercase block font-bold">Claimed</span>
+                        <div className="space-y-1 p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                            <span className="text-white/40 uppercase block font-bold">Claimed</span>
                             <span className="text-white font-mono">{Number(formatEther(deposit.totalClaimed)).toFixed(2)}</span>
                         </div>
-                        <div className="space-y-1 p-2 bg-white/[0.02] border border-white/5">
-                            <span className="text-gray-600 uppercase block font-bold">Yielded</span>
+                        <div className="space-y-1 p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                            <span className="text-white/40 uppercase block font-bold">Yielded</span>
                             <span className="text-white font-mono">{Number(formatEther(deposit.totalCompounded)).toFixed(2)}</span>
                         </div>
                     </div>
@@ -380,7 +380,7 @@ export default function TokenStakingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-[#e2ff3d] selection:text-black font-sans">
+        <div className="min-h-screen bg-transparent text-white selection:bg-[#e2ff3d] selection:text-black font-sans">
 
             <main className="container mx-auto max-w-7xl px-6 lg:px-8 py-6">
                 <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6">
@@ -392,10 +392,10 @@ export default function TokenStakingPage() {
                                 <span className="w-4 h-[1px] bg-white" />
                                 <span className="text-mono text-[8px] font-bold tracking-widest uppercase italic font-mono">Vault protocol</span>
                             </div>
-                            <h1 className="text-2xl font-black text-white tracking-tighter uppercase leading-none">
+                            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase leading-none mb-4">
                                 vZUG_VAULT<span className="text-[#e2ff3d]">V4.</span>
                             </h1>
-                            <p className="text-gray-500 text-[9px] font-mono tracking-tight uppercase max-w-lg">
+                            <p className="text-white/40 text-[11px] font-medium tracking-tight uppercase max-w-lg leading-relaxed">
                                 Liquid staking derivative vault. Optimized for high-fidelity yield capture and network liquidity.
                             </p>
                         </div>
@@ -421,8 +421,8 @@ export default function TokenStakingPage() {
                                 </div>
                             </div>
                             {/* NEW: PROTOCOL TVL */}
-                            <div className="space-y-0 border-l border-white/5 pl-6">
-                                <span className="text-[7px] font-mono text-[#e2ff3d]/60 font-bold uppercase tracking-widest block mb-1">Protocol_TVL</span>
+                            <div className="space-y-1 border-l border-white/10 pl-8">
+                                <span className="text-[9px] font-bold text-[#e2ff3d]/60 uppercase tracking-widest block mb-1">Protocol_TVL</span>
                                 <div className="text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
                                     {tvlData ? formatZug(Number(formatEther(tvlData.value))) : "Loading..."}
                                 </div>
@@ -434,7 +434,7 @@ export default function TokenStakingPage() {
 
                         {/* 2. CREATOR TERMINAL */}
                         <div className="lg:col-span-4 space-y-6">
-                            <div className="bg-[#0b0b0b] border border-white/5 p-6 sticky top-24 shadow-2xl">
+                            <div className="bg-white/[0.02] backdrop-blur-xl border border-white/10 p-8 rounded-[32px] sticky top-24 shadow-2xl">
                                 <div className="flex items-center justify-between mb-8">
                                     <h3 className="text-[10px] font-black tracking-[0.3em] uppercase text-white flex items-center gap-2">
                                         <Database className="w-3 h-3 text-[#e2ff3d]" /> STAKE_MODULE
@@ -449,9 +449,9 @@ export default function TokenStakingPage() {
                                             <button
                                                 key={tier.id}
                                                 onClick={() => setSelectedTier(tier.id)}
-                                                className={`flex justify-between items-center p-4 border transition-all ${selectedTier === tier.id
-                                                    ? "bg-[#e2ff3d]/5 border-[#e2ff3d]/50"
-                                                    : "bg-white/[0.01] border-white/5 hover:bg-white/5"
+                                                className={`flex justify-between items-center p-4 border rounded-xl transition-all ${selectedTier === tier.id
+                                                    ? "bg-[#e2ff3d]/10 border-[#e2ff3d]/50"
+                                                    : "bg-white/[0.02] border-white/5 hover:bg-white/5"
                                                     }`}
                                             >
                                                 <div className="text-left font-mono">
@@ -477,7 +477,7 @@ export default function TokenStakingPage() {
                                         </div>
                                         <button
                                             onClick={() => setAutoCompoundPref(!autoCompoundPref)}
-                                            className={`px-3 py-1 border text-[9px] font-black tracking-widest transition-all ${autoCompoundPref ? 'bg-[#e2ff3d] border-[#e2ff3d] text-black' : 'bg-transparent border-white/10 text-white hover:border-white/30'}`}
+                                            className={`px-3 py-1 border text-[9px] font-black tracking-widest transition-all rounded-lg ${autoCompoundPref ? 'bg-[#e2ff3d] border-[#e2ff3d] text-black' : 'bg-transparent border-white/10 text-white hover:border-white/30'}`}
                                         >
                                             {autoCompoundPref ? 'ON' : 'OFF'}
                                         </button>
@@ -490,7 +490,7 @@ export default function TokenStakingPage() {
                                                 <Database className="w-3 h-3" />
                                                 DEPOSIT_AMOUNT
                                             </label>
-                                            <span className="text-gray-700 text-[7px] font-mono font-bold uppercase tracking-tight">
+                                            <span className="text-white/40 text-[7px] font-mono font-bold uppercase tracking-tight">
                                                 BAL: {formatEther(vzugBalance || 0n).substring(0, 10)}
                                             </span>
                                         </div>
@@ -500,7 +500,7 @@ export default function TokenStakingPage() {
                                                 value={stakeAmount}
                                                 onChange={(e) => setStakeAmount(e.target.value)}
                                                 placeholder="0.00"
-                                                className="w-full bg-white/[0.02] border border-white/10 py-4 px-5 text-xs font-mono text-white placeholder:text-white/5 focus:ring-1 focus:ring-[#e2ff3d]/20 focus:border-[#e2ff3d]/40 outline-none transition-all"
+                                                className="w-full bg-white/[0.03] border border-white/10 py-4 px-5 text-xs font-mono text-white placeholder:text-white/5 focus:ring-1 focus:ring-[#e2ff3d]/20 focus:border-[#e2ff3d]/40 outline-none transition-all rounded-xl"
                                             />
                                             <button
                                                 onClick={() => setStakeAmount(vzugBalance ? formatEther(vzugBalance) : "0")}
@@ -515,7 +515,7 @@ export default function TokenStakingPage() {
                                     {!isConnected ? (
                                         <button
                                             onClick={() => setIsWalletModalOpen(true)}
-                                            className="w-full py-5 bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all hover:bg-[#e2ff3d]"
+                                            className="w-full py-5 bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all hover:bg-[#e2ff3d] rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                                         >
                                             CONNECT_WALLET
                                         </button>
@@ -547,7 +547,7 @@ export default function TokenStakingPage() {
                                         <button
                                             onClick={handleApprove}
                                             disabled={isPending}
-                                            className="w-full py-5 bg-yellow-500 hover:bg-yellow-400 text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-5 bg-yellow-500 hover:bg-yellow-400 text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2 rounded-2xl"
                                         >
                                             {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "GRANT_APPROVAL"}
                                         </button>
@@ -555,7 +555,7 @@ export default function TokenStakingPage() {
                                         <button
                                             onClick={handleStake}
                                             disabled={isPending}
-                                            className="w-full py-5 bg-[#e2ff3d] hover:bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-5 bg-[#e2ff3d] hover:bg-white text-black font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-2 rounded-2xl shadow-[0_0_30px_rgba(226,255,61,0.1)]"
                                         >
                                             {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "EXECUTE_STAKE"}
                                         </button>

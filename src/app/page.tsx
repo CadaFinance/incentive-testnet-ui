@@ -10,7 +10,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const params = await searchParams;
   const ref = params.ref;
-  const baseUrl = process.env.NEXT_PUBLIC_TESTNET_APP || 'https://testnet.zugchain.org';
+  const baseUrl = process.env.NEXT_PUBLIC_TESTNET_APP!;
 
   const baseMetadata: Metadata = {
     metadataBase: new URL(baseUrl),
@@ -26,7 +26,7 @@ export async function generateMetadata(
       openGraph: {
         title,
         description,
-        url: `https://testnet.zugchain.org/?ref=${ref}`,
+        url: `${baseUrl}/?ref=${ref}`,
         images: ['/refOG.png?v=2'],
       },
       twitter: {

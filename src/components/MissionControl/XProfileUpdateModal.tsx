@@ -113,7 +113,7 @@ export function XProfileUpdateModal({ open, onClose, walletAddress, onVerified }
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-md bg-[#09090b] border border-[#e2ff3d]/20 shadow-[0_0_50px_rgba(226,255,61,0.1)] p-6 md:p-8 max-h-[90vh] overflow-y-auto"
+                        className="relative w-full max-w-md bg-[#030303]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] p-6 md:p-8 max-h-[90vh] overflow-y-auto rounded-3xl"
                     >
                         {/* Close Button */}
                         <button
@@ -127,15 +127,15 @@ export function XProfileUpdateModal({ open, onClose, walletAddress, onVerified }
                         <div className="flex flex-col gap-6">
                             {/* Header */}
                             <div className="text-center space-y-2">
-                                <div className="mx-auto w-12 h-12 bg-[#e2ff3d]/10 flex items-center justify-center rounded-full mb-4">
-                                    <svg className="w-6 h-6 text-[#e2ff3d]" viewBox="0 0 24 24" fill="currentColor">
+                                <div className="mx-auto w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center rounded-2xl mb-4 shadow-[0_0_20px_rgba(226,255,61,0.1)]">
+                                    <svg className="w-5 h-5 text-[#e2ff3d]" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                                     </svg>
                                 </div>
                                 <h2 className="text-2xl font-black text-white uppercase tracking-tighter">
                                     Update X Profile
                                 </h2>
-                                <p className="text-zinc-500 text-xs font-mono">
+                                <p className="text-white/40 text-xs font-mono">
                                     Add ZugChain to your profile and upload a screenshot
                                 </p>
                             </div>
@@ -148,14 +148,14 @@ export function XProfileUpdateModal({ open, onClose, walletAddress, onVerified }
                                         Add to Your Name
                                     </label>
                                     <div className="flex items-center gap-2">
-                                        <div className="flex-1 bg-zinc-900/50 border border-white/10 px-4 py-3 text-white font-mono text-sm">
+                                        <div className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-3 text-white font-mono text-sm rounded-xl">
                                             {PROFILE_NAME}
                                         </div>
                                         <button
                                             onClick={() => handleCopy(PROFILE_NAME, 'Name')}
-                                            className="bg-[#e2ff3d]/10 hover:bg-[#e2ff3d]/20 border border-[#e2ff3d]/30 p-3 transition-colors"
+                                            className="bg-white/5 hover:bg-white/10 border border-white/10 p-3 transition-colors rounded-xl group"
                                         >
-                                            <Copy className="w-4 h-4 text-[#e2ff3d]" />
+                                            <Copy className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
                                         </button>
                                     </div>
                                 </div>
@@ -166,14 +166,14 @@ export function XProfileUpdateModal({ open, onClose, walletAddress, onVerified }
                                         Add to Your Bio
                                     </label>
                                     <div className="flex items-center gap-2">
-                                        <div className="flex-1 bg-zinc-900/50 border border-white/10 px-4 py-3 text-white font-mono text-sm">
+                                        <div className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-3 text-white font-mono text-sm rounded-xl">
                                             {PROFILE_BIO}
                                         </div>
                                         <button
                                             onClick={() => handleCopy(PROFILE_BIO, 'Bio')}
-                                            className="bg-[#e2ff3d]/10 hover:bg-[#e2ff3d]/20 border border-[#e2ff3d]/30 p-3 transition-colors"
+                                            className="bg-white/5 hover:bg-white/10 border border-white/10 p-3 transition-colors rounded-xl group"
                                         >
-                                            <Copy className="w-4 h-4 text-[#e2ff3d]" />
+                                            <Copy className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
                                         </button>
                                     </div>
                                 </div>
@@ -183,16 +183,16 @@ export function XProfileUpdateModal({ open, onClose, walletAddress, onVerified }
                                     href="https://x.com/settings/profile"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center justify-center gap-2 w-full bg-zinc-900/50 hover:bg-zinc-800/50 border border-white/10 hover:border-white/20 py-3 text-white text-xs font-bold uppercase tracking-wider transition-colors"
+                                    className="flex items-center justify-center gap-2 w-full bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-white/20 py-3 text-white text-xs font-bold uppercase tracking-wider transition-colors rounded-xl"
                                 >
-                                    <ExternalLink className="w-4 h-4" />
+                                    <ExternalLink className="w-4 h-4 opacity-50" />
                                     Open X Profile Settings
                                 </a>
                             </div>
 
                             {/* Divider */}
                             <div className="relative h-px bg-white/5 my-2">
-                                <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#09090b] px-2 text-[10px] text-zinc-600 font-mono uppercase">
+                                <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#09090b] px-2 text-[10px] text-white/30 font-mono uppercase">
                                     Upload Screenshot
                                 </span>
                             </div>
@@ -210,16 +210,16 @@ export function XProfileUpdateModal({ open, onClose, walletAddress, onVerified }
                                 {!previewUrl ? (
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="w-full border-2 border-dashed border-zinc-700 hover:border-[#e2ff3d]/50 bg-zinc-900/30 py-8 flex flex-col items-center gap-3 transition-colors group"
+                                        className="w-full border border-dashed border-white/10 hover:border-[#e2ff3d]/50 bg-white/[0.02] py-8 flex flex-col items-center gap-3 transition-colors group rounded-xl"
                                     >
-                                        <div className="w-12 h-12 bg-zinc-800 group-hover:bg-[#e2ff3d]/10 flex items-center justify-center rounded-full transition-colors">
-                                            <Upload className="w-5 h-5 text-zinc-500 group-hover:text-[#e2ff3d] transition-colors" />
+                                        <div className="w-12 h-12 bg-white/5 group-hover:bg-[#e2ff3d]/10 flex items-center justify-center rounded-full transition-colors">
+                                            <Upload className="w-5 h-5 text-white/40 group-hover:text-[#e2ff3d] transition-colors" />
                                         </div>
                                         <div className="text-center">
                                             <p className="text-white text-sm font-bold mb-1">
                                                 Upload Screenshot
                                             </p>
-                                            <p className="text-zinc-600 text-[10px] font-mono">
+                                            <p className="text-white/30 text-[10px] font-mono">
                                                 PNG, JPG or WEBP (max 10MB)
                                             </p>
                                         </div>
@@ -248,7 +248,7 @@ export function XProfileUpdateModal({ open, onClose, walletAddress, onVerified }
                                 <button
                                     onClick={handleVerify}
                                     disabled={!previewUrl || verifying}
-                                    className="w-full bg-[#e2ff3d] hover:bg-white text-black font-black uppercase py-4 tracking-widest text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+                                    className="w-full bg-[#e2ff3d] hover:bg-white text-black font-black uppercase py-4 tracking-widest text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group rounded-xl"
                                 >
                                     {verifying ? (
                                         <span className="flex items-center gap-2">

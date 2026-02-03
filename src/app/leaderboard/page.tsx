@@ -104,14 +104,14 @@ export default function LeaderboardPage() {
                             className="hidden sm:block fixed bottom-10 right-10 z-[100] w-[300px]"
                         >
                             {/* Animated Border Container */}
-                            <div className="relative p-[1px] overflow-hidden">
+                            <div className="relative p-[1px] overflow-hidden rounded-2xl">
                                 <div className="absolute -inset-[200%] animate-border-spin bg-neon-conic" />
-                                <div className="relative bg-[#050505] p-6 z-10">
+                                <div className="relative bg-[#030303]/90 backdrop-blur-xl p-6 z-10 rounded-2xl">
                                     <div className="space-y-4">
                                         {/* Header */}
                                         <div className="flex items-center justify-between gap-4">
                                             <div className="space-y-1">
-                                                <span className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em]">Your_Rank</span>
+                                                <span className="text-[8px] text-white/40 font-black uppercase tracking-[0.2em]">Your_Rank</span>
                                                 <h4 className="text-4xl font-black text-white tracking-tighter tabular-nums">#{userRank.rank || '...'}</h4>
                                             </div>
                                             <div className="w-14 h-14  flex items-center justify-center">
@@ -142,7 +142,7 @@ export default function LeaderboardPage() {
                                                 <span className="text-[#e2ff3d] font-black text-sm">${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
                                             <div className="flex items-center justify-between text-[10px] font-mono">
-                                                <span className="text-gray-600 uppercase font-bold tracking-widest">Wallet_ID</span>
+                                                <span className="text-white/40 uppercase font-bold tracking-widest">Wallet_ID</span>
                                                 <span className="text-white/40">{formatAddress(userAddress || '')}</span>
                                             </div>
                                         </div>
@@ -168,7 +168,7 @@ export default function LeaderboardPage() {
                                             <span className="text-4xl font-black text-[#e2ff3d] tracking-tighter leading-none">#{userRank.rank}</span>
                                             <div className="flex flex-col">
                                                 <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-widest leading-none mt-1">Your Rank</span>
-                                                <span className="text-[10px] text-gray-600 font-mono leading-none mt-2 opacity-50">{formatMobileAddress(userAddress || '')}</span>
+                                                <span className="text-[10px] text-white/60 font-mono leading-none mt-2 opacity-50">{formatMobileAddress(userAddress || '')}</span>
                                             </div>
                                         </div>
                                         {/* User Badges - Icon only on mobile card */}
@@ -214,10 +214,10 @@ export default function LeaderboardPage() {
                                 <span className="text-mono text-[7px] sm:text-[8px] font-bold tracking-widest uppercase italic text-green-500">Live Intelligence Dashboard</span>
                             </div>
                             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase leading-none">
-                                LEADERBOARD<span className="text-[#e2ff3d]">_</span>
+                                LEADERBOARD<span className="text-[#e2ff3d]">.</span>
                             </h1>
                         </div>
-                        <p className="text-gray-500 text-[9px] sm:text-[10px] font-mono tracking-tight uppercase max-w-lg leading-relaxed">
+                        <p className="text-white/40 text-[9px] sm:text-[10px] font-mono tracking-tight uppercase max-w-lg leading-relaxed">
                             Ranking top protocol contributors based on real-time activity metrics.
                         </p>
                     </div>
@@ -229,7 +229,7 @@ export default function LeaderboardPage() {
                             { label: 'Airdrop_Pool', fullLabel: 'Total_Airdrop_Pool', value: stats?.total_points ? '$' + (stats.total_points * 0.01).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '...', icon: Gift },
                             { label: 'Activity', fullLabel: 'Protocol_Activity', value: stats?.total_activity || '...', icon: Activity }
                         ].map((stat, i) => (
-                            <div key={i} className="p-3 sm:p-4 bg-white/[0.01] border border-white/5 rounded-sm flex flex-col justify-between h-full min-h-[70px] sm:min-h-[80px]">
+                            <div key={i} className="p-3 sm:p-4 bg-white/[0.02] border border-white/10 rounded-2xl flex flex-col justify-between h-full min-h-[70px] sm:min-h-[80px]">
                                 <div className="flex items-center justify-between opacity-30 mb-2">
                                     <stat.icon className="w-3 h-3 sm:w-3 sm:h-3 text-white" />
                                     {/* Responsive Label: Short on mobile, Long on desktop */}
@@ -244,14 +244,14 @@ export default function LeaderboardPage() {
 
                 {/* Table Area - Fixed Mobile Layout */}
                 <div className="w-full">
-                    <motion.div variants={itemVariants} className="inst-border bg-[#050505]/50 overflow-hidden">
+                    <motion.div variants={itemVariants} className="bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-[32px] overflow-hidden p-2">
                         <div className="overflow-x-auto custom-scrollbar pb-2">
                             <table className="w-full text-left border-collapse min-w-[340px] sm:min-w-[500px]">
                                 <thead>
-                                    <tr className="border-b border-white/[0.03] bg-white/[0.01]">
-                                        <th className="py-3 sm:py-4 pl-2 pr-1 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest w-10 sm:w-24 text-left">Rank</th>
-                                        <th className="py-3 sm:py-4 px-1 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest text-left">Contributor_Address</th>
-                                        <th className="py-3 sm:py-4 px-2 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest text-right">Points</th>
+                                    <tr className="border-b border-white/[0.05]">
+                                        <th className="py-3 sm:py-4 pl-4 pr-1 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-white/40 uppercase tracking-widest w-10 sm:w-24 text-left">Rank</th>
+                                        <th className="py-3 sm:py-4 px-1 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-white/40 uppercase tracking-widest text-left">Contributor_Address</th>
+                                        <th className="py-3 sm:py-4 px-2 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-white/40 uppercase tracking-widest text-right">Points</th>
                                         <th className="py-3 sm:py-4 px-2 sm:px-6 text-[7px] sm:text-[8px] font-mono font-bold text-[#e2ff3d] uppercase tracking-widest text-right">$USDZ</th>
                                     </tr>
                                 </thead>
@@ -271,8 +271,8 @@ export default function LeaderboardPage() {
                                                     : userAddress?.toLowerCase() === leader.address.toLowerCase() ? 'bg-[#e2ff3d]/[0.03]' : ''
                                                     }`}
                                             >
-                                                <td className="py-3 sm:py-5 pl-2 pr-1 sm:px-6">
-                                                    <span className={`text-[11px] sm:text-[13px] font-mono font-black transition-colors ${Number(leader.rank) <= 3 ? 'text-[#e2ff3d]' : 'text-gray-600 group-hover:text-white'}`}>#{leader.rank}</span>
+                                                <td className="py-3 sm:py-5 pl-4 pr-1 sm:px-6">
+                                                    <span className={`text-[11px] sm:text-[13px] font-mono font-black transition-colors ${Number(leader.rank) <= 3 ? 'text-[#e2ff3d]' : 'text-white/60 group-hover:text-white'}`}>#{leader.rank}</span>
                                                 </td>
                                                 <td className="py-3 sm:py-5 px-1 sm:px-6">
                                                     <div className="flex items-center gap-1 sm:gap-2 flex-nowrap">

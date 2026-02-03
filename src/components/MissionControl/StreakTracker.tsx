@@ -60,23 +60,23 @@ export function StreakTracker({ faucetStreak, stakeStreak, lastFaucetDate, lastS
                         <div
                             key={day}
                             className={`
-                                relative flex flex-col justify-between p-2 lg:p-3 border transition-all duration-300 h-16 lg:h-24
+                                relative flex flex-col justify-between p-2 lg:p-3 border transition-all duration-300 h-16 lg:h-24 rounded-xl
                                 ${isActive
-                                    ? 'bg-[#e2ff3d] border-[#e2ff3d]'
-                                    : 'bg-transparent border-white/10'
+                                    ? 'bg-[#e2ff3d]/[0.05] border-[#e2ff3d] shadow-[0_0_20px_rgba(226,255,61,0.05)]'
+                                    : 'bg-white/[0.02] border-white/10'
                                 }
                                 ${day === 7 ? 'col-span-1' : ''}
                             `}
                         >
                             <span className={`
                                 text-[8px] lg:text-[10px] font-mono font-bold uppercase tracking-widest
-                                ${isActive ? 'text-black' : 'text-gray-600'}
+                                ${isActive ? 'text-[#e2ff3d]' : 'text-zinc-600'}
                             `}>
                                 Day 0{day}
                             </span>
 
                             {isActive && (
-                                <span className="text-[9px] lg:text-xs font-black text-black uppercase tracking-tight self-end">
+                                <span className="text-[9px] lg:text-xs font-black text-[#e2ff3d] uppercase tracking-tight self-end">
                                     {/* Shorter text on mobile if space counts */}
                                     <span className="hidden lg:inline">COMPLETED</span>
                                     <span className="inline lg:hidden">DONE</span>

@@ -31,7 +31,7 @@ export async function GET(request: Request) {
                 [newCode, normalizedAddress, expiresAt]
             );
 
-            const botUsername = process.env.TELEGRAM_BOT_USERNAME || 'zugverify_bot';
+            const botUsername = process.env.TELEGRAM_BOT_USERNAME!;
             const deepLink = `https://t.me/${botUsername}?start=${newCode}`;
 
             return NextResponse.json({ code: newCode, deepLink });

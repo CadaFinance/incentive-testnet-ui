@@ -71,7 +71,7 @@ export function TweetVerifyModal({ open, onClose, walletAddress, referralCode, o
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-md bg-[#09090b] border border-[#e2ff3d]/20 shadow-[0_0_50px_rgba(226,255,61,0.1)] p-6 md:p-8"
+                        className="relative w-full max-w-md bg-[#030303]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] p-6 md:p-8 rounded-3xl"
                     >
                         {/* Close Button */}
                         <button
@@ -84,13 +84,15 @@ export function TweetVerifyModal({ open, onClose, walletAddress, referralCode, o
                         <div className="flex flex-col gap-6">
                             {/* Header */}
                             <div className="text-center space-y-2">
-                                <div className="mx-auto w-12 h-12 bg-[#e2ff3d]/10 flex items-center justify-center rounded-full mb-4">
-                                    <Twitter className="w-6 h-6 text-[#e2ff3d]" />
+                                <div className="mx-auto w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center rounded-2xl mb-4 shadow-[0_0_20px_rgba(226,255,61,0.1)]">
+                                    <svg className="w-5 h-5 text-[#e2ff3d]" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                    </svg>
                                 </div>
                                 <h2 className="text-2xl font-black text-white uppercase tracking-tighter">
                                     Verify Mission
                                 </h2>
-                                <p className="text-zinc-500 text-xs font-mono">
+                                <p className="text-white/40 text-xs font-mono">
                                     Paste the link to your tweet to claim rewards.
                                 </p>
                             </div>
@@ -106,7 +108,7 @@ export function TweetVerifyModal({ open, onClose, walletAddress, referralCode, o
                                         placeholder="https://x.com/username/status/123..."
                                         value={link}
                                         onChange={(e) => setLink(e.target.value)}
-                                        className="w-full bg-zinc-900/50 border border-white/10 text-white p-3 text-sm focus:border-[#e2ff3d]/50 focus:outline-none font-mono placeholder:text-zinc-700"
+                                        className="w-full bg-white/[0.03] border border-white/10 text-white p-4 text-sm focus:border-[#e2ff3d]/50 focus:outline-none font-mono placeholder:text-white/20 rounded-xl"
                                     />
                                 </div>
 
@@ -120,7 +122,7 @@ export function TweetVerifyModal({ open, onClose, walletAddress, referralCode, o
                                 <button
                                     onClick={handleVerify}
                                     disabled={verifying}
-                                    className="w-full bg-[#e2ff3d] hover:bg-white text-black font-black uppercase py-4 tracking-widest text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+                                    className="w-full bg-[#e2ff3d] hover:bg-white text-black font-black uppercase py-4 tracking-widest text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group rounded-xl"
                                 >
                                     {verifying ? (
                                         <span className="animate-pulse">Verifying...</span>
@@ -145,7 +147,7 @@ export function TweetVerifyModal({ open, onClose, walletAddress, referralCode, o
                                 href={INTENT_URL}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 text-xs text-zinc-500 hover:text-white transition-colors font-mono uppercase tracking-wide border border-white/5 hover:border-white/20 py-3 bg-zinc-900/30"
+                                className="flex items-center justify-center gap-2 text-xs text-white/40 hover:text-white transition-colors font-mono uppercase tracking-wide border border-white/10 hover:border-white/20 py-4 bg-white/[0.03] rounded-xl"
                             >
                                 <Twitter className="w-3 h-3" />
                                 Post Again

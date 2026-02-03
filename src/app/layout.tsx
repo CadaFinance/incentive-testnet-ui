@@ -28,7 +28,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="16x16" href="/zug_logo.svg" />
         <link rel="apple-touch-icon" href="/zug_logo.svg" />
       </head>
-      <body className="bg-[#020202] min-h-screen antialiased selection:bg-[#e2ff3d] selection:text-black">
+      <body className="bg-[#0f111a] min-h-screen antialiased selection:bg-[#e2ff3d] selection:text-black">
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             <div className="relative min-h-screen">
@@ -39,7 +39,7 @@ export default function RootLayout({
               </div>
 
               <div className="relative z-10 flex flex-col min-h-screen">
-                <Suspense fallback={<div className="h-16 bg-black" />}>
+                <Suspense fallback={<div className="h-16" />}>
                   <Header />
                 </Suspense>
                 <main className="flex-grow pt-16 pb-12">

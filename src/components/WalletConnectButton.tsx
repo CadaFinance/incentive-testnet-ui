@@ -96,10 +96,10 @@ export default function WalletConnectButton({ fullWidth = false }: WalletConnect
             <div className="relative" ref={dropdownRef}>
                 <button
                     onClick={() => setShowDropdown(!showDropdown)}
-                    className="flex items-center gap-4 bg-white/[0.02] border border-white/10 text-white px-6 py-2 rounded-sm font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-white/[0.05] transition-all group"
+                    className="flex items-center gap-4 bg-white/[0.02] border border-white/10 text-white px-5 py-2 h-[34px] rounded-lg font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-white/[0.05] transition-all group"
                 >
                     <div className="flex flex-col items-start leading-none gap-1">
-                        <span className="font-mono text-white text-[12px] tabular-nums tracking-tighter">
+                        <span className="font-mono text-white text-[10px] tabular-nums tracking-tighter">
                             {balance?.formatted ? parseFloat(balance.formatted).toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0.00'}<span className="text-[#e2ff3d] ml-1 opacity-80">{balance?.symbol}</span>
                         </span>
                     </div>
@@ -107,18 +107,18 @@ export default function WalletConnectButton({ fullWidth = false }: WalletConnect
                 </button>
 
                 {showDropdown && (
-                    <div className="absolute right-0 mt-3 w-56 bg-[#050505] rounded-sm inst-border z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                    <div className="absolute right-0 mt-3 w-56 bg-[#050505] rounded-lg border border-white/10 z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200 shadow-2xl">
                         <div className="px-5 py-4 border-b border-white/[0.03] bg-white/[0.01]">
-                            <div className="text-[8px] font-mono text-gray-700 tracking-[0.3em] uppercase mb-2 font-bold">NODE_AUTHENTICATED</div>
+                            <div className="text-[8px] font-mono text-gray-700 tracking-wider mb-2 font-bold">Node authenticated</div>
                             <div className="text-[10px] font-mono text-[#e2ff3d]/60 truncate tracking-tight selection:bg-[#e2ff3d] selection:text-black">
                                 {address}
                             </div>
                         </div>
                         <button
                             onClick={handleDisconnect}
-                            className="w-full flex items-center justify-between px-5 py-4 text-[10px] font-bold tracking-[0.2em] text-red-500 hover:bg-red-500/5 transition-colors uppercase group"
+                            className="w-full flex items-center justify-between px-5 py-4 text-[10px] font-bold tracking-tight text-red-500 hover:bg-red-500/5 transition-colors group"
                         >
-                            TERMINATE_SESSION
+                            Terminate session
                             <ArrowRightOnRectangleIcon className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                         </button>
                     </div>
@@ -131,7 +131,7 @@ export default function WalletConnectButton({ fullWidth = false }: WalletConnect
         <>
             <button
                 onClick={handleConnect}
-                className={`bg-[#e2ff3d] text-black px-6 py-2 rounded-sm font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-white transition-all tech-glow ${fullWidth ? 'w-full' : ''}`}
+                className={`bg-[#e2ff3d] text-black px-5 py-2 h-[34px] flex items-center justify-center rounded-lg font-bold text-[10px] tracking-wide hover:bg-white transition-all tech-glow ${fullWidth ? 'w-full' : ''}`}
             >
                 Connect Wallet
             </button>

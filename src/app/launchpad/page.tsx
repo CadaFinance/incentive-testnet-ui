@@ -62,7 +62,7 @@ const DEPOSIT_ABI = [
     }
 ] as const;
 
-const DEPOSIT_CONTRACT_ADDRESS = '0x00000000219ab540356cBB839Cbe05303d7705Fa';
+const DEPOSIT_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_DEPOSIT_CONTRACT! as `0x${string}`;
 
 export default function LaunchpadPage() {
     const { address, isConnected } = useAccount();

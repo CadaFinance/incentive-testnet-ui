@@ -27,7 +27,7 @@ export const DEPOSIT_CONTRACT =
 
 /** Admin/Developer Address (for UI access control) */
 export const ADMIN_ADDRESS =
-    (process.env.NEXT_PUBLIC_ADMIN_ADDRESS || '').toLowerCase();
+    (process.env.NEXT_PUBLIC_ADMIN_ADDRESS || '').toLowerCase(); // Keeping '' as safe fallback for avoiding crash on toLowerCase, but removing hardcoded address.
 
 // ============================================================
 // BUNDLED EXPORTS (for convenience)

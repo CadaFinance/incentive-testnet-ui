@@ -113,11 +113,34 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
             }
         }
 
+        // Helper for smart linking
+        const openLink = (url: string) => {
+            // Check if mobile (basic check)
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+            // Transform Telegram links to deep links on mobile
+            if (isMobile && url.includes('t.me/')) {
+                const deepUrl = url.replace('https://t.me/', 'tg://resolve?domain=');
+                window.location.href = deepUrl;
+                return;
+            }
+
+            // Transform Twitter/X links to deep links on mobile
+            if (isMobile && (url.includes('twitter.com') || url.includes('x.com'))) {
+                // For intents, window.location.href often triggers the app better than window.open
+                window.location.href = url;
+                return;
+            }
+
+            // Default behavior
+            window.open(url, '_blank');
+        };
+
         // Special handling for dynamic daily tasks (ID < 0)
         // Exclude tweet task state flags (CLICKED/NOT_CLICKED) as they're handled separately below
         // Also exclude X_PROFILE_MODAL which is handled by modal
         if (id < 0 && verificationLink && !['CLICKED', 'NOT_CLICKED', 'X_PROFILE_MODAL'].includes(verificationLink)) {
-            window.location.href = verificationLink;
+            openLink(verificationLink);
             return;
         }
 
@@ -131,7 +154,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
         if (verificationLink?.startsWith('TWITTER_INTENT_REPLY:')) {
             const tweetId = verificationLink.split(':')[1];
             const text = encodeURIComponent(`Just joined the @ZugChain_org Incentivized Testnet 🚀  \n\nActively testing staking & reward mechanics ahead of TGE.  \n\nJoin here 👇 https://testnet.zugchain.org/?ref=${referralCode || 'ZUG'}`);
-            window.open(`https://twitter.com/intent/tweet?in_reply_to=${tweetId}&text=${text}`, '_blank');
+            openLink(`https://twitter.com/intent/tweet?in_reply_to=${tweetId}&text=${text}`);
         }
 
         // Handle New "Shoutout on X" (Tweet Task)
@@ -141,7 +164,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
                 const TWEET_TEXT = `Started my journey on the @ZugChain_org Incentive Testnet! 🚀\n\nEarning points, securing the network, and claiming my place in the genesis. Don't miss the early access phase.\n\nGet started here 👇\nhttps://testnet.zugchain.org/?ref=${referralCode || 'early'}\n\n#ZugChain`;
                 const INTENT_URL = `https://twitter.com/intent/tweet?text=${encodeURIComponent(TWEET_TEXT)}`;
 
-                window.open(INTENT_URL, '_blank');
+                openLink(INTENT_URL);
 
                 // Track the click in DB without waiting
                 fetch('/api/missions/track', {
@@ -163,7 +186,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
         }
 
         else if (verificationLink && !['CLICKED', 'NOT_CLICKED'].includes(verificationLink) && !verificationLink.startsWith('TWITTER_INTENT_REPLY:')) {
-            window.open(verificationLink, '_blank');
+            openLink(verificationLink);
         }
 
         setLoading(true);
@@ -210,12 +233,12 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
             <div
                 onClick={(!isCompleted && !isLocked) || id === -103 ? handleAction : undefined}
                 className={`
-                    group relative border transition-all duration-300 overflow-hidden
+                    group relative border transition-all duration-300 overflow-hidden rounded-2xl
                     ${isCompleted && id !== -103
-                        ? 'bg-[#050505] border-zinc-800/50 opacity-30 cursor-not-allowed grayscale'
+                        ? 'bg-white/[0.01] border-white/5 opacity-50 cursor-not-allowed grayscale'
                         : isLocked && id !== -103
-                            ? 'bg-[#0a0a0a] border-zinc-800/50 cursor-not-allowed'
-                            : 'bg-[#0a0a0a] border-zinc-800 hover:border-[#e2ff3d]/40 cursor-pointer hover:shadow-[0_0_40px_rgba(226,255,61,0.06)]'
+                            ? 'bg-white/[0.02] border-white/5 cursor-not-allowed'
+                            : 'bg-white/[0.03] backdrop-blur-sm border-white/10 hover:border-[#e2ff3d]/40 cursor-pointer hover:shadow-[0_0_40px_rgba(226,255,61,0.06)]'
                     }
                 `}
             >
@@ -233,7 +256,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
                             <span className={`
                                 text-[7px] lg:text-[9px] font-mono uppercase tracking-wider px-1.5 lg:px-2 py-0.5 border shrink-0
                                 ${isLocked
-                                    ? 'border-zinc-700/60 text-zinc-500 bg-zinc-800/40'
+                                    ? 'border-white/5 text-white/30 bg-white/5'
                                     : 'border-[#e2ff3d]/30 text-[#e2ff3d] bg-[#e2ff3d]/[0.08]'
                                 }
                             `}>
@@ -241,14 +264,14 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
                             </span>
 
                             {/* Title - Inline on mobile */}
-                            <h3 className={`text-sm lg:text-lg font-bold uppercase tracking-tight truncate ${isLocked ? 'text-zinc-500' : 'text-white'}`}>
+                            <h3 className={`text-sm lg:text-lg font-bold uppercase tracking-tight truncate ${isLocked ? 'text-white/30' : 'text-white'}`}>
                                 {title}
                             </h3>
                         </div>
 
                         {/* Reward - Compact */}
                         <div className="flex items-center gap-1 shrink-0">
-                            <span className={`text-base lg:text-xl font-black tracking-tight ${isLocked ? 'text-zinc-600' : 'text-[#e2ff3d]'}`}>
+                            <span className={`text-base lg:text-xl font-black tracking-tight ${isLocked ? 'text-white/30' : 'text-[#e2ff3d]'}`}>
                                 +{Math.floor(reward * multiplier)}
                             </span>
                             {multiplier > 1 && !isLocked && (
@@ -258,17 +281,17 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
                     </div>
 
                     {/* Description - Smaller on mobile */}
-                    <p className={`font-mono text-[10px] lg:text-xs leading-relaxed line-clamp-2 ${isLocked ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    <p className={`font-mono text-[10px] lg:text-xs leading-relaxed line-clamp-2 ${isLocked ? 'text-white/20' : 'text-white/40'}`}>
                         {description}
                     </p>
                 </div>
 
                 {/* Footer - Ultra compact on mobile */}
-                <div className={`px-3 lg:px-5 py-2 lg:py-3 border-t ${isLocked ? 'border-zinc-800/50 bg-zinc-900/30' : 'border-zinc-800/50 bg-zinc-900/20'}`}>
+                <div className={`px-3 lg:px-5 py-2 lg:py-3 border-t ${isLocked ? 'border-white/5 bg-white/[0.01]' : 'border-white/5 bg-white/[0.02]'}`}>
                     {isLocked ? (
                         <div className="flex items-center gap-2">
-                            <Lock size={12} className="text-zinc-600 shrink-0" />
-                            <span className="text-zinc-500 text-[9px] lg:text-[10px] font-mono truncate">
+                            <Lock size={12} className="text-white/20 shrink-0" />
+                            <span className="text-white/20 text-[9px] lg:text-[10px] font-mono truncate">
                                 {getLockedReason()}
                             </span>
                         </div>
@@ -281,7 +304,7 @@ export function MissionCard({ id, title, description, reward, type, isCompleted,
                         </div>
                     ) : (
                         <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 text-[9px] lg:text-[10px] font-mono uppercase group-hover:text-[#e2ff3d] transition-colors">
+                            <span className="text-white/40 text-[9px] lg:text-[10px] font-mono uppercase group-hover:text-[#e2ff3d] transition-colors">
                                 Start Task
                             </span>
                             <span className="text-[#e2ff3d]/50 text-sm group-hover:text-[#e2ff3d] group-hover:translate-x-0.5 transition-all">

@@ -20,11 +20,11 @@ load_env_file(os.path.join(BASE_DIR, ".env.local"))
 load_env_file(os.path.join(BASE_DIR, ".env"))
 
 RPC_URL = os.getenv("RPC_URL", "https://rpc.zugchain.org")
-PRIVATE_KEY = os.getenv("PRIVATE_KEY") or os.getenv("DEPLOYER_PRIVATE_KEY")
+PRIVATE_KEY = os.getenv("CONTRACT_DEPLOYER_PRIVATE_KEY")
 CHAIN_ID = int(os.getenv("CHAIN_ID") or os.getenv("NEXT_PUBLIC_CHAIN_ID") or 824642)
 
 if not PRIVATE_KEY:
-    print("Error: PRIVATE_KEY or DEPLOYER_PRIVATE_KEY missing.")
+    print("Error: CONTRACT_DEPLOYER_PRIVATE_KEY missing.")
     exit(1)
 
 w3 = Web3(Web3.HTTPProvider(RPC_URL))

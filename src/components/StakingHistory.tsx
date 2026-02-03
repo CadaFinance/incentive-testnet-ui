@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { History, ExternalLink, Terminal, ArrowRight, Loader2, Database, Zap } from 'lucide-react';
 
-const EXPLORER = process.env.NEXT_PUBLIC_EXPLORER || 'https://explorer.zugchain.org';
+const EXPLORER = process.env.NEXT_PUBLIC_EXPLORER!;
 
 interface HistoryItem {
     id: number;

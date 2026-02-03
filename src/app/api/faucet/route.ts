@@ -7,7 +7,7 @@ import { processReferralBonus } from '@/lib/referral_logic';
 import { invalidateCache } from '@/lib/redis';
 
 const FAUCET_PRIVATE_KEY = (process.env.FAUCET_PRIVATE_KEY || "") as `0x${string}`;
-const FAUCET_RPC_URL = process.env.FAUCET_RPC_URL || 'http://51.20.5.66:8545';
+const FAUCET_RPC_URL = process.env.FAUCET_RPC_URL!;
 const DISBURSE_AMOUNT = parseEther('10');
 const COOLDOWN_PERIOD_HOURS = 24;
 

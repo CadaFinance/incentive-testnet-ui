@@ -5,13 +5,14 @@
   --zug-primary: #e2ff3d;
   /* Refined 'Electric Volt' - sharper, more modern */
   --zug-primary-rgb: 226, 255, 61;
-  --zug-dark: #050505;
-  /* Deeper black for higher contrast */
-  --zug-darker: #020202;
-  --zug-card: #0a0a0a;
+  --zug-dark: #0f111a;
+  /* Deep Space Dark - Matches Welcome App */
+  --zug-darker: #0f111a;
+  /* Global Page Background */
+  --zug-card: rgba(255, 255, 255, 0.02);
   --zug-border: rgba(255, 255, 255, 0.08);
   --zug-text: #ffffff;
-  --zug-text-muted: #666666;
+  --zug-text-muted: rgba(255, 255, 255, 0.4);
   --zug-success: #00ff88;
   --zug-error: #ff4d4d;
 

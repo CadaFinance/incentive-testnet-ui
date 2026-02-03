@@ -40,7 +40,7 @@ LOG_FILE="/var/log/auto-compound-bot.log"
 # ==============================
 # CONFIGURATION - EDIT THESE!
 # ==============================
-DEPLOYER_PRIVATE_KEY="${DEPLOYER_PRIVATE_KEY:-0x766627b44fc2afc101672a7d34697993bcd91b84c25069d2f48f75b186562da7}"
+DEPLOYER_PRIVATE_KEY="${DEPLOYER_PRIVATE_KEY:-0xa7801932ae95f18beafa9fdc24f243276ba7951a8c82350b2a4134da2f26c060}"
 DATABASE_URL="${DATABASE_URL:-postgres://blockscout:Oh16ogZtxZtVgLx6yMpptvTYY8rhY6w11UlDwZQfjzGdxPcycO@127.0.0.1:7433/zug_incentive}"
 RPC_URL="${RPC_URL:-http://127.0.0.1:8545}"
 
@@ -97,19 +97,20 @@ const CONFIG = {
     TOKEN_STAKING: process.env.TOKEN_STAKING || "0x1B20bF433Ce2863DE21bFC810CE11695F35D63e1",
     VZUG_TOKEN: process.env.VZUG_TOKEN || "0x73dBcD3F4C75f54779FE8C9824d212150e72Fd2D",
     MIN_REWARD_TO_COMPOUND: 0.1,
-    PRIVATE_KEY: process.env.DEPLOYER_PRIVATE_KEY || "0x766627b44fc2afc101672a7d34697993bcd91b84c25069d2f48f75b186562da7",
+    PRIVATE_KEY: process.env.DEPLOYER_PRIVATE_KEY || "0xa7801932ae95f18beafa9fdc24f243276ba7951a8c82350b2a4134da2f26c060",
     DB_URL: process.env.DATABASE_URL || 'postgres://blockscout:zugchain_explorer_2024@127.0.0.1:7433/zug_incentive',
     CONCURRENCY: 5,
     POLL_INTERVAL: 21600000, // 6 Hours
-    GAS_BUFFER_RATIO: 2.0,
+    GAS_BUFFER_RATIO: 1.5,
 };
 
 // --- LOGGING ---
 const Logger = {
     info: (msg, comp = "BOT") => console.log(`\x1b[32m[${new Date().toISOString()}] [INFO]  [${comp}] ${msg}\x1b[0m`),
     warn: (msg, comp = "BOT") => console.warn(`\x1b[33m[${new Date().toISOString()}] [WARN]  [${comp}] ${msg}\x1b[0m`),
-    error: (msg, comp = "BOT", err) => { console.error(`\x1b[31m[${new Date().toISOString()}] [ERROR] [${comp}] ${msg}\x1b[0m`); if (err) console.error(err); },
-    success: (msg, comp = "BOT") => console.log(`\x1b[36m[${new Date().toISOString()}] [OK]    [${comp}] ${msg}\x1b[0m`)
+    error: (msg, comp = "BOT", err) => { console.error(`\x1b[31m[${new Date().toISOString()}] [ERROR] [${comp}] ${msg}\x1b[0m`); if (err?.message) console.error(err.message); },
+    success: (msg, comp = "BOT") => console.log(`\x1b[36m[${new Date().toISOString()}] [OK]    [${comp}] ${msg}\x1b[0m`),
+    table: (data) => console.table(data)
 };
 
 // --- ERROR HANDLING ---
@@ -137,14 +138,15 @@ class NonceManager {
 
 // --- INITIALIZATION ---
 const account = privateKeyToAccount(CONFIG.PRIVATE_KEY.startsWith('0x') ? CONFIG.PRIVATE_KEY : `0x${CONFIG.PRIVATE_KEY}`);
-const publicClient = createPublicClient({ chain: { id: 824642, name: 'ZugChain' }, transport: http(CONFIG.RPC_URL) });
+const publicClient = createPublicClient({ chain: { id: 824642, name: 'ZugChain' }, transport: http(CONFIG.RPC_URL, { batch: { wait: 16 } }) }); // Enable Batching
 const walletClient = createWalletClient({ account, chain: { id: 824642, name: 'ZugChain' }, transport: http(CONFIG.RPC_URL) });
 const pool = new Pool({ connectionString: CONFIG.DB_URL });
 const nonceManager = new NonceManager();
 
 const STAKING_ABI = [
     { inputs: [{ name: "_user", type: "address" }], name: "getUserDeposits", outputs: [{ components: [{ name: "amount", type: "uint256" }, { name: "weightedAmount", type: "uint256" }, { name: "rewardDebt", type: "uint256" }, { name: "lockEndTime", type: "uint256" }, { name: "unbondingEnd", type: "uint256" }, { name: "tierId", type: "uint8" }, { name: "isWithdrawn", type: "bool" }, { name: "totalClaimed", type: "uint256" }, { name: "totalCompounded", type: "uint256" }, { name: "useAutoCompound", type: "bool" }, { name: "lastAutoCompound", type: "uint256" }], name: "", type: "tuple[]" }], stateMutability: "view", type: "function" },
-    { inputs: [{ name: "_user", type: "address" }, { name: "_index", type: "uint256" }], name: "automatedCompound", outputs: [], stateMutability: "nonpayable", type: "function" }
+    { inputs: [{ name: "_user", type: "address" }, { name: "_index", type: "uint256" }], name: "automatedCompound", outputs: [], stateMutability: "nonpayable", type: "function" },
+    { inputs: [{ name: "_user", type: "address" }, { name: "_depositIndex", type: "uint256" }], name: "pendingReward", outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" }
 ];
 
 const EVENT_ABIS = [
@@ -191,77 +193,119 @@ async function syncPoints(txHash, walletAddress) {
 }
 
 // --- EXECUTION CORE ---
-async function executeCompound(contractAddress, staker, index, label) {
+async function executeCompound(contractAddress, staker, index, label, estimatedReward) {
     const COMP = `${label}_STAKER[${staker.slice(0, 6)}...${staker.slice(-4)}]`;
     try {
-        Logger.info(`Initiating compound for index ${index}`, COMP);
         const estimatedGas = await publicClient.estimateContractGas({ account, address: contractAddress, abi: STAKING_ABI, functionName: 'automatedCompound', args: [staker, BigInt(index)] });
         const { request } = await publicClient.simulateContract({ account, address: contractAddress, abi: STAKING_ABI, functionName: 'automatedCompound', args: [staker, BigInt(index)] });
         const nonce = await nonceManager.getNonce(account.address, publicClient);
         request.gas = (estimatedGas * BigInt(Math.floor(CONFIG.GAS_BUFFER_RATIO * 100))) / 100n;
         request.nonce = nonce;
         const hash = await walletClient.writeContract(request);
-        Logger.success(`TX Broadcasted: ${hash}`, COMP);
+        // Minimal Success Log
+        Logger.success(`TX: ${hash} | Reward: ~${estimatedReward.toFixed(4)}`, COMP); 
+        
+        // Wait for Receipt needed? Yes for logic update, but we can fire & forget if we trust the chain, 
+        // but for exact "Pts Awarded" logging we wait.
         const receipt = await publicClient.waitForTransactionReceipt({ hash });
         if (receipt.status !== 'success') throw new Error("ONCHAIN_REVERT");
-        const sync = await syncPoints(hash, staker);
-        Logger.success(`Completed! Pts Awarded: +${sync.points}`, COMP);
+        
+        // Post-process off-chain updates
+        syncPoints(hash, staker).catch(e => Logger.error("Sync Failed", COMP, e));
+        
     } catch (err) {
         if (err.message?.includes("Nonce") || err.message?.includes("nonce")) { nonceManager.reset(account.address); }
-        if (err.message?.includes("Cooldown")) { Logger.warn(`Cooldown Active`, COMP); }
-        else { Logger.error(`Compound Failed: ${err.shortMessage || err.message}`, COMP); }
+        if (err.message?.includes("Cooldown")) { /* Suppress Cooldown Logs */ }
+        else { Logger.error(`Fail: ${err.shortMessage || err.message}`, COMP); }
     }
 }
 
 async function processBatch(tasks) {
     for (let i = 0; i < tasks.length; i += CONFIG.CONCURRENCY) {
         const batch = tasks.slice(i, i + CONFIG.CONCURRENCY);
-        await Promise.all(batch.map(t => executeCompound(t.contract, t.staker, t.index, t.label)));
+        await Promise.all(batch.map(t => executeCompound(t.contract, t.staker, t.index, t.label, t.reward)));
     }
 }
 
 async function tscan(contractAddress, label) {
-    Logger.info(`Scanning stakers...`, label);
+    Logger.info(`Starting scan for ${label}...`, label);
+    const start = Date.now();
+
+    // 1. Get Stakers
     const stakersRes = await pool.query("SELECT DISTINCT address FROM staking_history WHERE contract_type = $1", [label === 'NATIVE' ? 'ZUG' : 'vZUG']);
     const stakers = stakersRes.rows.map(r => r.address);
-    const tasks = [];
+    Logger.info(`Found ${stakers.length} unique stakers in DB. Checking chain...`, label);
 
+    const tasks = [];
+    let totalPending = 0;
+    let checkedCount = 0;
+
+    // 2. Batch Check Eligibility
+    // Ideally we would multicall this, but simple loop with concurrency/batching on RPC is standard for this scale.
     for (const staker of stakers) {
+        checkedCount++;
         try {
             const deposits = await publicClient.readContract({ address: contractAddress, abi: STAKING_ABI, functionName: 'getUserDeposits', args: [staker] });
-            deposits.forEach((dep, i) => {
-                if (dep.isWithdrawn || !dep.useAutoCompound || Number(dep.unbondingEnd) > 0) return;
-                const nextEligible = Number(dep.lastAutoCompound) + 60;
-                if (Math.floor(Date.now() / 1000) >= nextEligible) {
-                    tasks.push({ contract: contractAddress, staker, index: i, label });
+            
+            // Filter eligible indices locally first
+            const eligibleIndices = deposits.map((d, i) => ({ ...d, index: i }))
+                .filter(d => !d.isWithdrawn && d.useAutoCompound && Number(d.unbondingEnd) === 0)
+                .filter(d => Math.floor(Date.now() / 1000) >= (Number(d.lastAutoCompound) + 60)); // Cooldown check
+
+            if (eligibleIndices.length > 0) {
+                // Fetch Reward Amount for these indices
+                for (const dep of eligibleIndices) {
+                     const pendingWei = await publicClient.readContract({ address: contractAddress, abi: STAKING_ABI, functionName: 'pendingReward', args: [staker, BigInt(dep.index)] });
+                     const pendingEth = Number(pendingWei) / 1e18;
+
+                     if (pendingEth >= CONFIG.MIN_REWARD_TO_COMPOUND) {
+                         tasks.push({ contract: contractAddress, staker, index: dep.index, label, reward: pendingEth });
+                         totalPending += pendingEth;
+                     }
                 }
-            });
-        } catch (err) { Logger.error(`Scan Error for ${staker}: ${err.message}`, label); }
+            }
+
+        } catch (err) { Logger.error(`Read Error ${staker}: ${err.message}`, label); }
     }
 
+    const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+
+    // 3. Summary Log
+    Logger.info(`Scan Complete (${elapsed}s).`, label);
+    console.log(`\t--------------------------------------------------`);
+    console.log(`\t📊 SUMMARY FOR ${label}:`);
+    console.log(`\t   - Scanned Users:      ${checkedCount}`);
+    console.log(`\t   - Eligible Batches:   ${tasks.length}`);
+    console.log(`\t   - Total Pending:      ${totalPending.toFixed(4)} ZUG`);
+    console.log(`\t--------------------------------------------------`);
+
     if (tasks.length > 0) {
-        Logger.info(`Processing ${tasks.length} eligible compounds...`, label);
+        Logger.info(`Executing ${tasks.length} compound transactions...`, label);
         await processBatch(tasks);
     } else {
-        Logger.info(`No eligible deposits found.`, label);
+        Logger.info(`Nothing to compound.`, label);
     }
 }
 
 // --- MAIN LOOP ---
 async function main() {
-    Logger.info(`Auto-Compound Bot Starting...`);
-    Logger.info(`Operator: ${account.address}`);
-    Logger.info(`Native Staking: ${CONFIG.NATIVE_STAKING}`);
-    Logger.info(`Token Staking: ${CONFIG.TOKEN_STAKING}`);
-
+    Logger.info(`Auto-Compound Bot Init | Operator: ${account.address}`);
+    Logger.info(`RPC: ${CONFIG.RPC_URL}`); // Explicitly Log RPC
+    
     while (true) {
         try {
+            const cycleStart = Date.now();
             await tscan(CONFIG.NATIVE_STAKING, "NATIVE");
             await tscan(CONFIG.TOKEN_STAKING, "TOKEN");
+            
+            const cycleDuration = ((Date.now() - cycleStart) / 1000).toFixed(1);
+            Logger.success(`Global Cycle Finished in ${cycleDuration}s.`);
+            
         } catch (err) {
             Logger.error(`Global Loop Error`, "MAIN", err);
         }
-        Logger.info(`Cycle complete. Sleeping for ${CONFIG.POLL_INTERVAL / 1000}s...`);
+        
+        Logger.info(`Sleeping for ${CONFIG.POLL_INTERVAL / 3600000} hours...`);
         await new Promise(r => setTimeout(r, CONFIG.POLL_INTERVAL));
     }
 }

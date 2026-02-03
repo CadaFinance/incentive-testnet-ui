@@ -4,12 +4,12 @@ import { motion } from 'framer-motion'
 import { Twitter, Github, MessageCircle, BookOpen, FileText, Shield, Code, Zap, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 
-const MAIN_SITE = process.env.NEXT_PUBLIC_MAIN_SITE || 'https://zugchain.org'
-const EXPLORER = process.env.NEXT_PUBLIC_EXPLORER || 'https://explorer.zugchain.org'
-const TWITTER = process.env.NEXT_PUBLIC_TWITTER || 'https://twitter.com/ZugChain_org'
-const TELEGRAM = process.env.NEXT_PUBLIC_TELEGRAM || 'https://t.me/zugchain'
-const DISCORD = 'https://discord.com/invite/dV2sQtnQEu'
-const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || '824642'
+const MAIN_SITE = process.env.NEXT_PUBLIC_MAIN_SITE!
+const EXPLORER = process.env.NEXT_PUBLIC_EXPLORER!
+const TWITTER = process.env.NEXT_PUBLIC_TWITTER!
+const TELEGRAM = process.env.NEXT_PUBLIC_TELEGRAM!
+const DISCORD = process.env.NEXT_PUBLIC_DISCORD!
+const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID!
 
 const footerLinks = {
     product: [
@@ -51,7 +51,7 @@ const networkSpecs = [
 
 export default function Footer() {
     return (
-        <footer className="relative overflow-hidden bg-[#020202] border-t border-white/5 blueprint-grid-fine">
+        <footer className="relative overflow-hidden bg-transparent border-t border-white/5 blueprint-grid-fine">
             {/* Background Effects */}
             <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
 
@@ -73,7 +73,7 @@ export default function Footer() {
                                 />
                             </div>
 
-                            <p className="text-gray-500 text-sm font-light leading-relaxed mb-10 max-w-sm">
+                            <p className="text-white/40 text-sm font-light leading-relaxed mb-10 max-w-sm">
                                 Hybrid Layer 1 architectural framework. Engineered for sovereign capital emission and high-fidelity decentralized execution.
                             </p>
 
@@ -81,7 +81,7 @@ export default function Footer() {
                             <div className="grid grid-cols-2 gap-4">
                                 {networkSpecs.map((spec, idx) => (
                                     <div key={idx} className="bg-white/[0.02] border border-white/5 p-4 flex flex-col gap-1">
-                                        <div className="text-mono text-[8px] font-bold text-gray-700 tracking-[0.2em] uppercase">{spec.label}</div>
+                                        <div className="text-mono text-[8px] font-bold text-white/40 tracking-[0.2em] uppercase">{spec.label}</div>
                                         <div className="text-white font-bold text-[11px] tracking-tight tabular-nums">{spec.value}</div>
                                     </div>
                                 ))}
@@ -96,12 +96,12 @@ export default function Footer() {
                             {footerLinks.product.map((link) => (
                                 <li key={link.name}>
                                     {link.external ? (
-                                        <a href={link.href} target="_blank" className="text-gray-500 hover:text-white text-xs font-bold tracking-tight transition-all flex items-center gap-2 group uppercase">
+                                        <a href={link.href} target="_blank" className="text-white/40 hover:text-white text-xs font-bold tracking-tight transition-all flex items-center gap-2 group uppercase">
                                             {link.name}
                                             <ExternalLink className="w-3 h-3 text-[#e2ff3d]" />
                                         </a>
                                     ) : (
-                                        <Link href={link.href} className="text-gray-500 hover:text-white text-xs font-bold tracking-tight transition-all uppercase">
+                                        <Link href={link.href} className="text-white/40 hover:text-white text-xs font-bold tracking-tight transition-all uppercase">
                                             {link.name}
                                         </Link>
                                     )}
@@ -132,12 +132,12 @@ export default function Footer() {
                             {footerLinks.network.map((link) => (
                                 <li key={link.name}>
                                     {link.external ? (
-                                        <a href={link.href} target="_blank" className="text-gray-500 hover:text-white text-xs font-bold tracking-tight transition-all flex items-center gap-2 group uppercase">
+                                        <a href={link.href} target="_blank" className="text-white/40 hover:text-white text-xs font-bold tracking-tight transition-all flex items-center gap-2 group uppercase">
                                             {link.name}
                                             <ExternalLink className="w-3 h-3 text-[#e2ff3d]" />
                                         </a>
                                     ) : (
-                                        <Link href={link.href} className="text-gray-500 hover:text-white text-xs font-bold tracking-tight transition-all uppercase">
+                                        <Link href={link.href} className="text-white/40 hover:text-white text-xs font-bold tracking-tight transition-all uppercase">
                                             {link.name}
                                         </Link>
                                     )}

@@ -38,10 +38,10 @@ export function InstitutionalTaskCard({ badge, currentAmount, hasBadge, onClaim 
         <div
             onClick={handleClaim}
             className={`
-                group relative border transition-all duration-300 overflow-hidden cursor-pointer
+                group relative border transition-all duration-300 overflow-hidden cursor-pointer rounded-2xl
                 ${isCompleted
-                    ? 'bg-[#0a0a0a] border-[#e2ff3d]/50 hover:border-[#e2ff3d] hover:shadow-[0_0_30px_rgba(226,255,61,0.1)]'
-                    : 'bg-[#0a0a0a] border-zinc-800 hover:border-[#e2ff3d]/40 hover:shadow-[0_0_40px_rgba(226,255,61,0.06)]'
+                    ? 'bg-white/[0.03] border-[#e2ff3d]/50 hover:border-[#e2ff3d] hover:shadow-[0_0_30px_rgba(226,255,61,0.1)]'
+                    : 'bg-white/[0.01] backdrop-blur-sm border-white/5 hover:border-[#e2ff3d]/40 hover:shadow-[0_0_40px_rgba(226,255,61,0.06)]'
                 }
             `}
         >
@@ -65,10 +65,10 @@ export function InstitutionalTaskCard({ badge, currentAmount, hasBadge, onClaim 
 
                     {/* Reward Info */}
                     <div className="flex items-center gap-1.5 text-xs">
-                        <span className="text-zinc-600 font-mono text-[9px]">REWARD:</span>
+                        <span className="text-white/40 font-mono text-[9px]">REWARD:</span>
                         <span className="text-[#e2ff3d]">{badge.icon}</span>
                         <span className="font-bold text-white">{badge.name}</span>
-                        <span className="text-zinc-700">|</span>
+                        <span className="text-white/20">|</span>
                         <span className="font-black text-[#e2ff3d] flex items-center gap-0.5">
                             +{badge.rewardPoints}
                             <Zap size={10} />
@@ -89,24 +89,24 @@ export function InstitutionalTaskCard({ badge, currentAmount, hasBadge, onClaim 
                 </div>
 
                 {/* Row 3: Description */}
-                <p className="font-mono text-[10px] lg:text-xs leading-relaxed text-zinc-400">
+                <p className="font-mono text-[10px] lg:text-xs leading-relaxed text-white/40">
                     {badge.description}
                 </p>
             </div>
 
             {/* Footer with Progress - Ultra compact on mobile */}
-            <div className="px-3 lg:px-5 py-2 lg:py-3 border-t border-zinc-800/50 bg-zinc-900/20">
+            <div className="px-3 lg:px-5 py-2 lg:py-3 border-t border-white/5 bg-white/[0.01]">
                 {/* Progress Info */}
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                         {/* Progress Bar - Inline */}
-                        <div className="h-1 flex-1 bg-zinc-800 overflow-hidden max-w-[100px] lg:max-w-[150px]">
+                        <div className="h-1 flex-1 bg-white/5 overflow-hidden max-w-[100px] lg:max-w-[150px]">
                             <div
-                                className={`h-full transition-all duration-500 ${isCompleted ? 'bg-[#e2ff3d] shadow-[0_0_10px_#e2ff3d]' : 'bg-zinc-600'}`}
+                                className={`h-full transition-all duration-500 ${isCompleted ? 'bg-[#e2ff3d] shadow-[0_0_10px_#e2ff3d]' : 'bg-white/10'}`}
                                 style={{ width: `${progress}%` }}
                             />
                         </div>
-                        <span className={`text-[9px] lg:text-[10px] font-mono ${isCompleted ? 'text-[#e2ff3d]' : 'text-zinc-500'}`}>
+                        <span className={`text-[9px] lg:text-[10px] font-mono ${isCompleted ? 'text-[#e2ff3d]' : 'text-white/30'}`}>
                             {Math.floor(currentAmount).toLocaleString()} / {badge.targetAmount.toLocaleString()}
                         </span>
                     </div>
@@ -124,7 +124,7 @@ export function InstitutionalTaskCard({ badge, currentAmount, hasBadge, onClaim 
                             CLAIM NOW →
                         </span>
                     ) : (
-                        <div className="flex items-center gap-1 text-zinc-500 text-[9px] lg:text-[10px] font-mono uppercase">
+                        <div className="flex items-center gap-1 text-white/40 text-[9px] lg:text-[10px] font-mono uppercase">
                             <span>{badge.actionText}</span>
                             <ExternalLink size={10} className="opacity-60" />
                         </div>

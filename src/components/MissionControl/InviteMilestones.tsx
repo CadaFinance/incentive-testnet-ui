@@ -94,7 +94,7 @@ export function InviteMilestones({ address }: InviteMilestonesProps) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-[240px] bg-zinc-900 border border-white/5" />
+                    <div key={i} className="h-[240px] bg-white/[0.02] border border-white/5 rounded-2xl" />
                 ))}
             </div>
         );
@@ -102,7 +102,7 @@ export function InviteMilestones({ address }: InviteMilestonesProps) {
 
     if (!data) {
         return (
-            <div className="text-center py-12 text-zinc-600 font-mono text-xs">
+            <div className="text-center py-12 text-white/30 font-mono text-xs">
                 // UNABLE TO LOAD NETWORK MILESTONES
             </div>
         );
@@ -115,9 +115,9 @@ export function InviteMilestones({ address }: InviteMilestonesProps) {
 
     if (visibleMilestones.length === 0) {
         return (
-            <div className="border border-white/5 bg-[#0b0b0b] py-16 flex flex-col items-center justify-center gap-4">
+            <div className="border border-white/5 bg-white/[0.02] py-16 flex flex-col items-center justify-center gap-4 rounded-3xl">
                 <TrendingUp className="text-[#e2ff3d] w-10 h-10 opacity-50" />
-                <span className="text-gray-600 font-mono text-xs uppercase tracking-widest">
+                <span className="text-white/40 font-mono text-xs uppercase tracking-widest">
                     // ALL MILESTONES COMPLETED
                 </span>
                 <span className="text-white font-black text-2xl">
@@ -140,10 +140,10 @@ export function InviteMilestones({ address }: InviteMilestonesProps) {
                         key={milestone.id}
                         onClick={canInteract ? () => handleClaim(milestone.id, milestone.name) : undefined}
                         className={`
-                            group relative border p-4 lg:p-6 transition-all duration-300 overflow-hidden
+                            group relative border p-4 lg:p-6 transition-all duration-300 overflow-hidden rounded-2xl
                             ${isLocked
-                                ? 'bg-[#0a0a0a] border-white/[0.03] cursor-not-allowed filter grayscale opacity-50'
-                                : 'bg-[#080808] border-[#e2ff3d]/30 hover:border-[#e2ff3d] hover:bg-[#e2ff3d]/[0.02] cursor-pointer shadow-[0_0_30px_rgba(226,255,61,0.08)]'
+                                ? 'bg-white/[0.01] border-white/5 cursor-not-allowed filter grayscale opacity-50'
+                                : 'bg-white/[0.03] backdrop-blur-sm border-[#e2ff3d]/30 hover:border-[#e2ff3d] hover:bg-[#e2ff3d]/[0.05] cursor-pointer shadow-[0_0_30px_rgba(226,255,61,0.08)]'
                             }
                         `}
                     >
@@ -169,7 +169,7 @@ export function InviteMilestones({ address }: InviteMilestonesProps) {
                                     <span className={`
                                         text-[8px] lg:text-[9px] font-mono uppercase tracking-[0.2em] px-2 py-0.5 border block 
                                         ${isLocked
-                                            ? 'border-white/5 text-zinc-700'
+                                            ? 'border-white/5 text-white/30'
                                             : 'border-[#e2ff3d]/20 text-[#e2ff3d] bg-[#e2ff3d]/10 animate-pulse'
                                         }
                                     `}>
@@ -178,18 +178,18 @@ export function InviteMilestones({ address }: InviteMilestonesProps) {
                                 </div>
 
                                 <div className="flex items-center gap-1.5">
-                                    <span className={`text-[10px] font-mono ${isLocked ? 'text-zinc-700' : 'text-zinc-600'}`}>REWARD:</span>
-                                    <div className={`text-lg lg:text-xl font-black font-mono ${isLocked ? 'text-zinc-600' : 'text-white'}`}>
+                                    <span className={`text-[10px] font-mono ${isLocked ? 'text-white/20' : 'text-white/40'}`}>REWARD:</span>
+                                    <div className={`text-lg lg:text-xl font-black font-mono ${isLocked ? 'text-white/20' : 'text-white'}`}>
                                         +{milestone.reward_points.toLocaleString()}
                                     </div>
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className={`text-base lg:text-lg font-bold uppercase tracking-tight mb-1.5 relative z-10 ${isLocked ? 'text-zinc-500' : 'text-white'}`}>
+                                <h3 className={`text-base lg:text-lg font-bold uppercase tracking-tight mb-1.5 relative z-10 ${isLocked ? 'text-white/30' : 'text-white'}`}>
                                     {milestone.name}
                                 </h3>
-                                <p className={`font-mono text-[10px] lg:text-xs leading-relaxed max-w-[90%] relative z-10 ${isLocked ? 'text-zinc-700' : 'text-zinc-500'}`}>
+                                <p className={`font-mono text-[10px] lg:text-xs leading-relaxed max-w-[90%] relative z-10 ${isLocked ? 'text-white/20' : 'text-white/40'}`}>
                                     {milestone.description}
                                 </p>
                             </div>
@@ -197,14 +197,14 @@ export function InviteMilestones({ address }: InviteMilestonesProps) {
                             {/* Progress Bar */}
                             <div className="space-y-2">
                                 <div className="flex justify-between text-[9px] font-mono">
-                                    <span className={isLocked ? 'text-zinc-700' : 'text-zinc-500'}>Verified Invites</span>
-                                    <span className={isLocked ? 'text-zinc-600' : 'text-white'}>
+                                    <span className={isLocked ? 'text-white/20' : 'text-white/40'}>Verified Invites</span>
+                                    <span className={isLocked ? 'text-white/20' : 'text-white'}>
                                         {Math.min(data.current_verified_invites, milestone.required_verified_invites)} / {milestone.required_verified_invites}
                                     </span>
                                 </div>
-                                <div className="h-1.5 w-full bg-zinc-900 border border-white/5 overflow-hidden">
+                                <div className="h-1.5 w-full bg-white/5 border border-white/5 overflow-hidden">
                                     <div
-                                        className={`h-full transition-all duration-500 ${isLocked ? 'bg-zinc-700' : 'bg-[#e2ff3d] shadow-[0_0_10px_rgba(226,255,61,0.5)]'}`}
+                                        className={`h-full transition-all duration-500 ${isLocked ? 'bg-white/10' : 'bg-[#e2ff3d] shadow-[0_0_10px_rgba(226,255,61,0.5)]'}`}
                                         style={{
                                             width: `${Math.min(100, (data.current_verified_invites / milestone.required_verified_invites) * 100)}%`
                                         }}
@@ -214,7 +214,7 @@ export function InviteMilestones({ address }: InviteMilestonesProps) {
 
                             <div className="pt-4 border-t border-white/[0.03]">
                                 {isLocked ? (
-                                    <div className="flex items-center justify-between text-zinc-700">
+                                    <div className="flex items-center justify-between text-white/20">
                                         <span className="text-[9px] font-mono uppercase tracking-widest">
                                             {milestone.required_verified_invites - data.current_verified_invites} More Invites Needed
                                         </span>

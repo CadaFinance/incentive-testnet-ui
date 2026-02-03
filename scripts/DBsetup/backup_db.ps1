@@ -17,7 +17,7 @@
 # CONFIGURATION
 # -----------------------------------------------------------------------------
 $Config = @{
-    RemoteHost    = "20.160.155.158"
+    RemoteHost    = "20.126.0.212"
     RemoteUser    = "azureuser"
     ContainerName = "frontend-db"
     DbUser        = "blockscout"

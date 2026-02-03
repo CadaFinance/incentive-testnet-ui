@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-const TESTNET = process.env.NEXT_PUBLIC_TESTNET_APP || 'https://testnet.zugchain.org';
+const TESTNET = process.env.NEXT_PUBLIC_TESTNET_APP!;
 
 interface ReferralHubProps {
     referralCode?: string;

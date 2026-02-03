@@ -299,36 +299,35 @@ function MissionControlContent() {
                     </div>
 
                     {/* Central Protocol Lock */}
-                    <div className="relative z-10 w-full max-w-md p-8 lg:p-12 bg-zinc-950 border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8)] mx-4">
-                        <div className="absolute -top-px -left-px w-8 h-8 border-t border-l border-[#e2ff3d]/50" />
-                        <div className="absolute -bottom-px -right-px w-8 h-8 border-b border-r border-zinc-800" />
+                    <div className="relative z-10 w-full max-w-sm overflow-hidden bg-[#12141f] inst-border rounded-sm shadow-[0_0_50px_rgba(0,0,0,0.5)] mx-4">
+                        {/* Background Atmosphere */}
+                        <div className="absolute inset-0 blueprint-grid-fine opacity-20 pointer-events-none" />
+                        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#e2ff3d]/20 to-transparent" />
 
-                        <div className="space-y-8 text-center">
+                        <div className="p-10 text-center relative z-10">
+                            <div className="flex justify-center mb-8">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/[0.02] border border-white/5">
+                                    <Fingerprint className="text-[#e2ff3d] w-2.5 h-2.5" />
+                                    <span className="text-[8px] font-mono font-bold tracking-[0.3em] text-[#e2ff3d] uppercase">ACCESS_DENIED_v2.0</span>
+                                </div>
+                            </div>
 
-
-                            <div className="space-y-3">
-                                <h1 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none">
+                            <div className="space-y-4 mb-8">
+                                <h1 className="text-3xl font-black text-white uppercase tracking-tighter leading-none">
                                     RESTRICTED<br />
-                                    <span className="text-[#e2ff3d] outline-text-glow">ACCESS.</span>
+                                    <span className="text-[#e2ff3d]">ACCESS</span>
                                 </h1>
-                                <p className="text-[#e2ff3d]/40 font-mono text-[9px] uppercase tracking-[0.4em] font-bold">
-                                    ACTIVE // AUTH_REQUIRED
+                                <p className="text-gray-500 font-mono text-[9px] tracking-[0.05em] leading-relaxed uppercase max-w-[260px] mx-auto">
+                                    Mission Control requires a secure cryptographic link. Connect your authorized wallet to access network statistics.
                                 </p>
                             </div>
 
-                            <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-                            <p className="text-zinc-500 text-xs font-mono leading-relaxed px-4">
-                                Mission Control requires a secure cryptographic link. Connect your authorized wallet to access network statistics and distribution tasks.
-                            </p>
-
-                            <div className="pt-4">
+                            <div className="pt-2">
                                 <WalletConnectButton fullWidth />
                             </div>
 
-                            <div className="flex justify-center gap-6 opacity-30 text-[8px] font-mono text-zinc-600 uppercase tracking-widest">
-                                <span className="flex items-center gap-2"><div className="w-1 h-1 bg-zinc-800" /> SECURE_DATA</span>
-                                <span className="flex items-center gap-2"><div className="w-1 h-1 bg-zinc-800" /> AWAIT_SYNC</span>
+                            <div className="mt-8 pt-6 border-t border-white/5 flex flex-col items-center gap-2">
+                                <div className="text-[7px] font-mono text-white/5 uppercase tracking-[0.4em]">ENCRYPTED_TLS_v1.3</div>
                             </div>
                         </div>
                     </div>
@@ -385,17 +384,17 @@ function MissionControlContent() {
                             className="hidden sm:block fixed bottom-10 right-10 z-[100] w-[300px]"
                         >
                             {/* Animated Border Container */}
-                            <div className="relative p-[1px] overflow-hidden">
+                            <div className="relative p-[1px] overflow-hidden rounded-3xl">
                                 <div className="absolute -inset-[200%] animate-border-spin bg-neon-conic" />
-                                <div className="relative bg-[#050505] p-6 z-10">
+                                <div className="relative bg-[#030303]/90 backdrop-blur-xl p-6 z-10 rounded-3xl">
                                     <div className="space-y-4">
                                         {/* Header */}
                                         <div className="flex items-center justify-between gap-4">
                                             <div className="space-y-1">
-                                                <span className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em]">Your_Rank</span>
+                                                <span className="text-[8px] text-white/40 font-black uppercase tracking-[0.2em]">Your_Rank</span>
                                                 <h4 className="text-4xl font-black text-white tracking-tighter tabular-nums">#{userRank.rank || '...'}</h4>
                                             </div>
-                                            <div className="w-14 h-14  flex items-center justify-center">
+                                            <div className="w-14 h-14 bg-white/[0.03] rounded-2xl border border-white/10 flex items-center justify-center">
                                                 <ChartNoAxesColumn className="w-7 h-7 text-[#e2ff3d]" />
                                             </div>
                                         </div>
@@ -416,9 +415,8 @@ function MissionControlContent() {
                                                     );
                                                 })
                                             ) : (
-                                                <div className="w-full mt-2 p-3  space-y-2 animate-pulse">
-
-                                                    <p className="text-[10px] text-gray-400 font-mono leading-tight">
+                                                <div className="w-full mt-2 p-3 bg-white/[0.03] rounded-xl space-y-2 animate-pulse">
+                                                    <p className="text-[10px] text-white/40 font-mono leading-tight">
                                                         Obtain <span className="text-white font-bold">TITAN</span> badge to unlock <span className="text-[#e2ff3d] font-bold">4X $USDZ</span> reward multiplier.
                                                     </p>
                                                 </div>
@@ -437,7 +435,7 @@ function MissionControlContent() {
                                                             exit={{ opacity: 0, y: -10 }}
                                                             className="flex items-center justify-between text-[10px] font-mono h-full"
                                                         >
-                                                            <span className="text-gray-500 uppercase font-bold tracking-widest leading-none">Actual Reward</span>
+                                                            <span className="text-white/40 uppercase font-bold tracking-widest leading-none">Actual Reward</span>
                                                             <span className="text-white font-black whitespace-nowrap text-sm">${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                         </motion.div>
                                                     ) : (
@@ -463,7 +461,7 @@ function MissionControlContent() {
                                             </div>
 
                                             <div className="flex items-center justify-between text-[10px] font-mono">
-                                                <span className="text-gray-600 uppercase font-bold tracking-widest">Wallet_ID</span>
+                                                <span className="text-white/40 uppercase font-bold tracking-widest">Wallet_ID</span>
                                                 <span className="text-white/40">{formatAddress(address || '')}</span>
                                             </div>
                                         </div>
@@ -482,14 +480,14 @@ function MissionControlContent() {
                             {/* Rotating Border Base */}
                             <div className="absolute -inset-[300%] animate-border-spin bg-neon-conic" />
 
-                            <div className="relative z-10 bg-[#050505] p-4 rounded-[5px]">
+                            <div className="relative z-10 bg-[#030303]/90 backdrop-blur-xl p-4 rounded-xl">
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex flex-col">
                                         <div className="flex items-start gap-2">
                                             <span className="text-4xl font-black text-[#e2ff3d] tracking-tighter leading-none">#{userRank.rank}</span>
                                             <div className="flex flex-col">
                                                 <span className="text-[8px] text-[#e2ff3d] font-bold uppercase tracking-widest leading-none mt-1">Your Rank</span>
-                                                <span className="text-[10px] text-gray-600 font-mono leading-none mt-2 opacity-50">{formatMobileAddress(address || '')}</span>
+                                                <span className="text-[10px] text-white/40 font-mono leading-none mt-2 opacity-50">{formatMobileAddress(address || '')}</span>
                                             </div>
                                         </div>
                                         {/* User Badges - Icon only on mobile card */}
@@ -502,12 +500,7 @@ function MissionControlContent() {
                                                     const badge = INSTITUTIONAL_BADGES[badgeId as keyof typeof INSTITUTIONAL_BADGES];
                                                     return badge ? <span key={badgeId} className={`w-5 h-5 bg-white/5 border border-white/10 rounded-full flex items-center justify-center ${badge.color} text-[10px]`}>{badge.icon}</span> : null;
                                                 })
-                                            ) : (
-                                                <div className="flex items-center gap-2 px-2 py-1 bg-red-500/10 border border-red-500/20 rounded">
-                                                    <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
-                                                    <span className="text-[7px] text-red-500 font-black uppercase tracking-widest whitespace-nowrap">Grab your TITAN badge for 4x rewards</span>
-                                                </div>
-                                            )}
+                                            ) : null}
                                         </div>
                                     </div>
 
@@ -522,7 +515,7 @@ function MissionControlContent() {
                                                         exit={{ opacity: 0, x: -20 }}
                                                         className="flex flex-col items-end"
                                                     >
-                                                        <div className="text-2xl font-black text-[#e2ff3d] tracking-tighter">
+                                                        <div className="text-2xl font-black text-white tracking-tighter">
                                                             ${(parseInt(userRank.points || 0) * getUSDZMultiplier(userRank.badges)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                         </div>
                                                         <span className="text-[8px] text-[#e2ff3d]/60 font-bold uppercase tracking-widest mt-1">EST. $USDZ</span>
@@ -569,15 +562,15 @@ function MissionControlContent() {
                     </h1>
 
                     {/* Stats Card */}
-                    <div className="bg-zinc-900/60 border border-zinc-700/50 p-4">
+                    <div className="bg-white/[0.02] border border-white/10 p-5 rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.5)]">
                         {/* Tier Row: Current -> Next */}
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 {getTierIcon(referralInfo?.tier?.current_tier || 'SCOUT', 14, 'text-[#e2ff3d]')}
                                 <span className="text-[11px] font-black text-[#e2ff3d] uppercase">{referralInfo?.tier?.current_tier || 'SCOUT'}</span>
-                                <span className="text-zinc-700 text-xs">—</span>
-                                {getTierIcon(referralInfo?.tier?.next_tier || 'VANGUARD', 12, 'text-zinc-600')}
-                                <span className="text-[11px] font-black text-zinc-600 uppercase">{referralInfo?.tier?.next_tier || 'VANGUARD'}</span>
+                                <span className="text-white/20 text-xs">—</span>
+                                {getTierIcon(referralInfo?.tier?.next_tier || 'VANGUARD', 12, 'text-white/20')}
+                                <span className="text-[11px] font-black text-white/20 uppercase">{referralInfo?.tier?.next_tier || 'VANGUARD'}</span>
                             </div>
                             <div className="text-xl font-black text-white tabular-nums tracking-tight">
                                 {formatXP(totalPoints || 0)} <span className="text-[10px] text-[#e2ff3d] font-mono">XP</span>
@@ -586,29 +579,29 @@ function MissionControlContent() {
 
                         {/* Progress Bar */}
                         <div className="space-y-2">
-                            <div className="h-1 w-full bg-zinc-900 overflow-hidden">
+                            <div className="h-1.5 w-full bg-white/5 overflow-hidden rounded-full border border-white/5">
                                 <div
-                                    className="h-full bg-[#e2ff3d]"
+                                    className="h-full bg-[#e2ff3d] shadow-[0_0_10px_rgba(226,255,61,0.5)]"
                                     style={{ width: `${referralInfo?.tier?.progress_percent || 0}%` }}
                                 />
                             </div>
-                            <div className="flex justify-between text-[9px] font-mono text-zinc-500">
+                            <div className="flex justify-between text-[9px] font-mono text-white/40">
                                 <span className="truncate max-w-[60%]">
                                     {referralInfo?.tier?.next_tier !== 'MAX_LEVEL'
                                         ? `REQ: ${referralInfo?.tier?.missing_requirements?.replace('More ', '').toUpperCase() || '...'}`
                                         : 'MAX LEVEL'
                                     }
                                 </span>
-                                <span className="text-[#e2ff3d]">{Math.floor(referralInfo?.tier?.progress_percent || 0)}%</span>
+                                <span className="text-white/60">{Math.floor(referralInfo?.tier?.progress_percent || 0)}%</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Referral Card */}
-                    <div className="bg-zinc-900/50 border border-zinc-800 p-3">
+                    <div className="bg-white/[0.02] border border-white/10 p-4 rounded-2xl">
                         <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-black/50 border border-zinc-800 px-3 py-2.5">
-                                <span className="font-mono text-[9px] text-zinc-500 truncate block">
+                            <div className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-3 rounded-lg">
+                                <span className="font-mono text-[9px] text-white/40 truncate block">
                                     {referralInfo?.code && referralInfo.code !== 'LOADING'
                                         ? `testnet.zugchain.org/?ref=${referralInfo.code}`
                                         : 'Loading...'
@@ -621,20 +614,20 @@ function MissionControlContent() {
                                     navigator.clipboard.writeText(url);
                                     toast.success('Link copied!');
                                 }}
-                                className="bg-[#e2ff3d] text-black p-2.5 shrink-0"
+                                className="bg-[#e2ff3d] text-black p-3 shrink-0 rounded-lg hover:bg-white transition-colors"
                             >
                                 <Copy size={14} />
                             </button>
                         </div>
-                        <div className="flex items-center justify-between mt-2 px-1">
-                            <span className="text-[9px] font-mono text-zinc-600">Invites: <span className="text-[#e2ff3d]">{referralInfo?.stats?.total_referrals || 0}</span></span>
-                            <span className="text-[9px] font-mono text-[#e2ff3d]">{referralInfo?.tier?.current_multiplier || '1.0'}x Boost Active</span>
+                        <div className="flex items-center justify-between mt-3 px-1">
+                            <span className="text-[9px] font-mono text-white/40">Invites: <span className="text-white">{referralInfo?.stats?.total_referrals || 0}</span></span>
+                            <span className="text-[9px] font-mono text-[#e2ff3d] bg-[#e2ff3d]/10 px-2 py-0.5 rounded border border-[#e2ff3d]/20">{referralInfo?.tier?.current_multiplier || '1.0'}x Boost Active</span>
                         </div>
                     </div>
                 </div>
 
                 {/* ========== DESKTOP LAYOUT ========== */}
-                <div className="hidden lg:block relative border border-white/5 bg-zinc-950/40 backdrop-blur-xl p-12 overflow-hidden shadow-2xl">
+                <div className="hidden lg:block relative border border-white/10 bg-white/[0.02] backdrop-blur-xl p-12 overflow-hidden shadow-2xl rounded-[40px]">
                     <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
                     <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#e2ff3d]/50" />
@@ -661,8 +654,8 @@ function MissionControlContent() {
                             </div>
 
                             <div className="flex flex-wrap gap-4 pt-4">
-                                <div className="bg-zinc-900/50 border border-white/5 py-3 px-6 text-[#e2ff3d] min-w-[200px]">
-                                    <span className="text-[9px] font-mono text-zinc-500 font-bold uppercase tracking-widest block mb-1">Active Invites</span>
+                                <div className="bg-white/[0.02] border border-white/10 py-3 px-6 text-[#e2ff3d] min-w-[200px] rounded-2xl">
+                                    <span className="text-[9px] font-mono text-white/40 font-bold uppercase tracking-widest block mb-1">Active Invites</span>
                                     <span className="text-xl font-black tabular-nums tracking-tight">{referralInfo?.stats?.total_referrals || 0}</span>
                                 </div>
                             </div>
@@ -672,7 +665,7 @@ function MissionControlContent() {
                         <div className="w-[420px] space-y-4">
 
                             {/* XP Yield Module */}
-                            <div className="relative group/card bg-zinc-950 border border-white/10 p-8 shadow-xl">
+                            <div className="relative group/card bg-white/[0.02] backdrop-blur-md border border-white/10 p-8 shadow-2xl rounded-[32px]">
                                 <div className="space-y-6 relative">
                                     {/* Header: Tier Progression with Icons */}
                                     <div className="flex flex-col gap-2">
@@ -680,9 +673,9 @@ function MissionControlContent() {
                                             <div className="flex items-center gap-2">
                                                 {getTierIcon(referralInfo?.tier?.current_tier || 'SCOUT', 14, 'text-[#e2ff3d]')}
                                                 <span className="text-[#e2ff3d]">{referralInfo?.tier?.current_tier || 'UNRANKED'}</span>
-                                                <div className="h-px w-8 bg-zinc-800" />
-                                                {getTierIcon(referralInfo?.tier?.next_tier || 'VANGUARD', 12, 'text-zinc-600')}
-                                                <span className="text-zinc-600">{referralInfo?.tier?.next_tier || 'MAX'}</span>
+                                                <div className="h-px w-8 bg-white/10" />
+                                                {getTierIcon(referralInfo?.tier?.next_tier || 'VANGUARD', 12, 'text-white/20')}
+                                                <span className="text-white/20">{referralInfo?.tier?.next_tier || 'MAX'}</span>
                                             </div>
                                             <div className="px-2 py-0.5 bg-[#e2ff3d]/10 border border-[#e2ff3d]/20 text-[#e2ff3d] text-[9px]">
                                                 {referralInfo?.tier?.current_multiplier || '1.0'}X BOOST
@@ -690,7 +683,7 @@ function MissionControlContent() {
                                         </div>
 
                                         {referralInfo?.tier?.next_tier !== 'MAX_LEVEL' && (
-                                            <div className="text-[8px] font-mono text-zinc-500 uppercase tracking-wider pl-1 border-l-2 border-zinc-800">
+                                            <div className="text-[8px] font-mono text-white/30 uppercase tracking-wider pl-1 border-l-2 border-white/10">
                                                 REQ: {referralInfo?.tier?.missing_requirements?.replace('More ', '').toUpperCase() || 'SYNCING...'}
                                             </div>
                                         )}
@@ -706,7 +699,7 @@ function MissionControlContent() {
 
                                     {/* Progress Bar & Footer */}
                                     <div className="space-y-3 pt-2">
-                                        <div className="h-1.5 w-full bg-zinc-900 rounded-none overflow-hidden border border-white/5">
+                                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
                                             {referralInfo?.tier?.progress ? (
                                                 <div
                                                     className="h-full bg-[#e2ff3d] shadow-[0_0_10px_rgba(226,255,61,0.5)]"
@@ -716,12 +709,12 @@ function MissionControlContent() {
                                                 <div className="h-full bg-[#111] w-full" />
                                             )}
                                         </div>
-                                        <div className="flex justify-between items-center text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+                                        <div className="flex justify-between items-center text-[9px] font-mono text-white/40 uppercase tracking-widest">
                                             <span className="flex items-center gap-2">
                                                 <div className="w-1.5 h-1.5 bg-[#e2ff3d] animate-pulse" />
                                                 YIELD_RATE: <span className="text-white">{referralInfo?.tier?.current_multiplier || '1.0'}x</span>
                                             </span>
-                                            <span className="text-zinc-600">
+                                            <span className="text-white/40">
                                                 {referralInfo?.tier?.next_tier !== 'MAX_LEVEL'
                                                     ? `PROGRESS: ${Math.floor(referralInfo?.tier?.progress_percent || 0)}%`
                                                     : 'MAX_CLEARANCE'
@@ -733,9 +726,9 @@ function MissionControlContent() {
                             </div>
 
                             {/* Referral Portal Module */}
-                            <div className="bg-zinc-900/40 border border-white/5 p-6 space-y-4 backdrop-blur-md">
-                                <div className="flex items-center gap-0 group/link border border-white/10 hover:border-[#e2ff3d]/30 transition-all bg-black/40 p-1">
-                                    <div className="flex-1 font-mono text-[10px] text-zinc-400 px-4 truncate select-all py-3 tracking-wide">
+                            <div className="bg-white/[0.02] border border-white/10 p-6 space-y-4 backdrop-blur-md rounded-[24px]">
+                                <div className="flex items-center gap-0 group/link border border-white/10 hover:border-[#e2ff3d]/30 transition-all bg-black/40 p-1 rounded-xl">
+                                    <div className="flex-1 font-mono text-[10px] text-white/40 px-4 truncate select-all py-3 tracking-wide">
                                         {referralInfo?.code && referralInfo.code !== 'LOADING'
                                             ? `https://testnet.zugchain.org/?ref=${referralInfo.code}`
                                             : 'awaiting_deployment...'
@@ -747,22 +740,22 @@ function MissionControlContent() {
                                             navigator.clipboard.writeText(url);
                                             toast.success('Uplink copied to clipboard');
                                         }}
-                                        className="bg-[#e2ff3d] hover:bg-white text-black text-[10px] font-black uppercase px-6 py-3 transition-colors shrink-0 flex items-center gap-2"
+                                        className="bg-[#e2ff3d] hover:bg-white text-black text-[10px] font-black uppercase px-6 py-3 transition-colors shrink-0 flex items-center gap-2 rounded-lg"
                                     >
                                         [ COPY ]
                                     </button>
                                 </div>
 
-                                <div className="text-[8px] font-mono text-zinc-700 uppercase tracking-widest flex justify-between px-1">
+                                <div className="text-[8px] font-mono text-white/30 uppercase tracking-widest flex justify-between px-1">
                                     <span>// SECURE_SHARE_AUTH</span>
-                                    <span className="text-zinc-600">VALID_NODE</span>
+                                    <span className="text-white/20">VALID_NODE</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Network status */}
-                    <div className="flex items-center gap-6 opacity-30 mt-8">
+                    <div className="flex items-center gap-6 opacity-30 mt-8 pl-4">
                         <div className="flex items-center gap-2">
                             <div className={`w-1.5 h-1.5 rounded-full ${redisStatus?.connected ? 'bg-[#e2ff3d] animate-pulse' : 'bg-red-500'}`} />
                             <span className="text-[9px] font-mono text-white uppercase tracking-widest">
@@ -770,7 +763,7 @@ function MissionControlContent() {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-1 h-1 bg-zinc-600" />
+                            <div className="w-1 h-1 bg-white/40" />
                             <span className="text-[9px] font-mono text-white uppercase tracking-widest">
                                 Latency: {redisStatus?.latency || 0}ms
                             </span>
@@ -897,14 +890,14 @@ function MissionControlContent() {
                         </div>
                         <div className="flex gap-3">
                             {/* Total Invites */}
-                            <div className="bg-zinc-900/50 border border-white/10 px-4 py-2 min-w-[120px]">
-                                <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest block">Total Invites</span>
-                                <span className="text-2xl font-black text-zinc-400 font-mono">{referralInfo?.stats?.total_referrals || 0}</span>
+                            <div className="bg-white/[0.02] border border-white/10 px-5 py-3 min-w-[140px] rounded-xl text-right">
+                                <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest block mb-1">Total Invites</span>
+                                <span className="text-2xl font-black text-white tracking-tighter tabular-nums">{referralInfo?.stats?.total_referrals || 0}</span>
                             </div>
                             {/* Verified Invites */}
-                            <div className="bg-[#e2ff3d]/5 border border-[#e2ff3d]/20 px-4 py-2 min-w-[120px]">
-                                <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest block">Verified Invites</span>
-                                <span className="text-2xl font-black text-[#e2ff3d] font-mono">{referralInfo?.stats?.verified_referrals || 0}</span>
+                            <div className="bg-[#e2ff3d]/[0.02] border border-[#e2ff3d]/20 px-5 py-3 min-w-[140px] rounded-xl text-right shadow-[0_0_20px_rgba(226,255,61,0.05)]">
+                                <span className="text-[9px] font-mono text-[#e2ff3d]/60 uppercase tracking-widest block mb-1">Verified Invites</span>
+                                <span className="text-2xl font-black text-[#e2ff3d] tracking-tighter tabular-nums">{referralInfo?.stats?.verified_referrals || 0}</span>
                             </div>
                         </div>
                     </div>
