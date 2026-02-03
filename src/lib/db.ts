@@ -8,18 +8,20 @@ let pool: Pool;
 if (process.env.NODE_ENV === 'production') {
     pool = new Pool({
         connectionString,
-        max: 350,
+        max: 50, // OPTIMIZED: Reduced from 350 to prevent "Too Many Clients". PgBouncer recommended for higher loads.
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 5000,
+        application_name: 'zug_ui_prod'
     });
 } else {
     // In development, use a global variable so existing pool is not lost on HMR
     if (!(global as any).postgres) {
         (global as any).postgres = new Pool({
             connectionString,
-            max: 350,
+            max: 20, // OPTIMIZED: Dev environment safety limit
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 5000,
+            application_name: 'zug_ui_dev'
         });
     }
     pool = (global as any).postgres;

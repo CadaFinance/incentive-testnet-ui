@@ -121,22 +121,54 @@ async function processStakeSync(data) {
 
     const userRes = await pool.query("SELECT multiplier FROM users WHERE address = $1", [address]);
     const referralMultiplier = parseFloat(userRes.rows[0]?.multiplier || '1.0');
-    const stakePoints = Math.floor(basePoints * stakingMultiplier * referralMultiplier);
+    const stakePoints = (eventType === 'STAKED') ? Math.floor(basePoints * stakingMultiplier * referralMultiplier) : 0;
 
-    if (stakePoints <= 0 && eventType !== 'STAKED') return;
+    // PREPARE BALANCE UPDATE (Replaces DB Trigger)
+    const prefix = isNative ? 'zug' : 'vzug';
+    let balanceUpdateSQL = "";
+    
+    // Note: 'amount' here is already floating point from route.ts
+    // We use safe arithmetic.
+    Logger.info(`Processing Event: ${eventType} for ${address}`, 'DEBUG');
+
+    if (eventType === 'STAKED') {
+        balanceUpdateSQL = `, ${prefix}_staked = COALESCE(users.${prefix}_staked, 0) + ${amount}`;
+    } else if (eventType === 'UNSTAKE_REQUESTED' || eventType === 'WITHDRAWN') {
+        balanceUpdateSQL = `, ${prefix}_staked = GREATEST(0, COALESCE(users.${prefix}_staked, 0) - ${amount})`;
+    } else if (eventType === 'COMPOUNDED') {
+        balanceUpdateSQL = `, ${prefix}_compounded = COALESCE(users.${prefix}_compounded, 0) + ${amount}`;
+    } else if (eventType === 'REWARD_CLAIMED') {
+        balanceUpdateSQL = `, ${prefix}_claimed = COALESCE(users.${prefix}_claimed, 0) + ${amount}`;
+    }
 
     await pool.query('BEGIN');
     try {
+        // 1. Unified User Update (Points + Balance + Activity)
+        // If stakePoints > 0, we add points. If 0, we just update balance/activity.
+        const pointUpdateSQL = stakePoints > 0 ? `points = users.points + ${stakePoints}` : `points = users.points`;
+        
+        await pool.query(
+            `INSERT INTO users (address, points, total_claims, last_active) 
+             VALUES ($1, $2, 1, $3) 
+             ON CONFLICT (address) DO UPDATE SET 
+                ${pointUpdateSQL}, 
+                total_claims = users.total_claims + 1, 
+                last_active = $3
+                ${balanceUpdateSQL}`, 
+            [address, stakePoints > 0 ? stakePoints : 0, timestamp]
+        );
+
+        // 2. Audit Log (Only if points awarded)
         if (stakePoints > 0) {
             const taskKey = `${eventType}_V3_TIER_${tierId}`;
             const dupCheck = await pool.query("SELECT 1 FROM points_audit_log WHERE tx_hash = $1 AND task_type = $2", [txHash, taskKey]);
             if (dupCheck.rows.length === 0) {
                 await pool.query(`INSERT INTO points_audit_log (address, points_awarded, task_type, tx_hash) VALUES ($1, $2, $3, $4)`, [address, stakePoints, taskKey, txHash]);
-                await pool.query(`INSERT INTO users (address, points, total_claims, last_active) VALUES ($1, $2, 1, $3) ON CONFLICT (address) DO UPDATE SET points = users.points + $2, total_claims = users.total_claims + 1, last_active = $3`, [address, stakePoints, timestamp]);
                 Logger.success(`+${stakePoints} Points (TX: ${txHash.slice(0,10)}...)`, 'POINTS');
             }
         }
 
+        // 3. Daily Stats (Only for Staking)
         if (eventType === 'STAKED' && amount > 0) {
             const todayUTC = new Date().toISOString().split('T')[0];
             await pool.query(`INSERT INTO daily_streaks (address, streak_type, current_streak, last_action_date, updated_at, cooldown_start_at) VALUES ($1, 'STAKE', 1, $2::date, NOW(), NOW()) ON CONFLICT (address, streak_type) DO UPDATE SET current_streak = CASE WHEN daily_streaks.last_action_date = $2::date THEN daily_streaks.current_streak WHEN daily_streaks.last_action_date = ($2::date - INTERVAL '1 day')::date THEN CASE WHEN daily_streaks.current_streak >= 7 THEN 1 ELSE daily_streaks.current_streak + 1 END ELSE 1 END, updated_at = NOW(), last_action_date = $2::date, cooldown_start_at = CASE WHEN daily_streaks.last_action_date = $2::date THEN daily_streaks.cooldown_start_at ELSE NOW() END`, [address, todayUTC]);
@@ -150,6 +182,7 @@ async function processStakeSync(data) {
             }
         }
 
+        // 4. Referral Rewards (Only for Staking)
         if (eventType === 'STAKED') {
             const bonusColumn = isNative ? 'zug_stake_bonus_paid' : 'vzug_stake_bonus_paid';
             const timeColumn = isNative ? 'first_zug_stake_at' : 'first_vzug_stake_at';

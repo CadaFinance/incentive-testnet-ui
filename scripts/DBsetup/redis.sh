@@ -73,8 +73,11 @@ pidfile /var/run/redis/redis-server.pid
 loglevel notice
 
 # Memory Management
-maxmemory 256mb
-maxmemory-policy allkeys-lru
+maxmemory 1gb
+maxmemory-policy volatile-lru
+
+# Network Reliability (Fixes ETIMEDOUT)
+tcp-keepalive 60
 
 # Persistence (RDB Snapshots)
 save 300 10

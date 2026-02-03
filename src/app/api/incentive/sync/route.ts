@@ -120,15 +120,8 @@ export async function POST(request: Request) {
                     }
 
                     // Log History immediately if not a points event (points events logged later in transaction)
-                    if (['REWARD_CLAIMED', 'WITHDRAWN', 'UNSTAKE_REQUESTED'].includes(eventType)) {
-                        await db.query(
-                            `INSERT INTO staking_history (address, tx_hash, event_type, contract_type, amount, harvested_yield, created_at, block_number) 
-                             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-                             ON CONFLICT (tx_hash) DO UPDATE SET block_number = EXCLUDED.block_number`,
-                            [walletAddress, txHash, eventType, isNative ? 'ZUG' : 'vZUG', Number(amount) / 1e18, Number(harvestedYield) / 1e18, timestamp, receipt.blockNumber]
-                        );
-                        return NextResponse.json({ success: true, points: 0, message: `${decoded.eventName} processed` });
-                    }
+                    // OPTIMIZATION: Logic Unified. removed early return to ensure ALL events go to Queue.
+                    // The generic insert below handles history, and the Queue handles the user balance updates.
                 } catch (err) { continue; }
             } catch (e) { continue; }
         }

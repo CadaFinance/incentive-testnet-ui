@@ -40,190 +40,145 @@ export async function getUserMissions(address: string): Promise<Task[]> {
 /**
  * Internal: Fetch from DB
  */
+/**
+ * Internal: Fetch from DB (Optimized "One-Shot" Query)
+ * Replaces N+1 Query pattern with single efficient SELECT + LATERAL JOINS
+ */
 async function getUserMissionsUncached(address: string): Promise<Task[]> {
     const normalizedAddress = address.toLowerCase();
+    const todayUTC = new Date().toISOString().split('T')[0];
 
-    // 1. Fetch PENDING Static Missions
     const query = `
+        WITH user_state AS (
+            -- Fetch all user context in one go (Streaks, Social Profiles, History)
+            SELECT 
+                u.address,
+                u.twitter_id,
+                u.telegram_id,
+                u.discord_id,
+                
+                -- Streak Data (Aggregated)
+                COALESCE(ds_stake.current_streak, 0) as stake_streak,
+                COALESCE(ds_faucet.current_streak, 0) as faucet_streak,
+                ds_stake.last_action_date as last_stake_date,
+                ds_faucet.last_action_date as last_faucet_date,
+
+                -- Faucet & Stake Status for Today (UTC)
+                EXISTS (
+                    SELECT 1 FROM faucet_history fh 
+                    WHERE fh.address = u.address 
+                    AND (fh.claimed_at AT TIME ZONE 'UTC')::date = CURRENT_DATE
+                ) as is_faucet_done_today,
+
+                -- Completed Tasks Array (Fast Lookup)
+                ARRAY(
+                    SELECT task_id FROM user_task_history uth 
+                    WHERE uth.user_address = u.address
+                ) as completed_task_ids,
+
+                -- Progress for Complex Tasks
+                (SELECT state FROM user_task_progress utp WHERE utp.user_address = u.address AND utp.task_id = -104 LIMIT 1) as task_104_state
+
+            FROM users u
+            LEFT JOIN daily_streaks ds_stake ON ds_stake.address = u.address AND ds_stake.streak_type = 'STAKE'
+            LEFT JOIN daily_streaks ds_faucet ON ds_faucet.address = u.address AND ds_faucet.streak_type = 'FAUCET'
+            WHERE u.address = $1
+        )
         SELECT 
-            t.id, t.type, t.title, t.description, t.reward_points, t.verification_type, t.verification_data, t.icon_url, t.is_active, t.requires_verification,
-            t.requires_telegram, t.requires_discord,
-            to_char(t.created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at,
-            FALSE as is_completed
-        FROM tasks t
-        LEFT JOIN user_task_history uth 
-            ON t.id = uth.task_id AND uth.user_address = $1
+            -- Standard Tasks
+            t.id, t.type, t.title, t.description, t.reward_points, t.verification_type, t.verification_data, t.icon_url, t.is_active, 
+            t.requires_verification, t.requires_telegram, t.requires_discord,
+            FALSE as is_completed, -- Pending missions by definition
+            to_char(t.created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at
+        FROM tasks t, user_state us
         WHERE t.is_active = TRUE 
-        AND t.id >= 0 
-        AND t.title NOT ILIKE '%Discord%'
-        AND uth.id IS NULL -- ONLY PENDING
-        ORDER BY t.created_at DESC;
+          AND t.id >= 0 
+          AND t.title NOT ILIKE '%Discord%'
+          AND NOT (t.id = ANY(us.completed_task_ids)) -- Filter completed
+
+        UNION ALL
+
+        -- Virtual / Dynamic Missions (Computed in SQL instead of JS)
+        
+        -- 1. Daily Faucet
+        SELECT -1, 'DAILY', 'Daily Protocol Access', 'Claim your daily allowance from the faucet to maintain network activity.', 
+               25, 'MANUAL', '/faucet', NULL, TRUE, FALSE, FALSE, FALSE, FALSE, NOW()::text
+        FROM user_state us WHERE NOT us.is_faucet_done_today
+
+        UNION ALL
+
+        -- 2. Daily Stake
+        SELECT -2, 'DAILY', 'Secure the Network', 'Stake your ZUG tokens to validation nodes to increase security.',
+               50, 'MANUAL', '/', NULL, TRUE, FALSE, FALSE, FALSE, FALSE, NOW()::text
+        FROM user_state us 
+        WHERE (us.last_stake_date IS NULL OR us.last_stake_date < CURRENT_DATE)
+
+        UNION ALL
+
+        -- 3. Connect X
+        SELECT -100, 'SOCIAL', 'Connect Your X', 'Connect your X account to verify eligibility for legacy airdrop points.',
+               100, 'MANUAL', '/api/auth/twitter/login?address=' || us.address, 'https://abs.twimg.com/favicons/twitter.2.ico', TRUE, FALSE, FALSE, FALSE, FALSE, NOW()::text
+        FROM user_state us 
+        WHERE us.twitter_id IS NULL AND NOT (-100 = ANY(us.completed_task_ids))
+
+        UNION ALL
+
+        -- 4. Join Telegram
+        SELECT -101, 'SOCIAL', 'Join Telegram Community', 'Join the official ZugChain private group to stay updated.',
+               150, 'API_VERIFY', 'TELEGRAM_LOGIN', 'https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg', TRUE, FALSE, FALSE, FALSE, FALSE, NOW()::text
+        FROM user_state us 
+        WHERE us.telegram_id IS NULL AND NOT (-101 = ANY(us.completed_task_ids))
+
+        UNION ALL
+
+        -- 5. Join Discord (Phase 1)
+        SELECT -103, 'SOCIAL', 'Join Discord Server', 'Join the official ZugChain Discord server and verify your membership.',
+               100, 'API_VERIFY', 'DISCORD_LOGIN', 'https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png', TRUE, FALSE, FALSE, FALSE, FALSE, NOW()::text
+        FROM user_state us 
+        WHERE us.discord_id IS NULL AND NOT (-103 = ANY(us.completed_task_ids))
+
+        UNION ALL
+
+        -- 6. Grab Discord Role
+        SELECT -102, 'SOCIAL', 'Grab Discord Role', 'Claim your Verified Contributor role on the Discord server.',
+               400, 'API_VERIFY', 'DISCORD_LOGIN', 'https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png', TRUE, FALSE, FALSE, FALSE, FALSE, NOW()::text
+        FROM user_state us 
+        WHERE NOT (-102 = ANY(us.completed_task_ids))
+        
+        UNION ALL
+
+        -- 7. Shoutout on X
+        SELECT -104, 'SOCIAL', 'Shoutout on X', 'Tweet about your participation to earn points.',
+               1000, 'TWEET_VERIFY', CASE WHEN us.task_104_state = 'CLICKED' THEN 'CLICKED' ELSE 'NOT_CLICKED' END, 'https://abs.twimg.com/favicons/twitter.2.ico', TRUE, 
+               (us.twitter_id IS NULL), -- Requires Verification if no Twitter
+               FALSE, FALSE, FALSE, NOW()::text
+        FROM user_state us 
+        WHERE NOT (-104 = ANY(us.completed_task_ids))
+
+        UNION ALL
+
+        -- 8. Update X Profile
+        SELECT -105, 'SOCIAL', 'Update X Profile', 'Add ZugChain branding to your X profile name and bio to show your support.',
+               1500, 'X_PROFILE_UPDATE', 'X_PROFILE_MODAL', 'https://abs.twimg.com/favicons/twitter.2.ico', TRUE, 
+               (us.twitter_id IS NULL), 
+               FALSE, FALSE, FALSE, NOW()::text
+        FROM user_state us 
+        WHERE NOT (-105 = ANY(us.completed_task_ids));
     `;
 
-    // 2. Fetch Streaks for Dynamic Logic
-    const streaks = await getUserStreaks(normalizedAddress);
-    const dynamicMissions: Task[] = [];
-
-    // Source of Truth for FAUCET: Use PostgreSQL for UTC date comparison
-    const faucetHist = await db.query(
-        `SELECT 
-            CASE 
-                WHEN (claimed_at AT TIME ZONE 'UTC')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date 
-                THEN TRUE 
-                ELSE FALSE 
-            END as is_claimed_today
-         FROM faucet_history WHERE address = $1 ORDER BY claimed_at DESC LIMIT 1`,
-        [normalizedAddress]
-    );
-
-    let isFaucetDoneToday = faucetHist.rows.length > 0 && faucetHist.rows[0].is_claimed_today;
-    const now = new Date();
-
-    if (!isFaucetDoneToday) {
-        dynamicMissions.push({
-            id: -1,
-            type: 'DAILY',
-            title: 'Daily Protocol Access',
-            description: 'Claim your daily allowance from the faucet to maintain network activity.',
-            reward_points: 25,
-            verification_type: 'MANUAL',
-            verification_data: '/faucet',
-            is_completed: false
-        });
+    try {
+        const res = await db.query(query, [normalizedAddress]);
+        return res.rows;
+    } catch (e: any) {
+        // Fallback for empty user (fresh wallet)
+        if (e.message && e.message.includes('user_state')) {
+            console.warn("User state missing for missions, returning default missions.");
+        }
+        console.error("Optimized Mission Query Failed:", e);
+        // Fail gracefully with basic tasks if DB complex query fails?
+        // Or re-throw? Re-throwing is safer to detect issues.
+        throw e;
     }
-
-    // Source of Truth for STAKE: Use PostgreSQL for UTC date comparison
-    const stakeRes = await db.query(
-        `SELECT 1 FROM daily_streaks 
-         WHERE address = $1 AND streak_type = 'STAKE' 
-         AND last_action_date = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date`,
-        [normalizedAddress]
-    );
-    if (stakeRes.rowCount === 0) {
-        dynamicMissions.push({
-            id: -2,
-            type: 'DAILY',
-            title: 'Secure the Network',
-            description: 'Stake your ZUG tokens to validation nodes to increase security.',
-            reward_points: 50,
-            verification_type: 'MANUAL',
-            verification_data: '/',
-            is_completed: false
-        });
-    }
-
-    // 6. Fetch Discord Status & Completion History
-    const discordProfile = await getUserDiscordProfile(normalizedAddress);
-    const completedTaskIds = await db.query(
-        "SELECT task_id FROM user_task_history WHERE user_address = $1",
-        [normalizedAddress]
-    ).then(r => r.rows.map(row => row.task_id));
-
-    // Dynamic Task 3: Connect X (Virtual)
-    const twitterProfile = await getUserTwitterProfile(normalizedAddress);
-    if (!twitterProfile?.twitter_id && !completedTaskIds.includes(-100)) {
-        dynamicMissions.push({
-            id: -100,
-            type: 'SOCIAL',
-            title: 'Connect Your X',
-            description: 'Connect your X account to verify eligibility for legacy airdrop points.',
-            reward_points: 100,
-            verification_type: 'MANUAL',
-            verification_data: `/api/auth/twitter/login?address=${normalizedAddress}`,
-            is_completed: false,
-            icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico'
-        });
-    }
-
-    // Dynamic Task 4: Join Telegram Group
-    if (!twitterProfile?.telegram_id && !completedTaskIds.includes(-101)) {
-        dynamicMissions.push({
-            id: -101,
-            type: 'SOCIAL',
-            title: 'Join Telegram Community',
-            description: 'Join the official ZugChain private group to stay updated.',
-            reward_points: 150,
-            verification_type: 'API_VERIFY',
-            verification_data: 'TELEGRAM_LOGIN',
-            is_completed: false,
-            icon_url: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg'
-        });
-    }
-
-    // Dynamic Task 5: Join Discord Server (Phase 1)
-    if (!twitterProfile?.discord_id && !completedTaskIds.includes(-103)) {
-        dynamicMissions.push({
-            id: -103,
-            type: 'SOCIAL',
-            title: 'Join Discord Server',
-            description: 'Join the official ZugChain Discord server and verify your membership.',
-            reward_points: 100,
-            verification_type: 'API_VERIFY',
-            verification_data: 'DISCORD_LOGIN',
-            is_completed: false,
-            icon_url: 'https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
-        });
-    }
-
-    // Dynamic Task 6: Grab Discord Role (Phase 2)
-    // Only show if NOT completed in history (since it depends on specific role check)
-    if (!completedTaskIds.includes(-102)) {
-        dynamicMissions.push({
-            id: -102,
-            type: 'SOCIAL',
-            title: 'Grab Discord Role',
-            description: 'Claim your Verified Contributor role on the Discord server.',
-            reward_points: 400,
-            verification_type: 'API_VERIFY',
-            verification_data: 'DISCORD_LOGIN',
-            is_completed: false,
-            icon_url: 'https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
-        });
-    }
-
-    // Dynamic Task 7: Shoutout on X (Tweet Task)
-    if (!completedTaskIds.includes(-104)) {
-        // Check if user has "CLICKED" this task
-        const progressRes = await db.query(
-            "SELECT state FROM user_task_progress WHERE user_address = $1 AND task_id = -104",
-            [normalizedAddress]
-        );
-        const hasClicked = progressRes.rows.length > 0 && progressRes.rows[0].state === 'CLICKED';
-
-        dynamicMissions.push({
-            id: -104,
-            type: 'SOCIAL',
-            title: 'Shoutout on X',
-            description: 'Tweet about your participation to earn points.',
-            reward_points: 1000,
-            verification_type: 'TWEET_VERIFY', // Special frontend handling
-            verification_data: hasClicked ? 'CLICKED' : 'NOT_CLICKED', // Logic flag for Frontend
-            is_completed: false,
-            // Lock if Twitter not connected
-            requires_verification: !twitterProfile?.twitter_id,
-            icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico'
-        });
-    }
-
-    // Dynamic Task 8: Update X Profile (Screenshot Verification Simulation)
-    if (!completedTaskIds.includes(-105)) {
-        dynamicMissions.push({
-            id: -105,
-            type: 'SOCIAL',
-            title: 'Update X Profile',
-            description: 'Add ZugChain branding to your X profile name and bio to show your support.',
-            reward_points: 1500,
-            verification_type: 'X_PROFILE_UPDATE',
-            verification_data: 'X_PROFILE_MODAL',
-            is_completed: false,
-            requires_verification: !twitterProfile?.twitter_id,
-            icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico'
-        });
-    }
-
-    const res = await db.query(query, [normalizedAddress]);
-
-    return [...dynamicMissions, ...res.rows];
 }
 
 /**
