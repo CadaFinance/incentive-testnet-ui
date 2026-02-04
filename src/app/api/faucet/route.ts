@@ -171,7 +171,8 @@ export async function POST(req: NextRequest) {
         }
 
         // 7. Refresh Leaderboard
-        query('SELECT refresh_leaderboard()').catch(e => console.error('View Refresh Failed', e));
+        // OPTIMIZATION: Removed synchronous refresh. Using Generated Column 'effective_score' instead.
+        // query('SELECT refresh_leaderboard()').catch(e => console.error('View Refresh Failed', e));
 
         // Invalidate Redis Cache (Stats + Missions)
         await invalidateCache(`user:stats:${normalizedAddress}`);
