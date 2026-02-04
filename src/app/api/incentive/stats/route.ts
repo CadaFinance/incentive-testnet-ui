@@ -1,17 +1,21 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { getCached } from '@/lib/redis';
 
 export async function GET() {
     try {
-        const statsSql = `
-            SELECT 
-                COUNT(*) as total_users,
-                SUM(points) as total_points,
-                SUM(total_claims) as total_activity
-            FROM users
-        `;
-        const res = await query(statsSql);
-        const stats = res.rows[0];
+        // Cache global stats for 60 seconds (High Traffic Protection)
+        const stats = await getCached('global_stats_v1', async () => {
+            const statsSql = `
+                SELECT 
+                    COUNT(*) as total_users,
+                    SUM(points) as total_points,
+                    SUM(total_claims) as total_activity
+                FROM users
+            `;
+            const res = await query(statsSql);
+            return res.rows[0];
+        }, 60);
 
         // Derived/Simulated Institutional Metrics
         const institutionalStats = {
