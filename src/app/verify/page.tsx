@@ -7,8 +7,9 @@ import { ShieldCheck, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner';
 
 export default function VerifyPage() {
-    const [step, setStep] = useState<1 | 4>(1); // 1: Turnstile, 4: Success
+    const [step, setStep] = useState<1 | 2 | 4>(1); // 1: Turnstile, 2: Error, 4: Success
     const [isVerifying, setIsVerifying] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // Turnstile Callback
     const handleTurnstileSuccess = (token: string) => {
@@ -32,12 +33,13 @@ export default function VerifyPage() {
 
             setTimeout(() => {
                 window.location.href = '/';
-            }, 2000);
+            }, 15000); // 15 seconds to allow sync worker to update Nginx
 
         } catch (error: any) {
-            toast.error(error.message || 'Verification Failed');
+            const msg = error.message || 'Verification Failed';
+            setErrorMessage(msg);
             setIsVerifying(false);
-            setTimeout(() => window.location.reload(), 2000);
+            setStep(2); // Show error state, no auto-reload
         }
     };
 
@@ -106,6 +108,29 @@ export default function VerifyPage() {
                             </motion.div>
                         )}
 
+                        {step === 2 && (
+                            <motion.div
+                                key="error"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="text-center py-6"
+                            >
+                                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/20 mx-auto mb-6">
+                                    <AlertTriangle className="w-8 h-8 text-red-500" />
+                                </div>
+                                <h2 className="text-xl font-bold text-white mb-2 tracking-tight">Verification Failed</h2>
+                                <p className="text-sm text-red-400 mb-6">{errorMessage}</p>
+
+                                <button
+                                    onClick={() => window.location.href = '/'}
+                                    className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium text-white transition-colors"
+                                >
+                                    Return to Dashboard
+                                </button>
+                            </motion.div>
+                        )}
+
                         {step === 4 && (
                             <motion.div
                                 key="success"
@@ -117,14 +142,15 @@ export default function VerifyPage() {
                                     <CheckCircle2 className="w-8 h-8 text-[#e2ff3d]" />
                                 </div>
                                 <h2 className="text-xl font-bold text-white mb-2 tracking-tight">Clearance Granted</h2>
-                                <p className="text-xs font-mono text-[#e2ff3d] mb-6 uppercase tracking-widest">Redirecting to Dashboard...</p>
+                                <p className="text-xs text-white/50 mb-2">Synchronizing with security nodes...</p>
+                                <p className="text-[10px] font-mono text-[#e2ff3d] mb-6 uppercase tracking-widest">Redirecting in 15 seconds</p>
 
-                                <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
                                     <motion.div
                                         className="h-full bg-[#e2ff3d]"
                                         initial={{ width: "0%" }}
                                         animate={{ width: "100%" }}
-                                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                                        transition={{ duration: 15, ease: "linear" }}
                                     />
                                 </div>
                             </motion.div>
