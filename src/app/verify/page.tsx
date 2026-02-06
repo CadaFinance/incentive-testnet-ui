@@ -96,7 +96,7 @@ export default function VerifyPage() {
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="cf-turnstile" data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} data-theme="dark"></div>
+                                            <div className="cf-turnstile" data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} data-theme="dark" data-callback="onTurnstileSuccess"></div>
                                             <p className="text-[9px] text-white/20 font-mono uppercase tracking-widest text-center">
                                                 Protected by Cloudflare Turnstile
                                             </p>
