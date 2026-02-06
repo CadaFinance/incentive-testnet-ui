@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, Zap, ArrowRight, ShieldCheck, Clock, Terminal, Trophy, Activity, Wallet, Info, Gift } from 'lucide-react'
 import { useAccount, useBalance } from 'wagmi'
 import { toast } from 'sonner'
-import ReCAPTCHA from 'react-google-recaptcha'
+import Script from 'next/script'
 import WalletModal from '@/components/WalletModal'
 
 const containerVariants = {
@@ -32,7 +32,7 @@ function FaucetContent() {
     const [txHash, setTxHash] = useState<string | null>(null)
     const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
 
-    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
     const [referralCode, setReferralCode] = useState<string | null>(null)
 
     // Global Balance Refresh
@@ -70,12 +70,24 @@ function FaucetContent() {
         }
     }, [searchParams])
 
+    // Turnstile Global Callback
+    useEffect(() => {
+        // @ts-ignore
+        window.onFaucetTurnstileSuccess = (token: string) => {
+            setTurnstileToken(token)
+        }
+        return () => {
+            // @ts-ignore
+            delete window.onFaucetTurnstileSuccess
+        }
+    }, [])
+
     const addLog = (msg: string) => {
         setTerminalLogs(prev => [...prev.slice(-6), `> ${msg}`])
     }
 
     const handleClaim = async () => {
-        if (!targetAddress || !recaptchaToken) return
+        if (!targetAddress || !turnstileToken) return
 
         setStatus('requesting')
         setTerminalLogs(['Initializing Handshake...'])
@@ -85,7 +97,7 @@ function FaucetContent() {
                 method: 'POST',
                 body: JSON.stringify({
                     address: targetAddress,
-                    recaptchaToken,
+                    turnstileToken,
                     referralCode: localStorage.getItem('referralCode')
                 }),
                 headers: { 'Content-Type': 'application/json' }
@@ -94,7 +106,7 @@ function FaucetContent() {
             const data = await res.json()
 
             if (res.ok) {
-                addLog('Verifying Recaptcha...')
+                addLog('Verifying Turnstile...')
                 addLog('Disbursing 10 ZUG...')
                 setTxHash(data.hash)
                 setStatus('success')
@@ -156,6 +168,10 @@ function FaucetContent() {
 
     return (
         <div className="container mx-auto max-w-7xl px-6 lg:px-8 py-6">
+            <Script
+                src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+                strategy="lazyOnload"
+            />
             <motion.div
                 initial="hidden"
                 animate="visible"
@@ -199,13 +215,12 @@ function FaucetContent() {
                                 {/* reCAPTCHA Section - Optimized for mobile */}
                                 {isConnected && targetAddress && (
                                     <div className="flex justify-center py-4 bg-white/[0.01] border border-white/5 overflow-hidden rounded-xl">
-                                        <div className="scale-[0.85] sm:scale-100 origin-center transition-transform">
-                                            <ReCAPTCHA
-                                                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
-                                                onChange={(token: string | null) => setRecaptchaToken(token)}
-                                                theme="dark"
-                                            />
-                                        </div>
+                                        <div
+                                            className="cf-turnstile"
+                                            data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                                            data-theme="dark"
+                                            data-callback="onFaucetTurnstileSuccess"
+                                        />
                                     </div>
                                 )}
 
@@ -219,14 +234,14 @@ function FaucetContent() {
                                 ) : (
                                     <button
                                         onClick={handleClaim}
-                                        disabled={status === 'requesting' || !targetAddress || !recaptchaToken}
+                                        disabled={status === 'requesting' || !targetAddress || !turnstileToken}
                                         className="w-full bg-[#e2ff3d] hover:bg-[#d4f030] text-black text-sm py-4 font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group shadow-lg shadow-[#e2ff3d]/10 rounded-xl"
                                     >
                                         {status === 'requesting' ? (
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <>
-                                                {recaptchaToken ? 'Authorize Claim' : 'Complete Captcha'}
+                                                {turnstileToken ? 'Authorize Claim' : 'Complete Captcha'}
                                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                             </>
                                         )}

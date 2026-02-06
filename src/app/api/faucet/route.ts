@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createWalletClient, http, parseEther, isAddress } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { query } from '@/lib/db';
-import { verifyRecaptcha } from '@/lib/recaptcha';
+import { verifyTurnstile } from '@/lib/turnstile';
 import { processReferralBonus } from '@/lib/referral_logic';
 import { invalidateCache } from '@/lib/redis';
 
@@ -22,24 +22,30 @@ const client = createWalletClient({
 
 export async function POST(req: NextRequest) {
     try {
-        const { address, recaptchaToken, referralCode } = await req.json();
+        const { address, turnstileToken, referralCode } = await req.json();
 
         if (!address || !isAddress(address)) {
             return NextResponse.json({ error: 'INVALID_ADDRESS' }, { status: 400 });
         }
 
-        // 1. reCAPTCHA Verification (Corporate Bot Protection)
-        if (!recaptchaToken) {
-            return NextResponse.json({ error: 'RECAPTCHA_REQUIRED' }, { status: 400 });
+        // Get Client IP for Turnstile
+        const ip = req.headers.get('cf-connecting-ip') ||
+            req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+            '127.0.0.1';
+
+        // 1. Cloudflare Turnstile Verification (STRICT - MUST PASS)
+        if (!turnstileToken) {
+            return NextResponse.json({ error: 'CAPTCHA_REQUIRED' }, { status: 400 });
         }
-        const isHuman = await verifyRecaptcha(recaptchaToken);
+        const isHuman = await verifyTurnstile(turnstileToken, ip);
         if (!isHuman) {
-            return NextResponse.json({ error: 'RECAPTCHA_FAILED' }, { status: 403 });
+            console.warn(`[Faucet] Turnstile FAIL for IP: ${ip}`);
+            return NextResponse.json({ error: 'CAPTCHA_FAILED' }, { status: 403 });
         }
 
         const normalizedAddress = address.toLowerCase();
 
-        // 1.5 Social Verification (Anti-Bot)
+        // 2. Social Verification (STRICT - X Account Required)
         // Check if user has linked their X account
         const userCheck = await query('SELECT twitter_id FROM users WHERE address = $1', [normalizedAddress]);
         if (userCheck.rows.length === 0 || !userCheck.rows[0].twitter_id) {
