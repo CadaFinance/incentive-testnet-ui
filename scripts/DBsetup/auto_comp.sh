@@ -33,6 +33,26 @@ log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 
+# LOAD CONFIGURATION
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/setup.env" ]; then
+    log_info "Loading contract addresses from setup.env..."
+    source "$SCRIPT_DIR/setup.env"
+else
+    log_error "setup.env NOT FOUND in $SCRIPT_DIR!"
+    log_error "Please create it with the required contract addresses."
+    exit 1
+fi
+
+# VALIDATE CONFIGURATION
+REQUIRED_VARS=("NATIVE_STAKING" "TOKEN_STAKING" "VZUG_TOKEN")
+for VAR in "${REQUIRED_VARS[@]}"; do
+    if [ -z "${!VAR}" ]; then
+        log_error "Missing required variable in setup.env: $VAR"
+        exit 1
+    fi
+done
+
 # Configuration
 INSTALL_DIR="/opt/zugchain-autocompound"
 LOG_FILE="/var/log/auto-compound-bot.log"
@@ -44,10 +64,8 @@ DEPLOYER_PRIVATE_KEY="${DEPLOYER_PRIVATE_KEY:-0xa7801932ae95f18beafa9fdc24f24327
 DATABASE_URL="${DATABASE_URL:-postgres://blockscout:Oh16ogZtxZtVgLx6yMpptvTYY8rhY6w11UlDwZQfjzGdxPcycO@127.0.0.1:7433/zug_incentive}"
 RPC_URL="${RPC_URL:-http://127.0.0.1:8545}"
 
-# Contract Addresses (can be overridden)
-NATIVE_STAKING="${NATIVE_STAKING:-0xa5BD672f12501a16FFe31408316fe09dC63c09F2}"
-TOKEN_STAKING="${TOKEN_STAKING:-0x1B20bF433Ce2863DE21bFC810CE11695F35D63e1}"
-VZUG_TOKEN="${VZUG_TOKEN:-0x73dBcD3F4C75f54779FE8C9824d212150e72Fd2D}"
+# Contract Addresses (Loaded from setup.env)
+# NATIVE_STAKING, TOKEN_STAKING, VZUG_TOKEN are now set via source setup.env
 
 echo ""
 echo -e "${GREEN}╔══════════════════════════════════════════════════════════════╗${NC}"
@@ -93,12 +111,12 @@ const { Pool } = require('pg');
 // --- CONFIGURATION FROM ENVIRONMENT ---
 const CONFIG = {
     RPC_URL: process.env.RPC_URL || "http://127.0.0.1:8545",
-    NATIVE_STAKING: process.env.NATIVE_STAKING || "0xa5BD672f12501a16FFe31408316fe09dC63c09F2",
-    TOKEN_STAKING: process.env.TOKEN_STAKING || "0x1B20bF433Ce2863DE21bFC810CE11695F35D63e1",
-    VZUG_TOKEN: process.env.VZUG_TOKEN || "0x73dBcD3F4C75f54779FE8C9824d212150e72Fd2D",
+    NATIVE_STAKING: process.env.NATIVE_STAKING, // Loaded from ENV (setup.env)
+    TOKEN_STAKING: process.env.TOKEN_STAKING, // Loaded from ENV (setup.env)
+    VZUG_TOKEN: process.env.VZUG_TOKEN,       // Loaded from ENV (setup.env)
     MIN_REWARD_TO_COMPOUND: 0.1,
     PRIVATE_KEY: process.env.DEPLOYER_PRIVATE_KEY || "0xa7801932ae95f18beafa9fdc24f243276ba7951a8c82350b2a4134da2f26c060",
-    DB_URL: process.env.DATABASE_URL || 'postgres://blockscout:zugchain_explorer_2024@127.0.0.1:7433/zug_incentive',
+    DB_URL: process.env.DATABASE_URL || 'postgres://blockscout:Oh16ogZtxZtVgLx6yMpptvTYY8rhY6w11UlDwZQfjzGdxPcycO@127.0.0.1:7433/zug_incentive',
     CONCURRENCY: 5,
     POLL_INTERVAL: 21600000, // 6 Hours
     GAS_BUFFER_RATIO: 1.5,

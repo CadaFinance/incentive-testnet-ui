@@ -120,7 +120,7 @@ if systemctl is-active --quiet redis-server; then
     
     # Test connection
     log_info "Testing connection..."
-    PONG=$(redis-cli -p 6381 -a 'ZugChain2024!' ping 2>/dev/null)
+    PONG=$(redis-cli -p 6381 -a 'Oh16ogZtxZtVgLx6yMpptvTYY8rhY6w11UlDwZQfjzGdxPcycO' ping 2>/dev/null)
     if [ "$PONG" = "PONG" ]; then
         log_success "Connection test passed!"
     else
@@ -138,10 +138,10 @@ echo -e "${GREEN}║   Redis Setup Complete!                                    
 echo -e "${GREEN}╚══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  ${CYAN}Port:${NC}      6381"
-echo -e "  ${CYAN}Password:${NC}  ZugChain2024!"
+echo -e "  ${CYAN}Password:${NC}  Oh16ogZtxZtVgLx6yMpptvTYY8rhY6w11UlDwZQfjzGdxPcycO"
 echo -e "  ${CYAN}Status:${NC}    systemctl status redis-server"
 echo -e "  ${CYAN}Logs:${NC}      tail -f /var/log/redis/redis-server.log"
 echo ""
-echo -e "  ${CYAN}Connection URL:${NC} redis://:ZugChain2024!@<YOUR_IP>:6381"
+echo -e "  ${CYAN}Connection URL:${NC} redis://:Oh16ogZtxZtVgLx6yMpptvTYY8rhY6w11UlDwZQfjzGdxPcycO@<YOUR_IP>:6381"
 echo ""
 log_info "Don't forget to open Port 6381 in AWS Security Group!"

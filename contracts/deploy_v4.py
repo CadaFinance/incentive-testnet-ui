@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_env_file(os.path.join(BASE_DIR, ".env.local"))
 load_env_file(os.path.join(BASE_DIR, ".env"))
 
-RPC_URL = os.getenv("RPC_URL", "https://rpc.zugchain.org")
+RPC_URL = os.getenv("NEXT_PUBLIC_RPC_URL")
 PRIVATE_KEY = os.getenv("CONTRACT_DEPLOYER_PRIVATE_KEY")
 CHAIN_ID = int(os.getenv("CHAIN_ID") or os.getenv("NEXT_PUBLIC_CHAIN_ID") or 824642)
 

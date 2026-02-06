@@ -27,6 +27,26 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# LOAD CONFIGURATION
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/setup.env" ]; then
+    log_info "Loading contract addresses from setup.env..."
+    source "$SCRIPT_DIR/setup.env"
+else
+    log_error "setup.env NOT FOUND in $SCRIPT_DIR!"
+    log_error "Please create it with the required contract addresses."
+    exit 1
+fi
+
+# VALIDATE CONFIGURATION
+REQUIRED_VARS=("ETH_ZUG_TOKEN" "ETH_PRESALE_CONTRACT" "VZUG_CONTRACT_ADDRESS")
+for VAR in "${REQUIRED_VARS[@]}"; do
+    if [ -z "${!VAR}" ]; then
+        log_error "Missing required variable in setup.env: $VAR"
+        exit 1
+    fi
+done
+
 echo ""
 echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${PURPLE}║       ZugChain Presale Bot - Production Deployment           ║${NC}"
@@ -73,15 +93,15 @@ except ImportError:
 
 # 1. ETHEREUM MAINNET (Source)
 ETHERSCAN_API_KEY = "VCCSK5H7ZNGJRKADVRZHF1B1AKJR1MD32H"
-ETH_ZUG_TOKEN = "0xF5C0A842DCdd43b3A23e06EB6e49bAaE9B92b248"
-ETH_PRESALE_CONTRACT = "0x1CA4a1029356540fb66f62403289bCB6804f352F"
+ETH_ZUG_TOKEN = os.getenv("ETH_ZUG_TOKEN")
+ETH_PRESALE_CONTRACT = os.getenv("ETH_PRESALE_CONTRACT")
 ETHERSCAN_API_URL = "https://api.etherscan.io/v2/api"
 
 # 2. ZUGCHAIN TESTNET (Destination)
 ZUG_RPC_URL = "http://127.0.0.1:8545"
 ZUG_CHAIN_ID = 824642
 REWARDS_PRIVATE_KEY = "0x766627b44fc2afc101672a7d34697993bcd91b84c25069d2f48f75b186562da7"
-VZUG_CONTRACT_ADDRESS = "0x73dBcD3F4C75f54779FE8C9824d212150e72Fd2D"
+VZUG_CONTRACT_ADDRESS = os.getenv("VZUG_CONTRACT_ADDRESS")
 
 # 3. SETTINGS
 DB_FILE = "bridge_data.sqlite"
@@ -287,7 +307,7 @@ pip3 install web3 requests --break-system-packages > /dev/null 2>&1
 
 # 5. Create PM2
 log_info "Creating PM2 config..."
-cat > "$WORK_DIR/ecosystem.config.js" << 'PM2_EOF'
+cat > "$WORK_DIR/ecosystem.config.js" << PM2_EOF
 module.exports = {
   apps: [{
     name: 'zug-presale-bridge',
@@ -302,7 +322,12 @@ module.exports = {
     restart_delay: 3000,
     out_file: '/var/log/zug-bridge-out.log',
     error_file: '/var/log/zug-bridge-error.log',
-    max_memory_restart: '300M'
+    max_memory_restart: '300M',
+    env: {
+       ETH_ZUG_TOKEN: "$ETH_ZUG_TOKEN",
+       ETH_PRESALE_CONTRACT: "$ETH_PRESALE_CONTRACT",
+       VZUG_CONTRACT_ADDRESS: "$VZUG_CONTRACT_ADDRESS"
+    }
   }]
 };
 PM2_EOF

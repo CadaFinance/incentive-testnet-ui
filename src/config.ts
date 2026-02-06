@@ -25,18 +25,35 @@ export const zugChain = {
   },
 } as const
 
-// Safe interceptor for the UI tracker
+// Safe interceptor for the UI tracker & Ban Detection
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch;
-  window.fetch = function (...args) {
+  window.fetch = async function (...args) {
     const url = args[0] instanceof Request ? args[0].url : String(args[0]);
+
+    // 1. Tracking
     if (url.includes('rpc.zugchain.org')) {
       window.dispatchEvent(new CustomEvent('rpc-request', {
         detail: { url, timestamp: Date.now() }
       }));
     }
-    // Use apply to ensure 'fetch' is called with the correct 'window' context
-    return originalFetch.apply(window, args);
+
+    // 2. Execute Request
+    const response = await originalFetch.apply(window, args);
+
+    // 3. Security & Ban Detection
+    // If we get a 403 from RPC or a 302 Redirect to /verify
+    if (url.includes('rpc.zugchain.org')) {
+      if (response.status === 403 || response.redirected && response.url.includes('/verify')) {
+        console.warn("🛡️ Security Access Denied: Redirecting to Verification...");
+        // Prevent infinite loops if already on verify page
+        if (!window.location.pathname.includes('/verify')) {
+          window.location.href = '/verify?reason=automated_ban';
+        }
+      }
+    }
+
+    return response;
   };
 }
 
