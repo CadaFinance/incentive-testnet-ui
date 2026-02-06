@@ -9,7 +9,20 @@ const RATE_LIMIT_WINDOW = 3600; // 1 Hour
 export async function POST(req: NextRequest) {
     try {
         const { turnstileToken } = await req.json();
-        const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
+
+        // Priority 1: Cloudflare Connecting IP
+        let ip = req.headers.get('cf-connecting-ip');
+
+        // Priority 2: X-Forwarded-For (Get the first IP)
+        if (!ip) {
+            const forwarded = req.headers.get('x-forwarded-for');
+            if (forwarded) {
+                ip = forwarded.split(',')[0].trim();
+            }
+        }
+
+        // Priority 3: Fallback (should typically not be reached in prod)
+        if (!ip) ip = '127.0.0.1';
 
         // 1. Basic Validation
         if (!turnstileToken) {
